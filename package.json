@@ -1,0 +1,34 @@
+{
+  "name": "mots-fleches",
+  "version": "0.1.0",
+  "description": "Jeu de mots fléchés multijoueur en temps réel, pensé mobile-first.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host",
+    "generate-clues": "node scripts/generate-clues.mjs"
+  },
+  "dependencies": {
+    "@liveblocks/client": "^2.13.0",
+    "@liveblocks/react": "^2.13.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "framer-motion": "^11.11.17",
+    "howler": "^2.2.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.11",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vite-plugin-pwa": "^0.20.5"
+  }
+}

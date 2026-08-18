@@ -1,0 +1,95 @@
+import { useMemo, useState } from 'react';
+import { GameStateProvider, hasLiveblocksKey, useGameState } from './state/GameState';
+import { CrosswordGrid } from './components/CrosswordGrid';
+import { Scoreboard } from './components/Scoreboard';
+import { SoundToggle } from './components/SoundToggle';
+import { AuroraBackground } from './components/AuroraBackground';
+import { usePuzzle } from './hooks/usePuzzle';
+import { getOrCreateSessionCode } from './lib/sessionCode';
+
+const PUZZLE_ID = 'demo';
+
+function GameHeader({ title }: { title: string }) {
+  const game = useGameState();
+  return (
+    <header className="flex w-full max-w-[480px] animate-pop-in flex-col items-center gap-1 px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
+      <div className="flex w-full items-center justify-between">
+        <span className="w-9" aria-hidden="true" />
+        <h1 className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-200 bg-clip-text text-center font-display text-2xl font-semibold tracking-wide text-transparent drop-shadow-sm">
+          {title}
+        </h1>
+        <SoundToggle />
+      </div>
+      <p className="text-xs font-semibold text-white/70">
+        {game.multiplayer ? '🟢 Partie en direct' : 'Mode local — ajoutez une clé Liveblocks pour jouer à plusieurs'}
+      </p>
+    </header>
+  );
+}
+
+function SessionInviteBar({ sessionId }: { sessionId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div
+      className="my-3 flex animate-pop-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white/90 shadow-lg backdrop-blur-md"
+      style={{ animationDelay: '0.06s' }}
+    >
+      <span>
+        Partie <strong className="tracking-[0.2em]">{sessionId}</strong>
+      </span>
+      <button
+        type="button"
+        onClick={copyLink}
+        className="rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber px-3 py-1 font-semibold text-white shadow-sm transition active:scale-95"
+      >
+        {copied ? '✓ Copié !' : '🔗 Inviter'}
+      </button>
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-white">
+      <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-white/25 border-t-white" />
+      <p className="text-sm font-semibold text-white/80">Chargement de la grille…</p>
+    </div>
+  );
+}
+
+export default function App() {
+  const { puzzle, loading, error } = usePuzzle(PUZZLE_ID);
+  // Stable for the component's lifetime; reads `?session=` from the URL or mints
+  // one and writes it back, so the address bar becomes the shareable invite link.
+  const sessionId = useMemo(() => (hasLiveblocksKey ? getOrCreateSessionCode() : null), []);
+
+  return (
+    <div className="flex min-h-screen flex-col items-center pb-10">
+      <AuroraBackground />
+      {loading && <LoadingScreen />}
+      {!loading && puzzle && (
+        <GameStateProvider
+          roomId={sessionId ? `mots-fleches-${puzzle.id}-${sessionId}` : `mots-fleches-${puzzle.id}`}
+          puzzle={puzzle}
+        >
+          <GameHeader title={puzzle.title} />
+          {sessionId && <SessionInviteBar sessionId={sessionId} />}
+          {error && (
+            <p className="mb-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs text-amber-100">
+              Grille de secours (Supabase indisponible)
+            </p>
+          )}
+          <Scoreboard />
+          <CrosswordGrid puzzle={puzzle} />
+        </GameStateProvider>
+      )}
+    </div>
+  );
+}
