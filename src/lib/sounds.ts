@@ -43,7 +43,8 @@ export function vibrate(pattern: number | number[]): void {
 
 let audioCtx: AudioContext | null = null;
 
-function getAudioContext(): AudioContext {
+/** Partagé avec le talkie-walkie : les navigateurs limitent le nombre d'AudioContext. */
+export function getAudioContext(): AudioContext {
   if (!audioCtx) {
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     audioCtx = new Ctor();

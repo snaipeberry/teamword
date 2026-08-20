@@ -9,6 +9,7 @@ import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
 import { ReactionBar, ReactionOverlay } from './Reactions';
+import { PushToTalk, TalkingIndicator } from './PushToTalk';
 import {
   hapticTick,
   hapticWin,
@@ -448,6 +449,8 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
       </div>
 
       <div className="flex w-full shrink-0 items-center justify-center gap-1.5 px-1">
+        {game.multiplayer && <PushToTalk />}
+
         <motion.button
           type="button"
           onClick={revealActiveCell}
@@ -472,6 +475,7 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
       <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />
 
       <ReactionOverlay />
+      <TalkingIndicator />
 
       <AnimatePresence>
         {celebrating && <CompletionCelebration onDone={showRoundResults} />}

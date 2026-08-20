@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { LiveMap } from '@liveblocks/client';
 import {
   LiveblocksProvider,
@@ -13,6 +13,7 @@ import {
 } from '@liveblocks/react/suspense';
 import { getOrCreatePlayerId, getOrCreatePlayerName } from '../lib/playerName';
 import { wordCellIds } from '../lib/gridGeometry';
+import { playRadioClip, splitIntoChunks, startRecording, type Recording } from '../lib/voiceRadio';
 import type { Puzzle, WordEntry } from '../types/puzzle';
 
 export const hasLiveblocksKey = Boolean(import.meta.env.VITE_LIVEBLOCKS_PUBLIC_KEY);
@@ -66,6 +67,14 @@ export interface GameStateApi {
 
   /** Diffuse une réaction aux autres joueurs (éphémère, jamais persistée). */
   sendReaction: (emoji: string) => void;
+
+  /** Talkie-walkie : maintenir pour parler, relâcher pour envoyer. */
+  startTalking: () => Promise<void>;
+  stopTalking: () => void;
+  /** Noms des joueurs en train de parler, pour l'affichage. */
+  talkingNames: string[];
+  /** Le micro a été refusé (ou est indisponible) : on le signale plutôt que d'échouer en silence. */
+  micDenied: boolean;
   /** Réactions actuellement à l'écran. */
   reactions: LiveReaction[];
 }
@@ -182,6 +191,11 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       isReadyFor: () => true,
       sendReaction: pushReaction,
       reactions,
+      // En solo il n'y a personne à qui parler : le bouton est masqué côté UI.
+      startTalking: async () => {},
+      stopTalking: () => {},
+      talkingNames: [],
+      micDenied: false,
     }),
     [letters, revealed, setLetters, setRevealed, myColor, pushReaction, reactions],
   );
@@ -331,9 +345,93 @@ function LiveblocksGameBridge({
     [broadcast, pushReaction, myPresence.playerId, myPresence.name],
   );
 
+  // ---------- Talkie-walkie ----------
+  const recordingRef = useRef<Recording | null>(null);
+  // Indexé par playerId : `voice-end` ne transporte que l'identifiant.
+  const [talking, setTalking] = useState<Record<string, string>>({});
+  const [micDenied, setMicDenied] = useState(false);
+  const talkingNames = useMemo(() => Object.values(talking), [talking]);
+
+  const startTalking = useCallback(async () => {
+    if (recordingRef.current) return;
+    try {
+      recordingRef.current = await startRecording();
+      setMicDenied(false);
+      broadcast({ type: 'voice-start', playerId: myPresence.playerId, name: myPresence.name });
+    } catch {
+      // Micro refusé ou indisponible : on le signale à l'UI, on ne casse rien.
+      recordingRef.current = null;
+      setMicDenied(true);
+    }
+  }, [broadcast, myPresence.playerId, myPresence.name]);
+
+  const stopTalking = useCallback(() => {
+    const rec = recordingRef.current;
+    if (!rec) return;
+    recordingRef.current = null;
+    broadcast({ type: 'voice-end', playerId: myPresence.playerId });
+
+    void rec.stop().then((clip) => {
+      if (!clip) return;
+      const chunks = splitIntoChunks(clip.base64);
+      const clipId = `${myPresence.playerId}-${Date.now()}`;
+      chunks.forEach((data, seq) =>
+        broadcast({
+          type: 'voice-chunk',
+          playerId: myPresence.playerId,
+          name: myPresence.name,
+          clipId,
+          seq,
+          total: chunks.length,
+          data,
+        }),
+      );
+    });
+  }, [broadcast, myPresence.playerId, myPresence.name]);
+
+  // Réassemblage des messages reçus. Les morceaux d'un même clip peuvent
+  // arriver dans le désordre : on les range par numéro et on ne joue qu'une
+  // fois le compte complet atteint.
+  const inboxRef = useRef(new Map<string, { parts: Map<number, string>; total: number }>());
+
   useEventListener(({ event }) => {
-    if (event.type === 'reaction') pushReaction(event.emoji, event.name, false);
+    if (event.type === 'reaction') {
+      pushReaction(event.emoji, event.name, false);
+      return;
+    }
+    if (event.type === 'voice-start') {
+      setTalking((prev) => ({ ...prev, [event.playerId]: event.name }));
+      return;
+    }
+    if (event.type === 'voice-end') {
+      setTalking((prev) => {
+        if (!(event.playerId in prev)) return prev;
+        const next = { ...prev };
+        delete next[event.playerId];
+        return next;
+      });
+      return;
+    }
+    if (event.type === 'voice-chunk') {
+      const inbox = inboxRef.current;
+      const entry = inbox.get(event.clipId) ?? { parts: new Map<number, string>(), total: event.total };
+      entry.parts.set(event.seq, event.data);
+      inbox.set(event.clipId, entry);
+      if (entry.parts.size === entry.total) {
+        inbox.delete(event.clipId);
+        setTalking((prev) => {
+          if (!(event.playerId in prev)) return prev;
+          const next = { ...prev };
+          delete next[event.playerId];
+          return next;
+        });
+        const ordered = Array.from({ length: entry.total }, (_, i) => entry.parts.get(i) ?? '').join('');
+        void playRadioClip(ordered);
+      }
+    }
   });
+
+
 
   const registerPlayer = useMutation(({ storage, self }) => {
     storage.get('players').set(self.presence.playerId, {
@@ -418,10 +516,15 @@ function LiveblocksGameBridge({
       isReadyFor,
       sendReaction,
       reactions,
+      startTalking,
+      stopTalking,
+      talkingNames,
+      micDenied,
     }),
     [
       letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence,
       scoreboard, setReady, allReadyFor, isReadyFor, sendReaction, reactions,
+      startTalking, stopTalking, talkingNames, micDenied,
     ],
   );
 

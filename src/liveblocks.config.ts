@@ -49,12 +49,25 @@ declare global {
      * réaction n'a de sens qu'au moment où elle est envoyée, et la persister
      * ferait réapparaître de vieux emojis à chaque reconnexion.
      */
-    RoomEvent: {
-      type: 'reaction';
-      emoji: string;
-      playerId: string;
-      name: string;
-    };
+    RoomEvent:
+      | { type: 'reaction'; emoji: string; playerId: string; name: string }
+      /**
+       * Talkie-walkie. La voix est enregistrée pendant l'appui puis envoyée
+       * découpée au relâchement : les événements de diffusion doivent rester
+       * petits, un message de quelques secondes tient en 2 ou 3 morceaux.
+       * `voice-start` sert seulement à afficher « untel parle » en direct.
+       */
+      | { type: 'voice-start'; playerId: string; name: string }
+      | { type: 'voice-end'; playerId: string }
+      | {
+          type: 'voice-chunk';
+          playerId: string;
+          name: string;
+          clipId: string;
+          seq: number;
+          total: number;
+          data: string;
+        };
   }
 }
 
