@@ -1,0 +1,2216 @@
+[
+  {
+    "word": "go",
+    "size": 2,
+    "hint_str": "nana",
+    "complexity": 1
+  },
+  {
+    "word": "pas",
+    "size": 3,
+    "hint_str": "point",
+    "complexity": 1
+  },
+  {
+    "word": "truc",
+    "size": 4,
+    "hint_str": "machin",
+    "complexity": 1
+  },
+  {
+    "word": "aussi",
+    "size": 5,
+    "hint_str": "de même",
+    "complexity": 1
+  },
+  {
+    "word": "argent",
+    "size": 6,
+    "hint_str": "blé",
+    "complexity": 2
+  },
+  {
+    "word": "bonjour",
+    "size": 7,
+    "hint_str": "salutation",
+    "complexity": 1
+  },
+  {
+    "word": "que",
+    "size": 3,
+    "hint_str": "quoi donc?",
+    "complexity": 2
+  },
+  {
+    "word": "part",
+    "size": 4,
+    "hint_str": "portion",
+    "complexity": 1
+  },
+  {
+    "word": "mains",
+    "size": 5,
+    "hint_str": "battoirs",
+    "complexity": 2
+  },
+  {
+    "word": "mourir",
+    "size": 6,
+    "hint_str": "décéder",
+    "complexity": 1
+  },
+  {
+    "word": "travail",
+    "size": 7,
+    "hint_str": "labeur",
+    "complexity": 1
+  },
+  {
+    "word": "moi",
+    "size": 3,
+    "hint_str": "moi-même",
+    "complexity": 1
+  },
+  {
+    "word": "mort",
+    "size": 4,
+    "hint_str": "décédé",
+    "complexity": 1
+  },
+  {
+    "word": "tiens",
+    "size": 5,
+    "hint_str": "eh bien",
+    "complexity": 1
+  },
+  {
+    "word": "boulot",
+    "size": 6,
+    "hint_str": "emploi",
+    "complexity": 1
+  },
+  {
+    "word": "voiture",
+    "size": 7,
+    "hint_str": "automobile",
+    "complexity": 1
+  },
+  {
+    "word": "toi",
+    "size": 3,
+    "hint_str": "toi-même",
+    "complexity": 1
+  },
+  {
+    "word": "dont",
+    "size": 4,
+    "hint_str": "de qui",
+    "complexity": 1
+  },
+  {
+    "word": "trucs",
+    "size": 5,
+    "hint_str": "machins",
+    "complexity": 1
+  },
+  {
+    "word": "madame",
+    "size": 6,
+    "hint_str": "titre poli",
+    "complexity": 1
+  },
+  {
+    "word": "bizarre",
+    "size": 7,
+    "hint_str": "étrange",
+    "complexity": 1
+  },
+  {
+    "word": "but",
+    "size": 3,
+    "hint_str": "objectif",
+    "complexity": 1
+  },
+  {
+    "word": "main",
+    "size": 4,
+    "hint_str": "paluche",
+    "complexity": 1
+  },
+  {
+    "word": "livré",
+    "size": 5,
+    "hint_str": "transporté",
+    "complexity": 1
+  },
+  {
+    "word": "envoyé",
+    "size": 6,
+    "hint_str": "adressé",
+    "complexity": 1
+  },
+  {
+    "word": "envoyer",
+    "size": 7,
+    "hint_str": "adresser",
+    "complexity": 1
+  },
+  {
+    "word": "job",
+    "size": 3,
+    "hint_str": "poste",
+    "complexity": 1
+  },
+  {
+    "word": "sens",
+    "size": 4,
+    "hint_str": "dégage",
+    "complexity": 1
+  },
+  {
+    "word": "force",
+    "size": 5,
+    "hint_str": "puissance",
+    "complexity": 1
+  },
+  {
+    "word": "envoie",
+    "size": 6,
+    "hint_str": "adresse",
+    "complexity": 1
+  },
+  {
+    "word": "bic",
+    "size": 3,
+    "hint_str": "stylo-bille",
+    "complexity": 1
+  },
+  {
+    "word": "prêt",
+    "size": 4,
+    "hint_str": "crédit",
+    "complexity": 1
+  },
+  {
+    "word": "jolie",
+    "size": 5,
+    "hint_str": "à croquer",
+    "complexity": 2
+  },
+  {
+    "word": "sentir",
+    "size": 6,
+    "hint_str": "fouetter",
+    "complexity": 2
+  },
+  {
+    "word": "ort",
+    "size": 3,
+    "hint_str": "malpropre",
+    "complexity": 1
+  },
+  {
+    "word": "fort",
+    "size": 4,
+    "hint_str": "puissant",
+    "complexity": 1
+  },
+  {
+    "word": "tueur",
+    "size": 5,
+    "hint_str": "assassin",
+    "complexity": 1
+  },
+  {
+    "word": "cheval",
+    "size": 6,
+    "hint_str": "destrier",
+    "complexity": 1
+  },
+  {
+    "word": "oit",
+    "size": 3,
+    "hint_str": "toi, en argot",
+    "complexity": 1
+  },
+  {
+    "word": "faim",
+    "size": 4,
+    "hint_str": "grand appétit",
+    "complexity": 1
+  },
+  {
+    "word": "calme",
+    "size": 5,
+    "hint_str": "paisible",
+    "complexity": 1
+  },
+  {
+    "word": "livres",
+    "size": 6,
+    "hint_str": "trimballes",
+    "complexity": 2
+  },
+  {
+    "word": "wat",
+    "size": 3,
+    "hint_str": "c'est toi",
+    "complexity": 1
+  },
+  {
+    "word": "joli",
+    "size": 4,
+    "hint_str": "charmant",
+    "complexity": 1
+  },
+  {
+    "word": "prêts",
+    "size": 5,
+    "hint_str": "emprunts",
+    "complexity": 1
+  },
+  {
+    "word": "proche",
+    "size": 6,
+    "hint_str": "à côté",
+    "complexity": 1
+  },
+  {
+    "word": "sent",
+    "size": 4,
+    "hint_str": "dégage",
+    "complexity": 1
+  },
+  {
+    "word": "jeter",
+    "size": 5,
+    "hint_str": "projeter",
+    "complexity": 1
+  },
+  {
+    "word": "mignon",
+    "size": 6,
+    "hint_str": "adorable",
+    "complexity": 1
+  },
+  {
+    "word": "dame",
+    "size": 4,
+    "hint_str": "madame",
+    "complexity": 1
+  },
+  {
+    "word": "froid",
+    "size": 5,
+    "hint_str": "glacial",
+    "complexity": 1
+  },
+  {
+    "word": "blessé",
+    "size": 6,
+    "hint_str": "meurtri",
+    "complexity": 1
+  },
+  {
+    "word": "chat",
+    "size": 4,
+    "hint_str": "minet",
+    "complexity": 1
+  },
+  {
+    "word": "signe",
+    "size": 5,
+    "hint_str": "indice",
+    "complexity": 1
+  },
+  {
+    "word": "jeté",
+    "size": 4,
+    "hint_str": "projeté",
+    "complexity": 1
+  },
+  {
+    "word": "tante",
+    "size": 5,
+    "hint_str": "sœur de maman",
+    "complexity": 1
+  },
+  {
+    "word": "hâté",
+    "size": 4,
+    "hint_str": "précipitée",
+    "complexity": 1
+  },
+  {
+    "word": "plat",
+    "size": 4,
+    "hint_str": "mets cuisiné",
+    "complexity": 1
+  },
+  {
+    "word": "ouah",
+    "size": 4,
+    "hint_str": "wahou",
+    "complexity": 1
+  },
+  {
+    "word": "ivre",
+    "size": 4,
+    "hint_str": "soûl",
+    "complexity": 1
+  },
+  {
+    "word": "mêlé",
+    "size": 4,
+    "hint_str": "combiné",
+    "complexity": 1
+  },
+  {
+    "word": "buts",
+    "size": 4,
+    "hint_str": "objectifs",
+    "complexity": 1
+  },
+  {
+    "word": "fade",
+    "size": 4,
+    "hint_str": "sans saveur",
+    "complexity": 1
+  },
+  {
+    "word": "rame",
+    "size": 4,
+    "hint_str": "convoi ferré",
+    "complexity": 1
+  },
+  {
+    "word": "jobs",
+    "size": 4,
+    "hint_str": "emplois",
+    "complexity": 1
+  },
+  {
+    "word": "jeta",
+    "size": 4,
+    "hint_str": "projeta",
+    "complexity": 1
+  },
+  {
+    "word": "robe",
+    "size": 4,
+    "hint_str": "vêtement long",
+    "complexity": 1
+  },
+  {
+    "word": "ardu",
+    "size": 4,
+    "hint_str": "chauffé",
+    "complexity": 1
+  },
+  {
+    "word": "mugi",
+    "size": 4,
+    "hint_str": "beuglé",
+    "complexity": 1
+  },
+  {
+    "word": "fève",
+    "size": 4,
+    "hint_str": "légumineuse",
+    "complexity": 1
+  },
+  {
+    "word": "arde",
+    "size": 4,
+    "hint_str": "embrase",
+    "complexity": 2
+  },
+  {
+    "word": "bics",
+    "size": 4,
+    "hint_str": "stylos-billes",
+    "complexity": 1
+  },
+  {
+    "word": "hâta",
+    "size": 4,
+    "hint_str": "accéléra",
+    "complexity": 1
+  },
+  {
+    "word": "mêla",
+    "size": 4,
+    "hint_str": "combina",
+    "complexity": 1
+  },
+  {
+    "word": "bard",
+    "size": 4,
+    "hint_str": "loquace",
+    "complexity": 1
+  },
+  {
+    "word": "Franklin",
+    "size": 8,
+    "hint_str": "paratonnerre",
+    "complexity": 1
+  },
+  {
+    "word": "Pasteur",
+    "size": 7,
+    "hint_str": "vaccin la rage",
+    "complexity": 1
+  },
+  {
+    "word": "Balzac",
+    "size": 6,
+    "hint_str": "comédie humaine",
+    "complexity": 1
+  },
+  {
+    "word": "Galilée",
+    "size": 7,
+    "hint_str": "invente lunette",
+    "complexity": 1
+  },
+  {
+    "word": "Voltaire",
+    "size": 8,
+    "hint_str": "esprit lumières",
+    "complexity": 1
+  },
+  {
+    "word": "Raphaël",
+    "size": 7,
+    "hint_str": "peintre italien",
+    "complexity": 1
+  },
+  {
+    "word": "Rousseau",
+    "size": 8,
+    "hint_str": "né à genève",
+    "complexity": 1
+  },
+  {
+    "word": "Goya",
+    "size": 4,
+    "hint_str": "maja dénudée",
+    "complexity": 2
+  },
+  {
+    "word": "Lincoln",
+    "size": 7,
+    "hint_str": "usa, sécession",
+    "complexity": 1
+  },
+  {
+    "word": "Newton",
+    "size": 6,
+    "hint_str": "savant anglais",
+    "complexity": 1
+  },
+  {
+    "word": "Beethoven",
+    "size": 9,
+    "hint_str": "sourd et génial",
+    "complexity": 1
+  },
+  {
+    "word": "Baudelaire",
+    "size": 10,
+    "hint_str": "fleurs du mal",
+    "complexity": 1
+  },
+  {
+    "word": "Tesla",
+    "size": 5,
+    "hint_str": "inventeur serbe",
+    "complexity": 1
+  },
+  {
+    "word": "Cézanne",
+    "size": 7,
+    "hint_str": "peintre d'aix",
+    "complexity": 1
+  },
+  {
+    "word": "Curie",
+    "size": 5,
+    "hint_str": "physicienne",
+    "complexity": 1
+  },
+  {
+    "word": "Marx",
+    "size": 4,
+    "hint_str": "le capital",
+    "complexity": 1
+  },
+  {
+    "word": "Racine",
+    "size": 6,
+    "hint_str": "tragédien",
+    "complexity": 1
+  },
+  {
+    "word": "Churchill",
+    "size": 9,
+    "hint_str": "chef anglais",
+    "complexity": 1
+  },
+  {
+    "word": "Einstein",
+    "size": 8,
+    "hint_str": "génie physique",
+    "complexity": 1
+  },
+  {
+    "word": "Chopin",
+    "size": 6,
+    "hint_str": "pianiste",
+    "complexity": 1
+  },
+  {
+    "word": "Rodin",
+    "size": 5,
+    "hint_str": "sculpteur",
+    "complexity": 1
+  },
+  {
+    "word": "Napoléon",
+    "size": 8,
+    "hint_str": "empereur corse",
+    "complexity": 1
+  },
+  {
+    "word": "Diderot",
+    "size": 7,
+    "hint_str": "l'encyclopédie",
+    "complexity": 1
+  },
+  {
+    "word": "Mozart",
+    "size": 6,
+    "hint_str": "enfant prodige",
+    "complexity": 1
+  },
+  {
+    "word": "Copernic",
+    "size": 8,
+    "hint_str": "terre tourne",
+    "complexity": 1
+  },
+  {
+    "word": "Rimbaud",
+    "size": 7,
+    "hint_str": "poète voyant",
+    "complexity": 1
+  },
+  {
+    "word": "Vinci",
+    "size": 5,
+    "hint_str": "la joconde",
+    "complexity": 1
+  },
+  {
+    "word": "Picasso",
+    "size": 7,
+    "hint_str": "peintre cubiste",
+    "complexity": 1
+  },
+  {
+    "word": "Renoir",
+    "size": 6,
+    "hint_str": "portraitiste",
+    "complexity": 1
+  },
+  {
+    "word": "Sartre",
+    "size": 6,
+    "hint_str": "existentialisme",
+    "complexity": 1
+  },
+  {
+    "word": "Corneille",
+    "size": 9,
+    "hint_str": "auteur du cid",
+    "complexity": 1
+  },
+  {
+    "word": "Chaplin",
+    "size": 7,
+    "hint_str": "cinéaste muet",
+    "complexity": 1
+  },
+  {
+    "word": "Flaubert",
+    "size": 8,
+    "hint_str": "madame bovary",
+    "complexity": 1
+  },
+  {
+    "word": "Cléopâtre",
+    "size": 9,
+    "hint_str": "reine d'égypte",
+    "complexity": 1
+  },
+  {
+    "word": "Titien",
+    "size": 6,
+    "hint_str": "maître couleur",
+    "complexity": 2
+  },
+  {
+    "word": "Hugo",
+    "size": 4,
+    "hint_str": "les misérables",
+    "complexity": 1
+  },
+  {
+    "word": "Montesquieu",
+    "size": 11,
+    "hint_str": "esprit des lois",
+    "complexity": 1
+  },
+  {
+    "word": "Bach",
+    "size": 4,
+    "hint_str": "organiste",
+    "complexity": 1
+  },
+  {
+    "word": "Darwin",
+    "size": 6,
+    "hint_str": "père évolution",
+    "complexity": 1
+  },
+  {
+    "word": "Gandhi",
+    "size": 6,
+    "hint_str": "non-violence",
+    "complexity": 1
+  },
+  {
+    "word": "Monet",
+    "size": 5,
+    "hint_str": "impressionniste",
+    "complexity": 1
+  },
+  {
+    "word": "Magellan",
+    "size": 8,
+    "hint_str": "tour du monde",
+    "complexity": 1
+  },
+  {
+    "word": "Edison",
+    "size": 6,
+    "hint_str": "inventeur",
+    "complexity": 1
+  },
+  {
+    "word": "Molière",
+    "size": 7,
+    "hint_str": "auteur comique",
+    "complexity": 1
+  },
+  {
+    "word": "Kepler",
+    "size": 6,
+    "hint_str": "lois planètes",
+    "complexity": 1
+  },
+  {
+    "word": "Shakespeare",
+    "size": 11,
+    "hint_str": "hamlet, roméo",
+    "complexity": 2
+  },
+  {
+    "word": "Descartes",
+    "size": 9,
+    "hint_str": "rationalisme",
+    "complexity": 1
+  },
+  {
+    "word": "Matisse",
+    "size": 7,
+    "hint_str": "peintre fauve",
+    "complexity": 1
+  },
+  {
+    "word": "Rembrandt",
+    "size": 9,
+    "hint_str": "né en hollande",
+    "complexity": 1
+  },
+  {
+    "word": "Freud",
+    "size": 5,
+    "hint_str": "psychanalyste",
+    "complexity": 1
+  },
+  {
+    "word": "Monopoly",
+    "size": 8,
+    "hint_str": "jeu immobilier",
+    "complexity": 1
+  },
+  {
+    "word": "Milka",
+    "size": 5,
+    "hint_str": "chocolat mauve",
+    "complexity": 1
+  },
+  {
+    "word": "Goku",
+    "size": 4,
+    "hint_str": "guerrier saiyen",
+    "complexity": 1
+  },
+  {
+    "word": "Lego",
+    "size": 4,
+    "hint_str": "petites briques",
+    "complexity": 1
+  },
+  {
+    "word": "Mario",
+    "size": 5,
+    "hint_str": "plombier nippon",
+    "complexity": 1
+  },
+  {
+    "word": "Superman",
+    "size": 8,
+    "hint_str": "venu de krypton",
+    "complexity": 1
+  },
+  {
+    "word": "Adidas",
+    "size": 6,
+    "hint_str": "trois bandes",
+    "complexity": 1
+  },
+  {
+    "word": "Decathlon",
+    "size": 9,
+    "hint_str": "enseigne sport",
+    "complexity": 1
+  },
+  {
+    "word": "Netflix",
+    "size": 7,
+    "hint_str": "son tudum",
+    "complexity": 2
+  },
+  {
+    "word": "Disney",
+    "size": 6,
+    "hint_str": "studio animé",
+    "complexity": 1
+  },
+  {
+    "word": "Fnac",
+    "size": 4,
+    "hint_str": "culture et tech",
+    "complexity": 1
+  },
+  {
+    "word": "Instagram",
+    "size": 9,
+    "hint_str": "photos et story",
+    "complexity": 1
+  },
+  {
+    "word": "Naruto",
+    "size": 6,
+    "hint_str": "ninja blond",
+    "complexity": 1
+  },
+  {
+    "word": "Uber",
+    "size": 4,
+    "hint_str": "chauffeur privé",
+    "complexity": 1
+  },
+  {
+    "word": "Leclerc",
+    "size": 7,
+    "hint_str": "hyper e.leclerc",
+    "complexity": 1
+  },
+  {
+    "word": "Puma",
+    "size": 4,
+    "hint_str": "marque au félin",
+    "complexity": 1
+  },
+  {
+    "word": "Peugeot",
+    "size": 7,
+    "hint_str": "auto au lion",
+    "complexity": 1
+  },
+  {
+    "word": "Carrefour",
+    "size": 9,
+    "hint_str": "chariot géant",
+    "complexity": 2
+  },
+  {
+    "word": "Nintendo",
+    "size": 8,
+    "hint_str": "console de jeux",
+    "complexity": 1
+  },
+  {
+    "word": "Fanta",
+    "size": 5,
+    "hint_str": "soda à l'orange",
+    "complexity": 1
+  },
+  {
+    "word": "Reebok",
+    "size": 6,
+    "hint_str": "marque baskets",
+    "complexity": 1
+  },
+  {
+    "word": "Simpson",
+    "size": 7,
+    "hint_str": "famille jaune",
+    "complexity": 1
+  },
+  {
+    "word": "Ikea",
+    "size": 4,
+    "hint_str": "meubles suédois",
+    "complexity": 1
+  },
+  {
+    "word": "Yoda",
+    "size": 4,
+    "hint_str": "sage jedi vert",
+    "complexity": 1
+  },
+  {
+    "word": "Michelin",
+    "size": 8,
+    "hint_str": "bibendum blanc",
+    "complexity": 2
+  },
+  {
+    "word": "Zorro",
+    "size": 5,
+    "hint_str": "cavalier masqué",
+    "complexity": 1
+  },
+  {
+    "word": "Tintin",
+    "size": 6,
+    "hint_str": "reporter houppé",
+    "complexity": 1
+  },
+  {
+    "word": "Oreo",
+    "size": 4,
+    "hint_str": "biscuit fourré",
+    "complexity": 1
+  },
+  {
+    "word": "Sonic",
+    "size": 5,
+    "hint_str": "roule en boule",
+    "complexity": 2
+  },
+  {
+    "word": "Shrek",
+    "size": 5,
+    "hint_str": "ogre vert",
+    "complexity": 1
+  },
+  {
+    "word": "Renault",
+    "size": 7,
+    "hint_str": "auto française",
+    "complexity": 1
+  },
+  {
+    "word": "Kinder",
+    "size": 6,
+    "hint_str": "œuf surprise",
+    "complexity": 1
+  },
+  {
+    "word": "Mickey",
+    "size": 6,
+    "hint_str": "oreilles rondes",
+    "complexity": 2
+  },
+  {
+    "word": "Pikachu",
+    "size": 7,
+    "hint_str": "souris jaune",
+    "complexity": 1
+  },
+  {
+    "word": "Ferrari",
+    "size": 7,
+    "hint_str": "bolide italien",
+    "complexity": 1
+  },
+  {
+    "word": "Nike",
+    "size": 4,
+    "hint_str": "marque sportive",
+    "complexity": 1
+  },
+  {
+    "word": "Batman",
+    "size": 6,
+    "hint_str": "héros masqué",
+    "complexity": 1
+  },
+  {
+    "word": "Airbnb",
+    "size": 6,
+    "hint_str": "gîte chez soi",
+    "complexity": 1
+  },
+  {
+    "word": "Pokémon",
+    "size": 7,
+    "hint_str": "petits monstres",
+    "complexity": 1
+  },
+  {
+    "word": "Youtube",
+    "size": 7,
+    "hint_str": "vidéos en ligne",
+    "complexity": 1
+  },
+  {
+    "word": "Obélix",
+    "size": 6,
+    "hint_str": "porteur menhirs",
+    "complexity": 1
+  },
+  {
+    "word": "Zara",
+    "size": 4,
+    "hint_str": "chaîne de mode",
+    "complexity": 1
+  },
+  {
+    "word": "Google",
+    "size": 6,
+    "hint_str": "recherche web",
+    "complexity": 1
+  },
+  {
+    "word": "Spiderman",
+    "size": 9,
+    "hint_str": "tisse la toile",
+    "complexity": 1
+  },
+  {
+    "word": "Nutella",
+    "size": 7,
+    "hint_str": "pâte à tartiner",
+    "complexity": 1
+  },
+  {
+    "word": "Danone",
+    "size": 6,
+    "hint_str": "yaourts en pot",
+    "complexity": 1
+  },
+  {
+    "word": "Darty",
+    "size": 5,
+    "hint_str": "électroménager",
+    "complexity": 1
+  },
+  {
+    "word": "Kitkat",
+    "size": 6,
+    "hint_str": "barre à casser",
+    "complexity": 1
+  },
+  {
+    "word": "Astérix",
+    "size": 7,
+    "hint_str": "gaulois malin",
+    "complexity": 1
+  },
+  {
+    "word": "Orange",
+    "size": 6,
+    "hint_str": "réseau mobile",
+    "complexity": 1
+  },
+  {
+    "word": "blême",
+    "size": 5,
+    "hint_str": "très pâle",
+    "complexity": 1
+  },
+  {
+    "word": "rustre",
+    "size": 6,
+    "hint_str": "mal dégrossi",
+    "complexity": 1
+  },
+  {
+    "word": "placide",
+    "size": 7,
+    "hint_str": "très calme",
+    "complexity": 1
+  },
+  {
+    "word": "chétif",
+    "size": 6,
+    "hint_str": "corps fragile",
+    "complexity": 2
+  },
+  {
+    "word": "torpeur",
+    "size": 7,
+    "hint_str": "corps engourdi",
+    "complexity": 2
+  },
+  {
+    "word": "quiétude",
+    "size": 8,
+    "hint_str": "calme profond",
+    "complexity": 1
+  },
+  {
+    "word": "exigu",
+    "size": 5,
+    "hint_str": "trop petit",
+    "complexity": 1
+  },
+  {
+    "word": "probité",
+    "size": 7,
+    "hint_str": "sens moral sûr",
+    "complexity": 1
+  },
+  {
+    "word": "cocasse",
+    "size": 7,
+    "hint_str": "assez comique",
+    "complexity": 1
+  },
+  {
+    "word": "lugubre",
+    "size": 7,
+    "hint_str": "glas qui sonne",
+    "complexity": 2
+  },
+  {
+    "word": "insipide",
+    "size": 8,
+    "hint_str": "sans saveur",
+    "complexity": 1
+  },
+  {
+    "word": "loquace",
+    "size": 7,
+    "hint_str": "qui parle trop",
+    "complexity": 1
+  },
+  {
+    "word": "véracité",
+    "size": 8,
+    "hint_str": "caractère vrai",
+    "complexity": 1
+  },
+  {
+    "word": "morose",
+    "size": 6,
+    "hint_str": "triste et morne",
+    "complexity": 1
+  },
+  {
+    "word": "antre",
+    "size": 5,
+    "hint_str": "repaire caché",
+    "complexity": 1
+  },
+  {
+    "word": "rêche",
+    "size": 5,
+    "hint_str": "rugueux, âpre",
+    "complexity": 1
+  },
+  {
+    "word": "affront",
+    "size": 7,
+    "hint_str": "grave offense",
+    "complexity": 1
+  },
+  {
+    "word": "besogne",
+    "size": 7,
+    "hint_str": "travail à faire",
+    "complexity": 1
+  },
+  {
+    "word": "ténacité",
+    "size": 8,
+    "hint_str": "ne lâche rien",
+    "complexity": 1
+  },
+  {
+    "word": "mesquin",
+    "size": 7,
+    "hint_str": "regarde au sou",
+    "complexity": 2
+  },
+  {
+    "word": "rébarbatif",
+    "size": 10,
+    "hint_str": "rebutant, dur",
+    "complexity": 1
+  },
+  {
+    "word": "terne",
+    "size": 5,
+    "hint_str": "sans éclat",
+    "complexity": 1
+  },
+  {
+    "word": "blafard",
+    "size": 7,
+    "hint_str": "teint de craie",
+    "complexity": 2
+  },
+  {
+    "word": "rutilant",
+    "size": 8,
+    "hint_str": "très brillant",
+    "complexity": 1
+  },
+  {
+    "word": "fourbe",
+    "size": 6,
+    "hint_str": "faux et rusé",
+    "complexity": 1
+  },
+  {
+    "word": "prestance",
+    "size": 9,
+    "hint_str": "belle allure",
+    "complexity": 1
+  },
+  {
+    "word": "idylle",
+    "size": 6,
+    "hint_str": "amour naissant",
+    "complexity": 1
+  },
+  {
+    "word": "avenant",
+    "size": 7,
+    "hint_str": "agréable, doux",
+    "complexity": 1
+  },
+  {
+    "word": "véloce",
+    "size": 6,
+    "hint_str": "très rapide",
+    "complexity": 1
+  },
+  {
+    "word": "véhément",
+    "size": 8,
+    "hint_str": "passionné, vif",
+    "complexity": 1
+  },
+  {
+    "word": "cupide",
+    "size": 6,
+    "hint_str": "avide d'argent",
+    "complexity": 1
+  },
+  {
+    "word": "sagace",
+    "size": 6,
+    "hint_str": "très perspicace",
+    "complexity": 1
+  },
+  {
+    "word": "austère",
+    "size": 7,
+    "hint_str": "sans fioritures",
+    "complexity": 2
+  },
+  {
+    "word": "tumulte",
+    "size": 7,
+    "hint_str": "grand désordre",
+    "complexity": 1
+  },
+  {
+    "word": "fébrile",
+    "size": 7,
+    "hint_str": "agité, nerveux",
+    "complexity": 1
+  },
+  {
+    "word": "bucolique",
+    "size": 9,
+    "hint_str": "vie champêtre",
+    "complexity": 1
+  },
+  {
+    "word": "impétueux",
+    "size": 9,
+    "hint_str": "plein de fougue",
+    "complexity": 1
+  },
+  {
+    "word": "hautain",
+    "size": 7,
+    "hint_str": "arrogant, fier",
+    "complexity": 1
+  },
+  {
+    "word": "fruste",
+    "size": 6,
+    "hint_str": "grossier, brut",
+    "complexity": 1
+  },
+  {
+    "word": "désuet",
+    "size": 6,
+    "hint_str": "passé de mode",
+    "complexity": 1
+  },
+  {
+    "word": "affable",
+    "size": 7,
+    "hint_str": "sourire facile",
+    "complexity": 2
+  },
+  {
+    "word": "acerbe",
+    "size": 6,
+    "hint_str": "mordant, dur",
+    "complexity": 1
+  },
+  {
+    "word": "diaphane",
+    "size": 8,
+    "hint_str": "très fin, léger",
+    "complexity": 1
+  },
+  {
+    "word": "candide",
+    "size": 7,
+    "hint_str": "naïf, innocent",
+    "complexity": 1
+  },
+  {
+    "word": "hargneux",
+    "size": 8,
+    "hint_str": "grogne facile",
+    "complexity": 1
+  },
+  {
+    "word": "besace",
+    "size": 6,
+    "hint_str": "sac de mendiant",
+    "complexity": 1
+  },
+  {
+    "word": "obtus",
+    "size": 5,
+    "hint_str": "peu intelligent",
+    "complexity": 1
+  },
+  {
+    "word": "couard",
+    "size": 6,
+    "hint_str": "peureux, lâche",
+    "complexity": 1
+  },
+  {
+    "word": "dodu",
+    "size": 4,
+    "hint_str": "bien en chair",
+    "complexity": 1
+  },
+  {
+    "word": "nonchalant",
+    "size": 10,
+    "hint_str": "indolent, mou",
+    "complexity": 1
+  },
+  {
+    "word": "biture",
+    "size": 6,
+    "hint_str": "ivresse",
+    "complexity": 1
+  },
+  {
+    "word": "pieuter",
+    "size": 7,
+    "hint_str": "dormir",
+    "complexity": 1
+  },
+  {
+    "word": "combine",
+    "size": 7,
+    "hint_str": "astuce",
+    "complexity": 1
+  },
+  {
+    "word": "froc",
+    "size": 4,
+    "hint_str": "pantalon",
+    "complexity": 1
+  },
+  {
+    "word": "vioc",
+    "size": 4,
+    "hint_str": "vieux",
+    "complexity": 1
+  },
+  {
+    "word": "naze",
+    "size": 4,
+    "hint_str": "fatigué",
+    "complexity": 1
+  },
+  {
+    "word": "clebs",
+    "size": 5,
+    "hint_str": "chien",
+    "complexity": 1
+  },
+  {
+    "word": "sympa",
+    "size": 5,
+    "hint_str": "agréable",
+    "complexity": 1
+  },
+  {
+    "word": "mioche",
+    "size": 6,
+    "hint_str": "enfant",
+    "complexity": 1
+  },
+  {
+    "word": "flouze",
+    "size": 6,
+    "hint_str": "argent",
+    "complexity": 1
+  },
+  {
+    "word": "minot",
+    "size": 5,
+    "hint_str": "enfant",
+    "complexity": 1
+  },
+  {
+    "word": "gueuler",
+    "size": 7,
+    "hint_str": "hurler",
+    "complexity": 2
+  },
+  {
+    "word": "clamser",
+    "size": 7,
+    "hint_str": "mourir",
+    "complexity": 1
+  },
+  {
+    "word": "zinc",
+    "size": 4,
+    "hint_str": "comptoir",
+    "complexity": 1
+  },
+  {
+    "word": "keuf",
+    "size": 4,
+    "hint_str": "policier",
+    "complexity": 1
+  },
+  {
+    "word": "pote",
+    "size": 4,
+    "hint_str": "ami",
+    "complexity": 1
+  },
+  {
+    "word": "bosser",
+    "size": 6,
+    "hint_str": "travailler",
+    "complexity": 1
+  },
+  {
+    "word": "pieu",
+    "size": 4,
+    "hint_str": "lit",
+    "complexity": 1
+  },
+  {
+    "word": "ringard",
+    "size": 7,
+    "hint_str": "démodé",
+    "complexity": 1
+  },
+  {
+    "word": "magouille",
+    "size": 9,
+    "hint_str": "combine",
+    "complexity": 1
+  },
+  {
+    "word": "pitchoun",
+    "size": 8,
+    "hint_str": "petit enfant",
+    "complexity": 1
+  },
+  {
+    "word": "crevé",
+    "size": 5,
+    "hint_str": "fatigué",
+    "complexity": 2
+  },
+  {
+    "word": "flipper",
+    "size": 7,
+    "hint_str": "avoir peur",
+    "complexity": 1
+  },
+  {
+    "word": "fringues",
+    "size": 8,
+    "hint_str": "vêtements",
+    "complexity": 1
+  },
+  {
+    "word": "pompes",
+    "size": 6,
+    "hint_str": "chaussures",
+    "complexity": 1
+  },
+  {
+    "word": "plumard",
+    "size": 7,
+    "hint_str": "lit",
+    "complexity": 1
+  },
+  {
+    "word": "marrant",
+    "size": 7,
+    "hint_str": "comique",
+    "complexity": 2
+  },
+  {
+    "word": "guitoune",
+    "size": 8,
+    "hint_str": "tente",
+    "complexity": 1
+  },
+  {
+    "word": "déguster",
+    "size": 8,
+    "hint_str": "souffrir",
+    "complexity": 1
+  },
+  {
+    "word": "pochtron",
+    "size": 8,
+    "hint_str": "ivrogne",
+    "complexity": 1
+  },
+  {
+    "word": "daube",
+    "size": 5,
+    "hint_str": "nul",
+    "complexity": 1
+  },
+  {
+    "word": "falzar",
+    "size": 6,
+    "hint_str": "pantalon",
+    "complexity": 1
+  },
+  {
+    "word": "thune",
+    "size": 5,
+    "hint_str": "argent",
+    "complexity": 1
+  },
+  {
+    "word": "stresser",
+    "size": 8,
+    "hint_str": "angoisser",
+    "complexity": 1
+  },
+  {
+    "word": "fric",
+    "size": 4,
+    "hint_str": "argent",
+    "complexity": 1
+  },
+  {
+    "word": "pinard",
+    "size": 6,
+    "hint_str": "rouge",
+    "complexity": 2
+  },
+  {
+    "word": "causer",
+    "size": 6,
+    "hint_str": "parler",
+    "complexity": 1
+  },
+  {
+    "word": "gonzesse",
+    "size": 8,
+    "hint_str": "femme",
+    "complexity": 1
+  },
+  {
+    "word": "dodo",
+    "size": 4,
+    "hint_str": "sommeil",
+    "complexity": 1
+  },
+  {
+    "word": "bagnole",
+    "size": 7,
+    "hint_str": "voiture",
+    "complexity": 1
+  },
+  {
+    "word": "bénef",
+    "size": 5,
+    "hint_str": "bénéfice",
+    "complexity": 1
+  },
+  {
+    "word": "rade",
+    "size": 4,
+    "hint_str": "bar",
+    "complexity": 1
+  },
+  {
+    "word": "cagole",
+    "size": 6,
+    "hint_str": "fille du sud",
+    "complexity": 1
+  },
+  {
+    "word": "rigolo",
+    "size": 6,
+    "hint_str": "drôle",
+    "complexity": 1
+  },
+  {
+    "word": "bahut",
+    "size": 5,
+    "hint_str": "école",
+    "complexity": 2
+  },
+  {
+    "word": "bidule",
+    "size": 6,
+    "hint_str": "truc",
+    "complexity": 1
+  },
+  {
+    "word": "chouette",
+    "size": 8,
+    "hint_str": "sympa",
+    "complexity": 1
+  },
+  {
+    "word": "flic",
+    "size": 4,
+    "hint_str": "policier",
+    "complexity": 1
+  },
+  {
+    "word": "dérouiller",
+    "size": 10,
+    "hint_str": "être battu",
+    "complexity": 1
+  },
+  {
+    "word": "baraque",
+    "size": 7,
+    "hint_str": "maison",
+    "complexity": 1
+  },
+  {
+    "word": "a",
+    "size": 1,
+    "hint_str": "forme de avoir",
+    "complexity": 1
+  },
+  {
+    "word": "y",
+    "size": 1,
+    "hint_str": "à cet endroit",
+    "complexity": 1
+  },
+  {
+    "word": "or",
+    "size": 2,
+    "hint_str": "métal jaune",
+    "complexity": 1
+  },
+  {
+    "word": "os",
+    "size": 2,
+    "hint_str": "dur du corps",
+    "complexity": 1
+  },
+  {
+    "word": "ça",
+    "size": 2,
+    "hint_str": "cela",
+    "complexity": 1
+  },
+  {
+    "word": "vu",
+    "size": 2,
+    "hint_str": "aperçu",
+    "complexity": 1
+  },
+  {
+    "word": "si",
+    "size": 2,
+    "hint_str": "tellement",
+    "complexity": 1
+  },
+  {
+    "word": "et",
+    "size": 2,
+    "hint_str": "de plus",
+    "complexity": 1
+  },
+  {
+    "word": "an",
+    "size": 2,
+    "hint_str": "année",
+    "complexity": 1
+  },
+  {
+    "word": "ou",
+    "size": 2,
+    "hint_str": "au choix",
+    "complexity": 2
+  },
+  {
+    "word": "X",
+    "size": 1,
+    "hint_str": "grande école",
+    "complexity": 1
+  },
+  {
+    "word": "V",
+    "size": 1,
+    "hint_str": "héros masqué",
+    "complexity": 1
+  },
+  {
+    "word": "Oz",
+    "size": 2,
+    "hint_str": "pays magique",
+    "complexity": 1
+  },
+  {
+    "word": "Ré",
+    "size": 2,
+    "hint_str": "île atlantique",
+    "complexity": 1
+  },
+  {
+    "word": "bu",
+    "size": 2,
+    "hint_str": "déjà avalé",
+    "complexity": 1
+  },
+  {
+    "word": "du",
+    "size": 2,
+    "hint_str": "un peu de",
+    "complexity": 1
+  },
+  {
+    "word": "dé",
+    "size": 2,
+    "hint_str": "à jouer",
+    "complexity": 1
+  },
+  {
+    "word": "fi",
+    "size": 2,
+    "hint_str": "dédain léger",
+    "complexity": 1
+  },
+  {
+    "word": "ha",
+    "size": 2,
+    "hint_str": "petit rire",
+    "complexity": 1
+  },
+  {
+    "word": "hé",
+    "size": 2,
+    "hint_str": "appel bref",
+    "complexity": 1
+  },
+  {
+    "word": "ho",
+    "size": 2,
+    "hint_str": "surprise brève",
+    "complexity": 1
+  },
+  {
+    "word": "il",
+    "size": 2,
+    "hint_str": "lui, au masc.",
+    "complexity": 1
+  },
+  {
+    "word": "if",
+    "size": 2,
+    "hint_str": "arbre funéraire",
+    "complexity": 1
+  },
+  {
+    "word": "je",
+    "size": 2,
+    "hint_str": "moi qui parle",
+    "complexity": 1
+  },
+  {
+    "word": "ka",
+    "size": 2,
+    "hint_str": "âme égyptienne",
+    "complexity": 1
+  },
+  {
+    "word": "la",
+    "size": 2,
+    "hint_str": "celle-ci",
+    "complexity": 1
+  },
+  {
+    "word": "le",
+    "size": 2,
+    "hint_str": "celui-ci",
+    "complexity": 1
+  },
+  {
+    "word": "ma",
+    "size": 2,
+    "hint_str": "à moi, au fém.",
+    "complexity": 1
+  },
+  {
+    "word": "mi",
+    "size": 2,
+    "hint_str": "moitié de",
+    "complexity": 1
+  },
+  {
+    "word": "ne",
+    "size": 2,
+    "hint_str": "mot de négation",
+    "complexity": 1
+  },
+  {
+    "word": "ni",
+    "size": 2,
+    "hint_str": "ni ceci ni cela",
+    "complexity": 1
+  },
+  {
+    "word": "pu",
+    "size": 2,
+    "hint_str": "rendu possible",
+    "complexity": 1
+  },
+  {
+    "word": "pi",
+    "size": 2,
+    "hint_str": "3,14 environ",
+    "complexity": 1
+  },
+  {
+    "word": "ta",
+    "size": 2,
+    "hint_str": "à toi, au fém.",
+    "complexity": 1
+  },
+  {
+    "word": "té",
+    "size": 2,
+    "hint_str": "tiens, au sud",
+    "complexity": 1
+  },
+  {
+    "word": "un",
+    "size": 2,
+    "hint_str": "le chiffre 1",
+    "complexity": 1
+  },
+  {
+    "word": "Qi",
+    "size": 2,
+    "hint_str": "énergie vitale",
+    "complexity": 1
+  },
+  {
+    "word": "Wu",
+    "size": 2,
+    "hint_str": "clan du rap",
+    "complexity": 1
+  },
+  {
+    "word": "Ys",
+    "size": 2,
+    "hint_str": "cité engloutie",
+    "complexity": 1
+  },
+  {
+    "word": "Zu",
+    "size": 2,
+    "hint_str": "oiseau démon",
+    "complexity": 1
+  },
+  {
+    "word": "art",
+    "size": 3,
+    "hint_str": "création",
+    "complexity": 1
+  },
+  {
+    "word": "cor",
+    "size": 3,
+    "hint_str": "cuivre chasseur",
+    "complexity": 1
+  },
+  {
+    "word": "dos",
+    "size": 3,
+    "hint_str": "partie arrière",
+    "complexity": 1
+  },
+  {
+    "word": "eau",
+    "size": 3,
+    "hint_str": "liquide vital",
+    "complexity": 1
+  },
+  {
+    "word": "feu",
+    "size": 3,
+    "hint_str": "flamme ardente",
+    "complexity": 1
+  },
+  {
+    "word": "gaz",
+    "size": 3,
+    "hint_str": "fluide volatil",
+    "complexity": 1
+  },
+  {
+    "word": "hop",
+    "size": 3,
+    "hint_str": "et voilà !",
+    "complexity": 1
+  },
+  {
+    "word": "ion",
+    "size": 3,
+    "hint_str": "atome chargé",
+    "complexity": 1
+  },
+  {
+    "word": "kir",
+    "size": 3,
+    "hint_str": "apéro classique",
+    "complexity": 1
+  },
+  {
+    "word": "lac",
+    "size": 3,
+    "hint_str": "étendue d'eau",
+    "complexity": 1
+  },
+  {
+    "word": "nid",
+    "size": 3,
+    "hint_str": "logis d'oiseau",
+    "complexity": 1
+  },
+  {
+    "word": "riz",
+    "size": 3,
+    "hint_str": "céréale à sushi",
+    "complexity": 1
+  },
+  {
+    "word": "sel",
+    "size": 3,
+    "hint_str": "assaisonnement",
+    "complexity": 1
+  },
+  {
+    "word": "vin",
+    "size": 3,
+    "hint_str": "jus fermenté",
+    "complexity": 1
+  },
+  {
+    "word": "zoo",
+    "size": 3,
+    "hint_str": "parc animalier",
+    "complexity": 1
+  },
+  {
+    "word": "ici",
+    "size": 3,
+    "hint_str": "en ce lieu",
+    "complexity": 1
+  },
+  {
+    "word": "ode",
+    "size": 3,
+    "hint_str": "poème lyrique",
+    "complexity": 1
+  },
+  {
+    "word": "bec",
+    "size": 3,
+    "hint_str": "bouche d'oiseau",
+    "complexity": 1
+  },
+  {
+    "word": "ego",
+    "size": 3,
+    "hint_str": "amour-propre",
+    "complexity": 1
+  },
+  {
+    "word": "thé",
+    "size": 3,
+    "hint_str": "boisson chaude",
+    "complexity": 1
+  },
+  {
+    "word": "île",
+    "size": 3,
+    "hint_str": "terre en mer",
+    "complexity": 1
+  },
+  {
+    "word": "épi",
+    "size": 3,
+    "hint_str": "partie du blé",
+    "complexity": 1
+  },
+  {
+    "word": "axe",
+    "size": 3,
+    "hint_str": "ligne médiane",
+    "complexity": 1
+  },
+  {
+    "word": "ara",
+    "size": 3,
+    "hint_str": "perroquet vif",
+    "complexity": 1
+  },
+  {
+    "word": "col",
+    "size": 3,
+    "hint_str": "tour du cou",
+    "complexity": 1
+  },
+  {
+    "word": "nom",
+    "size": 3,
+    "hint_str": "appellation",
+    "complexity": 1
+  },
+  {
+    "word": "bar",
+    "size": 3,
+    "hint_str": "café-comptoir",
+    "complexity": 1
+  },
+  {
+    "word": "wok",
+    "size": 3,
+    "hint_str": "poêle chinoise",
+    "complexity": 1
+  },
+  {
+    "word": "cep",
+    "size": 3,
+    "hint_str": "pied de vigne",
+    "complexity": 1
+  },
+  {
+    "word": "ci",
+    "size": 2,
+    "hint_str": "à cet endroit",
+    "complexity": 1
+  },
+  {
+    "word": "oh",
+    "size": 2,
+    "hint_str": "exclamation",
+    "complexity": 1
+  },
+  {
+    "word": "ex",
+    "size": 2,
+    "hint_str": "ancien conjoint",
+    "complexity": 1
+  },
+  {
+    "word": "écru",
+    "size": 4,
+    "hint_str": "couleur lin",
+    "complexity": 1
+  },
+  {
+    "word": "idem",
+    "size": 4,
+    "hint_str": "la même chose",
+    "complexity": 1
+  },
+  {
+    "word": "ogre",
+    "size": 4,
+    "hint_str": "géant mangeur",
+    "complexity": 1
+  },
+  {
+    "word": "épée",
+    "size": 4,
+    "hint_str": "arme d'escrime",
+    "complexity": 1
+  },
+  {
+    "word": "étal",
+    "size": 4,
+    "hint_str": "table de marché",
+    "complexity": 1
+  },
+  {
+    "word": "wifi",
+    "size": 4,
+    "hint_str": "réseau sans fil",
+    "complexity": 1
+  },
+  {
+    "word": "écho",
+    "size": 4,
+    "hint_str": "son répété",
+    "complexity": 1
+  },
+  {
+    "word": "déjà",
+    "size": 4,
+    "hint_str": "avant ce jour",
+    "complexity": 1
+  },
+  {
+    "word": "jupe",
+    "size": 4,
+    "hint_str": "habit féminin",
+    "complexity": 1
+  },
+  {
+    "word": "kiwi",
+    "size": 4,
+    "hint_str": "fruit poilu",
+    "complexity": 1
+  },
+  {
+    "word": "thym",
+    "size": 4,
+    "hint_str": "herbe du sud",
+    "complexity": 1
+  },
+  {
+    "word": "afin",
+    "size": 4,
+    "hint_str": "dans le but de",
+    "complexity": 1
+  },
+  {
+    "word": "amer",
+    "size": 4,
+    "hint_str": "goût prononcé",
+    "complexity": 1
+  },
+  {
+    "word": "axer",
+    "size": 4,
+    "hint_str": "orienter vers",
+    "complexity": 1
+  },
+  {
+    "word": "type",
+    "size": 4,
+    "hint_str": "genre, modèle",
+    "complexity": 1
+  },
+  {
+    "word": "azur",
+    "size": 4,
+    "hint_str": "bleu du ciel",
+    "complexity": 1
+  },
+  {
+    "word": "asti",
+    "size": 4,
+    "hint_str": "vin pétillant",
+    "complexity": 1
+  },
+  {
+    "word": "vase",
+    "size": 4,
+    "hint_str": "pot à fleurs",
+    "complexity": 1
+  },
+  {
+    "word": "taxi",
+    "size": 4,
+    "hint_str": "véhicule loué",
+    "complexity": 1
+  },
+  {
+    "word": "uni",
+    "size": 3,
+    "hint_str": "sans motif",
+    "complexity": 1
+  },
+  {
+    "word": "yak",
+    "size": 3,
+    "hint_str": "bœuf tibétain",
+    "complexity": 1
+  },
+  {
+    "word": "quai",
+    "size": 4,
+    "hint_str": "bord du fleuve",
+    "complexity": 1
+  }
+]

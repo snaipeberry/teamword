@@ -8,7 +8,7 @@ Jeu de mots fléchés (arrow crossword) multijoueur en temps réel, pensé mobil
 - **Framer Motion** — cell-fill pop, wrong-answer shake, win celebration.
 - **Web Audio (synthesized)** — instant SFX with no binary assets to ship; **Howler** is wired up and ready for real sound-designed audio (see `src/lib/sounds.ts`).
 - **Liveblocks** — realtime multiplayer (shared grid state + live cursors). Optional: the app runs single-player locally when no key is configured.
-- **Supabase** — puzzle content storage (Postgres). Optional: falls back to a bundled demo puzzle when no key is configured.
+- **Serveur de grilles** (Python, `scripts/grid_generation/serve_puzzles.py`) — remplit des squelettes pré-construits à la demande. Optionnel : l'app retombe sur une grille de démonstration embarquée s'il est éteint.
 - **vite-plugin-pwa** — installable on iOS home screen.
 
 **Design**: animated gradient-blob background (`AuroraBackground.tsx`, pure CSS transforms), Fredoka (display/grid letters) + Nunito (clue text) via Google Fonts, glassmorphic cards for the scoreboard/session bar, haptic feedback on supported devices (`vibrate()` in `sounds.ts` — no-ops on iOS Safari, which has never implemented the Vibration API), and a sound mute toggle persisted in `localStorage`.
@@ -24,6 +24,41 @@ npm run dev
 
 Open the printed `http://localhost:5173` on your phone (same Wi-Fi, use the `Network:` URL Vite prints) to test the mobile UI directly.
 
+## Serveur de grilles (remplissage seul)
+
+Les grilles ne sont plus embarquées : un petit service Python les fabrique à
+la demande en remplissant des **squelettes pré-construits hors-ligne**. Il ne
+cherche jamais de nouvelle structure — c'est ce qui rend la latence faible et
+prévisible (~1 ms au lieu de plusieurs secondes).
+
+```bash
+cd scripts/grid_generation
+python3 serve_puzzles.py            # http://127.0.0.1:8787
+```
+
+L'app appelle `GET /puzzle?seed=<session>-r<numéro>` et retombe sur la grille
+de démonstration embarquée si le service est éteint.
+
+- **`seed`** : indispensable en multijoueur. Le service est déterministe, donc
+  deux joueurs d'une même partie obtiennent la même grille sans que le serveur
+  ait à stocker quoi que ce soit. L'app y met `<session>-r<numéro de grille>`,
+  de sorte que terminer une grille enchaîne les deux joueurs sur la suivante.
+
+Il n'y a **qu'un seul dictionnaire et un seul banc** : la notion de difficulté
+a été retirée au profit d'un dataset unique et bien plus large
+(`scripts/datasets/mots_fleches_enriched_v4_hints.json`, 4573 mots utilisables).
+Le banc vit dans `scripts/grid_generation/banks/skeletons_8x8.json` et est déjà
+construit. Pour le régénérer (opération lente, hors-ligne) :
+
+```bash
+python3 generate_grid_v2.py ../datasets/mots_fleches_enriched_v4_hints.json \
+    --build-bank 80 --bank-file banks/skeletons_8x8.json \
+    --max-isolated 3 --max-dead-clues 7
+```
+
+Configurer l'URL du service via `VITE_PUZZLE_API_URL` (défaut :
+`http://127.0.0.1:8787`).
+
 ## Enabling multiplayer (Liveblocks)
 
 1. Create a project at [liveblocks.io](https://liveblocks.io) (free tier: 10 simultaneous connections/room, 3,000 collaboration-minutes/month — plenty for testing).
@@ -36,7 +71,7 @@ The public-key approach used here (`LiveblocksProvider publicApiKey=...`) is fin
 ### How co-op sessions work
 
 - On first load (with a Liveblocks key configured), the app mints a short session code and writes it into the URL as `?session=XXXXXX` (`src/lib/sessionCode.ts`) — that URL **is** the invite link. The "Inviter" button just copies `window.location.href` to the clipboard.
-- The Liveblocks room id is `mots-fleches-{puzzleId}-{sessionCode}`, so each session is an independent grid + scoreboard even for the same puzzle.
+- The Liveblocks room id is `mots-fleches-{sessionCode}` — stable for the whole session, *not* per grid. It has to be: the shared `round` counter lives in that room's storage, and you'd need to know the round already to pick a per-grid room. Welcome side effect: scores accumulate across every grid of the session.
 - **Scoring**: 1 point per word, credited to whoever's keystroke completes it. Attribution happens *inside* the `setLetter` Liveblocks mutation (`src/state/GameState.tsx`) — it reads the word's letters before and after the change, and only awards a point on an unsolved → solved transition, using `self.presence.playerId` from the mutation's own context. This runs once per mutating client, so it can't double-award or mis-attribute to whoever's screen happens to re-render.
 - **Persistence / resuming**: Liveblocks Storage (`letters`, `scores`, `players` — see `liveblocks.config.ts`) persists in the room indefinitely; it's not tied to anyone being connected. Reopening the same session URL — alone or with others — reconnects to the exact same grid and scoreboard. The `players` map keeps each player's name/color even while they're offline, so the scoreboard can show "Alice (hors ligne) — 3 mots" for someone who scored earlier and left.
 - **Player identity**: a stable per-browser id + display name live in `localStorage` (`src/lib/playerName.ts`), separate from Liveblocks' own `connectionId` (which changes every reconnect). This is what scores are keyed by, and it's why reloading resumes as the same player rather than a new one. Note this means identity is per-browser, not per-account — clearing site data or switching browsers starts a fresh identity.

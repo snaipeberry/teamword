@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react';
-import { supabase, hasSupabaseConfig } from '../lib/supabaseClient';
 import { buildGrid } from '../lib/gridBuilder';
 import { demoPuzzle } from '../data/demoPuzzle';
-import type { ClueCellPlacement, Puzzle, WordEntry } from '../types/puzzle';
-
-interface PuzzleRow {
-  id: string;
-  title: string;
-  rows: number;
-  cols: number;
-  words: WordEntry[];
-  clue_cells: ClueCellPlacement[];
-}
+import { fetchPuzzle } from '../lib/puzzleApi';
+import type { Puzzle } from '../types/puzzle';
 
 interface UsePuzzleResult {
   puzzle: Puzzle | null;
@@ -19,46 +10,56 @@ interface UsePuzzleResult {
   error: string | null;
 }
 
-/** Falls back to the bundled demo puzzle whenever Supabase isn't configured or the fetch fails. */
-export function usePuzzle(puzzleId: string): UsePuzzleResult {
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(hasSupabaseConfig ? null : demoPuzzle);
-  const [loading, setLoading] = useState(hasSupabaseConfig);
+/**
+ * Récupère une grille auprès du serveur de remplissage.
+ *
+ * Le serveur ne fait que remplir des squelettes pré-construits, et il est
+ * déterministe pour une graine donnée : les deux joueurs d'une partie
+ * appellent chacun le service et obtiennent la même grille.
+ *
+ * On lui demande `words` + `clue_cells` plutôt qu'une grille toute faite,
+ * pour que `buildGrid` la reconstruise côté client — il revalide au passage
+ * l'adjacence indice/mot et la cohérence des croisements.
+ */
+export function usePuzzle(seed: string): UsePuzzleResult {
+  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) return;
-
+    const controller = new AbortController();
     let cancelled = false;
-    setLoading(true);
 
-    supabase
-      .from('puzzles')
-      .select('id, title, rows, cols, words, clue_cells')
-      .eq('id', puzzleId)
-      .single()
-      .then(({ data, error: fetchError }) => {
+    setLoading(true);
+    setError(null);
+
+    fetchPuzzle({ seed, signal: controller.signal })
+      .then((payload) => {
         if (cancelled) return;
-        if (fetchError || !data) {
-          setError(fetchError?.message ?? 'Grille introuvable');
-          setPuzzle(demoPuzzle);
-        } else {
-          const row = data as PuzzleRow;
-          setPuzzle({
-            id: row.id,
-            title: row.title,
-            rows: row.rows,
-            cols: row.cols,
-            words: row.words,
-            grid: buildGrid(row.rows, row.cols, row.words, row.clue_cells),
-          });
-        }
+        setPuzzle({
+          id: payload.id,
+          title: payload.title,
+          rows: payload.rows,
+          cols: payload.cols,
+          words: payload.words,
+          grid: buildGrid(payload.rows, payload.cols, payload.words, payload.clue_cells),
+        });
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (cancelled || (err instanceof Error && err.name === 'AbortError')) return;
+        // Le jeu reste jouable hors ligne / serveur éteint : on retombe sur
+        // la grille de démonstration embarquée.
+        setError(err instanceof Error ? err.message : String(err));
+        setPuzzle(demoPuzzle);
         setLoading(false);
       });
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [puzzleId]);
+  }, [seed]);
 
   return { puzzle, loading, error };
 }

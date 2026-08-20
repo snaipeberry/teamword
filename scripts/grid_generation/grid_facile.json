@@ -1,0 +1,942 @@
+{
+  "version": 3,
+  "type": "mots-fleches",
+  "rows": 8,
+  "cols": 8,
+  "grid": [
+    [
+      {
+        "type": "clue",
+        "number": 1,
+        "solution": null,
+        "clues": [
+          {
+            "number": 1,
+            "word": "ort",
+            "hint_str": "malpropre",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              0,
+              1
+            ],
+            "length": 3
+          },
+          {
+            "number": 1,
+            "word": "pote",
+            "hint_str": "ami",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              1,
+              0
+            ],
+            "length": 4
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 2,
+        "solution": null,
+        "clues": [
+          {
+            "number": 2,
+            "word": "os",
+            "hint_str": "dur du corps",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              0,
+              5
+            ],
+            "length": 2
+          },
+          {
+            "number": 2,
+            "word": "ys",
+            "hint_str": "cité engloutie",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              1,
+              4
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 3,
+        "solution": null,
+        "clues": [
+          {
+            "number": 3,
+            "word": "keuf",
+            "hint_str": "policier",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              1,
+              7
+            ],
+            "length": 4
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "p",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 4,
+        "solution": null,
+        "clues": [
+          {
+            "number": 4,
+            "word": "mi",
+            "hint_str": "moitié de",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              2,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "y",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "k",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "m",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 5,
+        "solution": null,
+        "clues": [
+          {
+            "number": 5,
+            "word": "si",
+            "hint_str": "tellement",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              2,
+              4
+            ],
+            "length": 2
+          },
+          {
+            "number": 5,
+            "word": "la",
+            "hint_str": "celle-ci",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              3,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 6,
+        "solution": null,
+        "clues": [
+          {
+            "number": 6,
+            "word": "pi",
+            "hint_str": "3,14 environ",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              3,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 7,
+        "solution": null,
+        "clues": [
+          {
+            "number": 7,
+            "word": "il",
+            "hint_str": "lui, au masc.",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              3,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 8,
+        "solution": null,
+        "clues": [
+          {
+            "number": 8,
+            "word": "ne",
+            "hint_str": "mot de négation",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              4,
+              4
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 9,
+        "solution": null,
+        "clues": [
+          {
+            "number": 9,
+            "word": "pu",
+            "hint_str": "rendu possible",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              3,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "p",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 10,
+        "solution": null,
+        "clues": [
+          {
+            "number": 10,
+            "word": "an",
+            "hint_str": "année",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              4,
+              3
+            ],
+            "length": 2
+          },
+          {
+            "number": 10,
+            "word": "oz",
+            "hint_str": "pays magique",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              5,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 11,
+        "solution": null,
+        "clues": [
+          {
+            "number": 11,
+            "word": "if",
+            "hint_str": "arbre funéraire",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              4,
+              6
+            ],
+            "length": 2
+          },
+          {
+            "number": 11,
+            "word": "té",
+            "hint_str": "tiens, au sud",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              5,
+              5
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "f",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 12,
+        "solution": null,
+        "clues": [
+          {
+            "number": 12,
+            "word": "ho",
+            "hint_str": "surprise brève",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              5,
+              1
+            ],
+            "length": 2
+          },
+          {
+            "number": 12,
+            "word": "wu",
+            "hint_str": "clan du rap",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              6,
+              0
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "h",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 13,
+        "solution": null,
+        "clues": [
+          {
+            "number": 13,
+            "word": "et",
+            "hint_str": "de plus",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              5,
+              4
+            ],
+            "length": 2
+          },
+          {
+            "number": 13,
+            "word": "un",
+            "hint_str": "le chiffre 1",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              6,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "w",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 14,
+        "solution": null,
+        "clues": [
+          {
+            "number": 14,
+            "word": "zu",
+            "hint_str": "oiseau démon",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              6,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "é",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 15,
+        "solution": null,
+        "clues": [
+          {
+            "number": 15,
+            "word": "ni",
+            "hint_str": "ni ceci ni cela",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              7,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 16,
+        "solution": null,
+        "clues": [
+          {
+            "number": 16,
+            "word": "vu",
+            "hint_str": "aperçu",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              7,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "v",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ]
+  ],
+  "words": [
+    {
+      "number": 1,
+      "word": "ort",
+      "hint_str": "malpropre",
+      "complexity": 1,
+      "row": 0,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 1,
+      "word": "pote",
+      "hint_str": "ami",
+      "complexity": 1,
+      "row": 1,
+      "col": 0,
+      "direction": "V",
+      "length": 4
+    },
+    {
+      "number": 2,
+      "word": "os",
+      "hint_str": "dur du corps",
+      "complexity": 1,
+      "row": 0,
+      "col": 5,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 2,
+      "word": "ys",
+      "hint_str": "cité engloutie",
+      "complexity": 1,
+      "row": 1,
+      "col": 4,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 3,
+      "word": "keuf",
+      "hint_str": "policier",
+      "complexity": 1,
+      "row": 1,
+      "col": 7,
+      "direction": "V",
+      "length": 4
+    },
+    {
+      "number": 4,
+      "word": "mi",
+      "hint_str": "moitié de",
+      "complexity": 1,
+      "row": 2,
+      "col": 2,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 5,
+      "word": "si",
+      "hint_str": "tellement",
+      "complexity": 1,
+      "row": 2,
+      "col": 4,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 5,
+      "word": "la",
+      "hint_str": "celle-ci",
+      "complexity": 1,
+      "row": 3,
+      "col": 3,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 6,
+      "word": "pi",
+      "hint_str": "3,14 environ",
+      "complexity": 1,
+      "row": 3,
+      "col": 6,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 7,
+      "word": "il",
+      "hint_str": "lui, au masc.",
+      "complexity": 1,
+      "row": 3,
+      "col": 2,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 8,
+      "word": "ne",
+      "hint_str": "mot de négation",
+      "complexity": 1,
+      "row": 4,
+      "col": 4,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 9,
+      "word": "pu",
+      "hint_str": "rendu possible",
+      "complexity": 1,
+      "row": 3,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 10,
+      "word": "an",
+      "hint_str": "année",
+      "complexity": 1,
+      "row": 4,
+      "col": 3,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 10,
+      "word": "oz",
+      "hint_str": "pays magique",
+      "complexity": 1,
+      "row": 5,
+      "col": 2,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 11,
+      "word": "if",
+      "hint_str": "arbre funéraire",
+      "complexity": 1,
+      "row": 4,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 11,
+      "word": "té",
+      "hint_str": "tiens, au sud",
+      "complexity": 1,
+      "row": 5,
+      "col": 5,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 12,
+      "word": "ho",
+      "hint_str": "surprise brève",
+      "complexity": 1,
+      "row": 5,
+      "col": 1,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 12,
+      "word": "wu",
+      "hint_str": "clan du rap",
+      "complexity": 1,
+      "row": 6,
+      "col": 0,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 13,
+      "word": "et",
+      "hint_str": "de plus",
+      "complexity": 1,
+      "row": 5,
+      "col": 4,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 13,
+      "word": "un",
+      "hint_str": "le chiffre 1",
+      "complexity": 1,
+      "row": 6,
+      "col": 3,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 14,
+      "word": "zu",
+      "hint_str": "oiseau démon",
+      "complexity": 1,
+      "row": 6,
+      "col": 2,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 15,
+      "word": "ni",
+      "hint_str": "ni ceci ni cela",
+      "complexity": 1,
+      "row": 7,
+      "col": 3,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 16,
+      "word": "vu",
+      "hint_str": "aperçu",
+      "complexity": 1,
+      "row": 7,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    }
+  ],
+  "stats": {
+    "words": 23,
+    "letters": 36,
+    "clues": 28,
+    "black": 0,
+    "dead_clues": 12,
+    "avg_word_length": 2.22,
+    "coverage": 0.5625,
+    "score": -1790.74
+  }
+}

@@ -1,0 +1,966 @@
+{
+  "version": 3,
+  "type": "mots-fleches",
+  "rows": 8,
+  "cols": 8,
+  "grid": [
+    [
+      {
+        "type": "clue",
+        "number": 1,
+        "solution": null,
+        "clues": [
+          {
+            "number": 1,
+            "word": "nez",
+            "hint_str": "sent les odeurs",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              0,
+              1
+            ],
+            "length": 3
+          },
+          {
+            "number": 1,
+            "word": "dos",
+            "hint_str": "partie arrière",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              1,
+              0
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 2,
+        "solution": null,
+        "clues": [
+          {
+            "number": 2,
+            "word": "ci",
+            "hint_str": "juste ici",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              0,
+              5
+            ],
+            "length": 2
+          },
+          {
+            "number": 2,
+            "word": "wei",
+            "hint_str": "royaume ancien",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              1,
+              4
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "c",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 3,
+        "solution": null,
+        "clues": [
+          {
+            "number": 3,
+            "word": "iris",
+            "hint_str": "fleur violette",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              1,
+              7
+            ],
+            "length": 4
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "d",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 4,
+        "solution": null,
+        "clues": [
+          {
+            "number": 4,
+            "word": "qui",
+            "hint_str": "pronom du sujet",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              2,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 5,
+        "solution": null,
+        "clues": [
+          {
+            "number": 5,
+            "word": "un",
+            "hint_str": "unité de base",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              2,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "w",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 6,
+        "solution": null,
+        "clues": [
+          {
+            "number": 6,
+            "word": "que",
+            "hint_str": "mot de liaison",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              2,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "q",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 7,
+        "solution": null,
+        "clues": [
+          {
+            "number": 7,
+            "word": "pu",
+            "hint_str": "devenu capable",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              3,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 8,
+        "solution": null,
+        "clues": [
+          {
+            "number": 8,
+            "word": "uni",
+            "hint_str": "sans motif",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              3,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 9,
+        "solution": null,
+        "clues": [
+          {
+            "number": 9,
+            "word": "pi",
+            "hint_str": "cercle et rayon",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              3,
+              6
+            ],
+            "length": 2
+          },
+          {
+            "number": 9,
+            "word": "je",
+            "hint_str": "celui qui parle",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              4,
+              5
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "p",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 10,
+        "solution": null,
+        "clues": [
+          {
+            "number": 10,
+            "word": "fi",
+            "hint_str": "petit dédain",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              4,
+              1
+            ],
+            "length": 2
+          },
+          {
+            "number": 10,
+            "word": "du",
+            "hint_str": "part de",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              5,
+              0
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "f",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 11,
+        "solution": null,
+        "clues": [
+          {
+            "number": 11,
+            "word": "jus",
+            "hint_str": "liquide sucré",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              4,
+              5
+            ],
+            "length": 3
+          },
+          {
+            "number": 11,
+            "word": "nid",
+            "hint_str": "maison d'oiseau",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              5,
+              4
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "j",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "d",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 12,
+        "solution": null,
+        "clues": [
+          {
+            "number": 12,
+            "word": "ta",
+            "hint_str": "tien, au fém.",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              6,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 13,
+        "solution": null,
+        "clues": [
+          {
+            "number": 13,
+            "word": "ne",
+            "hint_str": "petit mot niant",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              5,
+              4
+            ],
+            "length": 2
+          },
+          {
+            "number": 13,
+            "word": "on",
+            "hint_str": "les gens",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              6,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 14,
+        "solution": null,
+        "clues": [
+          {
+            "number": 14,
+            "word": "ho",
+            "hint_str": "exclamation",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              6,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 15,
+        "solution": null,
+        "clues": [
+          {
+            "number": 15,
+            "word": "as",
+            "hint_str": "champion",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              6,
+              7
+            ],
+            "length": 2
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 16,
+        "solution": null,
+        "clues": [
+          {
+            "number": 16,
+            "word": "toi",
+            "hint_str": "face à moi",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              6,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 17,
+        "solution": null,
+        "clues": [
+          {
+            "number": 17,
+            "word": "ha",
+            "hint_str": "rire qui fuse",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              6,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "h",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 18,
+        "solution": null,
+        "clues": [
+          {
+            "number": 18,
+            "word": "andros",
+            "hint_str": "fruits mijotés",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              7,
+              2
+            ],
+            "length": 6
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "d",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      }
+    ]
+  ],
+  "words": [
+    {
+      "number": 1,
+      "word": "nez",
+      "hint_str": "sent les odeurs",
+      "complexity": 2,
+      "row": 0,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 1,
+      "word": "dos",
+      "hint_str": "partie arrière",
+      "complexity": 2,
+      "row": 1,
+      "col": 0,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 2,
+      "word": "ci",
+      "hint_str": "juste ici",
+      "complexity": 2,
+      "row": 0,
+      "col": 5,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 2,
+      "word": "wei",
+      "hint_str": "royaume ancien",
+      "complexity": 2,
+      "row": 1,
+      "col": 4,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 3,
+      "word": "iris",
+      "hint_str": "fleur violette",
+      "complexity": 2,
+      "row": 1,
+      "col": 7,
+      "direction": "V",
+      "length": 4
+    },
+    {
+      "number": 4,
+      "word": "qui",
+      "hint_str": "pronom du sujet",
+      "complexity": 2,
+      "row": 2,
+      "col": 2,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 5,
+      "word": "un",
+      "hint_str": "unité de base",
+      "complexity": 2,
+      "row": 2,
+      "col": 3,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 6,
+      "word": "que",
+      "hint_str": "mot de liaison",
+      "complexity": 2,
+      "row": 2,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 7,
+      "word": "pu",
+      "hint_str": "devenu capable",
+      "complexity": 2,
+      "row": 3,
+      "col": 6,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 8,
+      "word": "uni",
+      "hint_str": "sans motif",
+      "complexity": 2,
+      "row": 3,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 9,
+      "word": "pi",
+      "hint_str": "cercle et rayon",
+      "complexity": 2,
+      "row": 3,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 9,
+      "word": "je",
+      "hint_str": "celui qui parle",
+      "complexity": 2,
+      "row": 4,
+      "col": 5,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 10,
+      "word": "fi",
+      "hint_str": "petit dédain",
+      "complexity": 2,
+      "row": 4,
+      "col": 1,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 10,
+      "word": "du",
+      "hint_str": "part de",
+      "complexity": 2,
+      "row": 5,
+      "col": 0,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 11,
+      "word": "jus",
+      "hint_str": "liquide sucré",
+      "complexity": 2,
+      "row": 4,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 11,
+      "word": "nid",
+      "hint_str": "maison d'oiseau",
+      "complexity": 2,
+      "row": 5,
+      "col": 4,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 12,
+      "word": "ta",
+      "hint_str": "tien, au fém.",
+      "complexity": 2,
+      "row": 6,
+      "col": 2,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 13,
+      "word": "ne",
+      "hint_str": "petit mot niant",
+      "complexity": 2,
+      "row": 5,
+      "col": 4,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 13,
+      "word": "on",
+      "hint_str": "les gens",
+      "complexity": 1,
+      "row": 6,
+      "col": 3,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 14,
+      "word": "ho",
+      "hint_str": "exclamation",
+      "complexity": 2,
+      "row": 6,
+      "col": 6,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 15,
+      "word": "as",
+      "hint_str": "champion",
+      "complexity": 2,
+      "row": 6,
+      "col": 7,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 16,
+      "word": "toi",
+      "hint_str": "face à moi",
+      "complexity": 2,
+      "row": 6,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 17,
+      "word": "ha",
+      "hint_str": "rire qui fuse",
+      "complexity": 2,
+      "row": 6,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 18,
+      "word": "andros",
+      "hint_str": "fruits mijotés",
+      "complexity": 2,
+      "row": 7,
+      "col": 2,
+      "direction": "H",
+      "length": 6
+    }
+  ],
+  "stats": {
+    "words": 24,
+    "letters": 39,
+    "clues": 25,
+    "black": 0,
+    "dead_clues": 7,
+    "avg_word_length": 2.62,
+    "coverage": 0.6094,
+    "score": 353.38
+  }
+}

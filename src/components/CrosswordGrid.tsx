@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Puzzle } from '../types/puzzle';
 import { cellId, wordCellIds } from '../lib/gridGeometry';
-import { useGameState, type PlayerCursor } from '../state/GameState';
+import { useGameState, useRound, type PlayerCursor } from '../state/GameState';
 import { ClueCell } from './ClueCell';
 import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
@@ -20,6 +20,7 @@ import {
 
 export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   const game = useGameState();
+  const { advanceRound } = useRound();
   const inputRef = useRef<HTMLInputElement>(null);
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
@@ -57,6 +58,11 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
     });
     return cells;
   }, [puzzle.grid]);
+
+  const answerByCellId = useMemo(
+    () => new Map(allLetterCells.map(({ id, answer }) => [id, answer])),
+    [allLetterCells],
+  );
 
   // A word is "found" once every one of its cells holds the right letter — at that
   // point it locks (see isCellLocked below) and its clue/cells get the found effects.
@@ -112,6 +118,50 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
       hapticWin();
     }
   }, [isSolved]);
+
+  // Le passage à la manche suivante est déclenché à la FIN de la célébration
+  // (voir onDone de CompletionCelebration) plutôt qu'à la détection de la
+  // victoire : sinon la grille serait remplacée avant que le joueur ait vu
+  // les confettis.
+  const goToNextRound = useCallback(() => {
+    setCelebrating(false);
+    advanceRound();
+  }, [advanceRound]);
+
+  const revealActiveCell = useCallback(() => {
+    unlockAudio();
+
+    // Repli en cascade, pour que le bouton fasse toujours quelque chose :
+    // la case sélectionnée, sinon la première case encore fausse du mot en
+    // cours, sinon n'importe quelle case fausse de la grille (sans ce
+    // dernier niveau, le bouton devenait inerte dès que le mot courant
+    // était complet).
+    const isWrong = (id: string) => game.getLetter(id) !== answerByCellId.get(id);
+
+    let target: string | null = null;
+    if (activeCellId && isWrong(activeCellId)) {
+      target = activeCellId;
+    } else if (activeWordId) {
+      target = (cellsByWordId.get(activeWordId) ?? []).find(isWrong) ?? null;
+    }
+    if (!target) {
+      target = allLetterCells.map((c) => c.id).find(isWrong) ?? null;
+    }
+    if (!target) return;
+
+    const answer = answerByCellId.get(target);
+    if (!answer) return;
+
+    game.revealLetter(target, answer);
+    playCorrectSound();
+    hapticTick();
+    setWrongCells((prev) => {
+      if (!prev.has(target!)) return prev;
+      const next = new Set(prev);
+      next.delete(target!);
+      return next;
+    });
+  }, [activeCellId, activeWordId, cellsByWordId, allLetterCells, answerByCellId, game]);
 
   const activeWordCellIds = activeWordId ? (cellsByWordId.get(activeWordId) ?? []) : [];
 
@@ -297,17 +347,28 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
         onKeyDown={handleKeyDown}
       />
 
-      <motion.button
-        type="button"
-        onClick={checkGrid}
-        whileTap={{ scale: 0.94 }}
-        className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-aurora-violet shadow-xl transition"
-      >
-        <span aria-hidden="true">✓</span> Vérifier
-      </motion.button>
+      <div className="flex items-center gap-3">
+        <motion.button
+          type="button"
+          onClick={revealActiveCell}
+          whileTap={{ scale: 0.94 }}
+          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-lg backdrop-blur-md transition"
+        >
+          <span aria-hidden="true">💡</span> Révéler
+        </motion.button>
+
+        <motion.button
+          type="button"
+          onClick={checkGrid}
+          whileTap={{ scale: 0.94 }}
+          className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-aurora-violet shadow-xl transition"
+        >
+          <span aria-hidden="true">✓</span> Vérifier
+        </motion.button>
+      </div>
 
       <AnimatePresence>
-        {celebrating && <CompletionCelebration onDone={() => setCelebrating(false)} />}
+        {celebrating && <CompletionCelebration onDone={goToNextRound} />}
       </AnimatePresence>
     </div>
   );

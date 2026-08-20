@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { LiveMap } from '@liveblocks/client';
 import {
   LiveblocksProvider,
@@ -27,6 +27,7 @@ export interface PlayerScore {
   name: string;
   color: string;
   score: number;
+  hints: number;
   online: boolean;
   isMe: boolean;
 }
@@ -36,6 +37,9 @@ export interface GameStateApi {
   multiplayer: boolean;
   getLetter: (cellId: string) => string;
   setLetter: (cellId: string, letter: string) => void;
+  /** Écrit la bonne lettre sans jamais accorder de point (voir revealLetter). */
+  revealLetter: (cellId: string, letter: string) => void;
+  isRevealed: (cellId: string) => boolean;
   others: PlayerCursor[];
   myColor: string;
   myPlayerId: string;
@@ -52,14 +56,75 @@ export function useGameState(): GameStateApi {
   return ctx;
 }
 
+/**
+ * Manche courante + passage à la suivante.
+ *
+ * Séparé de GameStateApi parce qu'il faut connaître la manche AVANT d'avoir
+ * la grille : c'est elle qui détermine quelle grille charger.
+ */
+export interface RoundApi {
+  round: number;
+  advanceRound: () => void;
+}
+
+const RoundContext = createContext<RoundApi | null>(null);
+
+export function useRound(): RoundApi {
+  const ctx = useContext(RoundContext);
+  if (!ctx) throw new Error('useRound must be used within a SessionProvider');
+  return ctx;
+}
+
 const PLAYER_COLORS = ['#F5A623', '#4ECDC4', '#FF6B6B', '#8E7CFF', '#2ECC71'];
 
 function randomColor(): string {
   return PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
 }
 
-function LocalGameProvider({ children }: { children: React.ReactNode }) {
+// ============================================================
+// Mode local (aucune clé Liveblocks)
+// ============================================================
+
+const LocalLettersContext = createContext<{
+  letters: Record<string, string>;
+  setLetters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  revealed: Record<string, boolean>;
+  setRevealed: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+} | null>(null);
+
+function LocalSessionProvider({ children }: { children: React.ReactNode }) {
+  const [round, setRound] = useState(0);
   const [letters, setLetters] = useState<Record<string, string>>({});
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  const roundApi = useMemo<RoundApi>(
+    () => ({
+      round,
+      advanceRound: () => {
+        setRound((r) => r + 1);
+        setLetters({});
+        setRevealed({});
+      },
+    }),
+    [round],
+  );
+
+  const lettersApi = useMemo(
+    () => ({ letters, setLetters, revealed, setRevealed }),
+    [letters, revealed],
+  );
+
+  return (
+    <RoundContext.Provider value={roundApi}>
+      <LocalLettersContext.Provider value={lettersApi}>{children}</LocalLettersContext.Provider>
+    </RoundContext.Provider>
+  );
+}
+
+function LocalGameProvider({ children }: { children: React.ReactNode }) {
+  const store = useContext(LocalLettersContext);
+  if (!store) throw new Error('LocalGameProvider must be used within a SessionProvider');
+  const { letters, setLetters, revealed, setRevealed } = store;
   const myColor = useMemo(randomColor, []);
 
   const api = useMemo<GameStateApi>(
@@ -67,17 +132,26 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       multiplayer: false,
       getLetter: (cellId) => letters[cellId] ?? '',
       setLetter: (cellId, letter) => setLetters((prev) => ({ ...prev, [cellId]: letter })),
+      revealLetter: (cellId, letter) => {
+        setLetters((prev) => ({ ...prev, [cellId]: letter }));
+        setRevealed((prev) => ({ ...prev, [cellId]: true }));
+      },
+      isRevealed: (cellId) => Boolean(revealed[cellId]),
       others: [],
       myColor,
       myPlayerId: 'local',
       setMyActiveCell: () => {},
       scoreboard: [],
     }),
-    [letters, myColor],
+    [letters, revealed, setLetters, setRevealed, myColor],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
 }
+
+// ============================================================
+// Mode multijoueur
+// ============================================================
 
 /** cellId -> ids of the word(s) that cell belongs to, and wordId -> its ordered cellIds / definition. */
 function usePuzzleIndex(puzzle: Puzzle) {
@@ -99,6 +173,25 @@ function usePuzzleIndex(puzzle: Puzzle) {
   }, [puzzle.words]);
 }
 
+function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
+  const round = useStorage((root) => root.round) ?? 0;
+
+  // On repart d'une grille vierge : les lettres de la manche précédente
+  // n'ont plus de sens sur la nouvelle. Les scores, eux, se cumulent.
+  const advanceRound = useMutation(({ storage }) => {
+    storage.set('round', (storage.get('round') ?? 0) + 1);
+    // LiveMap n'a pas de .clear() : on supprime clé par clé, en figeant
+    // d'abord la liste pour ne pas muter la map pendant qu'on l'itère.
+    const lettersMap = storage.get('letters');
+    Array.from(lettersMap.keys()).forEach((key) => lettersMap.delete(key));
+    const revealedMap = storage.get('revealed');
+    Array.from(revealedMap.keys()).forEach((key) => revealedMap.delete(key));
+  }, []);
+
+  const api = useMemo<RoundApi>(() => ({ round, advanceRound }), [round, advanceRound]);
+  return <RoundContext.Provider value={api}>{children}</RoundContext.Provider>;
+}
+
 function LiveblocksGameBridge({
   puzzle,
   children,
@@ -111,6 +204,8 @@ function LiveblocksGameBridge({
   const letters = useStorage((root) => root.letters);
   const scores = useStorage((root) => root.scores);
   const players = useStorage((root) => root.players);
+  const hints = useStorage((root) => root.hints);
+  const revealed = useStorage((root) => root.revealed);
   const others = useOthers();
   const [myPresence, updateMyPresence] = useMyPresence();
 
@@ -149,6 +244,17 @@ function LiveblocksGameBridge({
     [wordsById, cellsByWordId, wordIdsByCellId],
   );
 
+  // Volontairement SANS attribution de points : une lettre donnée par l'aide
+  // ne doit pas pouvoir faire gagner le mot. Seul le compteur d'indices bouge,
+  // pour que l'usage de l'aide reste visible des deux joueurs.
+  const revealLetter = useMutation(({ storage, self }, targetCellId: string, letter: string) => {
+    storage.get('letters').set(targetCellId, letter);
+    storage.get('revealed').set(targetCellId, true);
+    const playerId = self.presence.playerId;
+    const hintsMap = storage.get('hints');
+    hintsMap.set(playerId, (hintsMap.get(playerId) ?? 0) + 1);
+  }, []);
+
   const registerPlayer = useMutation(({ storage, self }) => {
     storage.get('players').set(self.presence.playerId, {
       name: self.presence.name,
@@ -181,18 +287,21 @@ function LiveblocksGameBridge({
           name: isMe ? myPresence.name : (onlineOther?.presence.name ?? stored?.name ?? 'Joueur'),
           color: isMe ? myPresence.color : (onlineOther?.presence.color ?? stored?.color ?? '#9CA3AF'),
           score: scores.get(id) ?? 0,
+          hints: hints.get(id) ?? 0,
           online: onlineIds.has(id),
           isMe,
         };
       })
       .sort((a, b) => b.score - a.score || Number(b.isMe) - Number(a.isMe));
-  }, [players, scores, others, myPresence]);
+  }, [players, scores, hints, others, myPresence]);
 
   const api = useMemo<GameStateApi>(
     () => ({
       multiplayer: true,
       getLetter: (cellId) => letters.get(cellId) ?? '',
       setLetter,
+      revealLetter,
+      isRevealed: (cellId) => revealed.get(cellId) === true,
       others: others.map((o) => ({
         connectionId: o.connectionId,
         name: o.presence.name,
@@ -204,7 +313,7 @@ function LiveblocksGameBridge({
       setMyActiveCell: (cellId) => updateMyPresence({ activeCell: cellId }),
       scoreboard,
     }),
-    [letters, others, myPresence, setLetter, updateMyPresence, scoreboard],
+    [letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence, scoreboard],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
@@ -212,23 +321,30 @@ function LiveblocksGameBridge({
 
 function ConnectingFallback() {
   return (
-    <div className="flex min-h-[50vh] items-center justify-center text-sm text-neutral-500">
+    <div className="flex min-h-[50vh] items-center justify-center text-sm text-white/70">
       Connexion à la partie…
     </div>
   );
 }
 
-export function GameStateProvider({
-  roomId,
-  puzzle,
+// ============================================================
+// Providers exportés
+// ============================================================
+
+/**
+ * Ouvre la session (room Liveblocks ou état local). L'identifiant de room ne
+ * dépend QUE de la session, pas de la manche : il faut déjà être connecté
+ * pour savoir quelle manche est en cours.
+ */
+export function SessionProvider({
+  sessionId,
   children,
 }: {
-  roomId: string;
-  puzzle: Puzzle;
+  sessionId: string;
   children: React.ReactNode;
 }) {
   if (!hasLiveblocksKey) {
-    return <LocalGameProvider>{children}</LocalGameProvider>;
+    return <LocalSessionProvider>{children}</LocalSessionProvider>;
   }
 
   const playerName = getOrCreatePlayerName();
@@ -237,14 +353,41 @@ export function GameStateProvider({
   return (
     <LiveblocksProvider publicApiKey={import.meta.env.VITE_LIVEBLOCKS_PUBLIC_KEY as string}>
       <RoomProvider
-        id={roomId}
+        id={`mots-fleches-${sessionId}`}
         initialPresence={{ name: playerName, color: randomColor(), activeCell: null, playerId }}
-        initialStorage={{ letters: new LiveMap(), scores: new LiveMap(), players: new LiveMap() }}
+        initialStorage={{
+          round: 0,
+          letters: new LiveMap(),
+          scores: new LiveMap(),
+          hints: new LiveMap(),
+          revealed: new LiveMap(),
+          players: new LiveMap(),
+        }}
       >
         <ClientSideSuspense fallback={<ConnectingFallback />}>
-          <LiveblocksGameBridge puzzle={puzzle}>{children}</LiveblocksGameBridge>
+          <LiveblocksRoundProvider>{children}</LiveblocksRoundProvider>
         </ClientSideSuspense>
       </RoomProvider>
     </LiveblocksProvider>
   );
+}
+
+/** À placer sous SessionProvider, une fois la grille de la manche chargée. */
+export function GameStateProvider({
+  puzzle,
+  children,
+}: {
+  puzzle: Puzzle;
+  children: React.ReactNode;
+}) {
+  if (!hasLiveblocksKey) {
+    return <LocalGameProvider>{children}</LocalGameProvider>;
+  }
+  return <LiveblocksGameBridge puzzle={puzzle}>{children}</LiveblocksGameBridge>;
+}
+
+/** Petit hook utilitaire pour vider la grille locale/partagée en fin de manche. */
+export function useAdvanceRound(): () => void {
+  const { advanceRound } = useRound();
+  return useCallback(() => advanceRound(), [advanceRound]);
 }

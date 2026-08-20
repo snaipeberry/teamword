@@ -1,0 +1,9758 @@
+[
+  {
+    "word": "go",
+    "size": 2,
+    "hint_str": "meuf",
+    "complexity": 2
+  },
+  {
+    "word": "pas",
+    "size": 3,
+    "hint_str": "mie",
+    "complexity": 1
+  },
+  {
+    "word": "truc",
+    "size": 4,
+    "hint_str": "bidule",
+    "complexity": 1
+  },
+  {
+    "word": "aussi",
+    "size": 5,
+    "hint_str": "également",
+    "complexity": 2
+  },
+  {
+    "word": "argent",
+    "size": 6,
+    "hint_str": "flouze",
+    "complexity": 2
+  },
+  {
+    "word": "bonjour",
+    "size": 7,
+    "hint_str": "salut",
+    "complexity": 2
+  },
+  {
+    "word": "beaucoup",
+    "size": 8,
+    "hint_str": "énormément",
+    "complexity": 3
+  },
+  {
+    "word": "président",
+    "size": 9,
+    "hint_str": "animateur",
+    "complexity": 3
+  },
+  {
+    "word": "entreprise",
+    "size": 10,
+    "hint_str": "société",
+    "complexity": 4
+  },
+  {
+    "word": "funérailles",
+    "size": 11,
+    "hint_str": "obsèque",
+    "complexity": 5
+  },
+  {
+    "word": "actuellement",
+    "size": 12,
+    "hint_str": "maintenant",
+    "complexity": 5
+  },
+  {
+    "word": "nécessiterait",
+    "size": 13,
+    "hint_str": "requerrait",
+    "complexity": 5
+  },
+  {
+    "word": "blanchissement",
+    "size": 14,
+    "hint_str": "blanchiment",
+    "complexity": 5
+  },
+  {
+    "word": "gargouillements",
+    "size": 15,
+    "hint_str": "gargouillis",
+    "complexity": 5
+  },
+  {
+    "word": "que",
+    "size": 3,
+    "hint_str": "quoi",
+    "complexity": 1
+  },
+  {
+    "word": "part",
+    "size": 4,
+    "hint_str": "partie",
+    "complexity": 1
+  },
+  {
+    "word": "mains",
+    "size": 5,
+    "hint_str": "pince",
+    "complexity": 2
+  },
+  {
+    "word": "mourir",
+    "size": 6,
+    "hint_str": "crever",
+    "complexity": 2
+  },
+  {
+    "word": "travail",
+    "size": 7,
+    "hint_str": "boulot",
+    "complexity": 2
+  },
+  {
+    "word": "protéger",
+    "size": 8,
+    "hint_str": "favoriser",
+    "complexity": 3
+  },
+  {
+    "word": "toilettes",
+    "size": 9,
+    "hint_str": "sanitaire",
+    "complexity": 3
+  },
+  {
+    "word": "discussion",
+    "size": 10,
+    "hint_str": "dialogue",
+    "complexity": 4
+  },
+  {
+    "word": "enregistrer",
+    "size": 11,
+    "hint_str": "filmer",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrent",
+    "size": 12,
+    "hint_str": "filment",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblaient",
+    "size": 13,
+    "hint_str": "recueillaient",
+    "complexity": 5
+  },
+  {
+    "word": "enregistraient",
+    "size": 14,
+    "hint_str": "filmaient",
+    "complexity": 5
+  },
+  {
+    "word": "nécessiteraient",
+    "size": 15,
+    "hint_str": "requerraient",
+    "complexity": 5
+  },
+  {
+    "word": "moi",
+    "size": 3,
+    "hint_str": "mézigue",
+    "complexity": 1
+  },
+  {
+    "word": "mort",
+    "size": 4,
+    "hint_str": "péri",
+    "complexity": 1
+  },
+  {
+    "word": "tiens",
+    "size": 5,
+    "hint_str": "tin",
+    "complexity": 2
+  },
+  {
+    "word": "boulot",
+    "size": 6,
+    "hint_str": "taf",
+    "complexity": 2
+  },
+  {
+    "word": "voiture",
+    "size": 7,
+    "hint_str": "bagnole",
+    "complexity": 2
+  },
+  {
+    "word": "mesdames",
+    "size": 8,
+    "hint_str": "dame",
+    "complexity": 3
+  },
+  {
+    "word": "policiers",
+    "size": 9,
+    "hint_str": "argousin",
+    "complexity": 4
+  },
+  {
+    "word": "enregistré",
+    "size": 10,
+    "hint_str": "filmés",
+    "complexity": 4
+  },
+  {
+    "word": "entreprises",
+    "size": 11,
+    "hint_str": "société",
+    "complexity": 5
+  },
+  {
+    "word": "hiéroglyphes",
+    "size": 12,
+    "hint_str": "idéogramme",
+    "complexity": 5
+  },
+  {
+    "word": "métropolitain",
+    "size": 13,
+    "hint_str": "métro",
+    "complexity": 5
+  },
+  {
+    "word": "gargouillement",
+    "size": 14,
+    "hint_str": "gargouillis",
+    "complexity": 5
+  },
+  {
+    "word": "approprieraient",
+    "size": 15,
+    "hint_str": "usurperaient",
+    "complexity": 5
+  },
+  {
+    "word": "toi",
+    "size": 3,
+    "hint_str": "tézigue",
+    "complexity": 1
+  },
+  {
+    "word": "dont",
+    "size": 4,
+    "hint_str": "duquel",
+    "complexity": 1
+  },
+  {
+    "word": "trucs",
+    "size": 5,
+    "hint_str": "bidule",
+    "complexity": 2
+  },
+  {
+    "word": "madame",
+    "size": 6,
+    "hint_str": "dame",
+    "complexity": 2
+  },
+  {
+    "word": "bizarre",
+    "size": 7,
+    "hint_str": "baroque",
+    "complexity": 2
+  },
+  {
+    "word": "voitures",
+    "size": 8,
+    "hint_str": "chignole",
+    "complexity": 4
+  },
+  {
+    "word": "tradition",
+    "size": 9,
+    "hint_str": "coutume",
+    "complexity": 4
+  },
+  {
+    "word": "présidente",
+    "size": 10,
+    "hint_str": "animateur",
+    "complexity": 4
+  },
+  {
+    "word": "discussions",
+    "size": 11,
+    "hint_str": "dialogue",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrait",
+    "size": 12,
+    "hint_str": "filmait",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerai",
+    "size": 13,
+    "hint_str": "filmerai",
+    "complexity": 5
+  },
+  {
+    "word": "gazouillements",
+    "size": 14,
+    "hint_str": "gazouillis",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerions",
+    "size": 15,
+    "hint_str": "filmerions",
+    "complexity": 5
+  },
+  {
+    "word": "but",
+    "size": 3,
+    "hint_str": "fin",
+    "complexity": 1
+  },
+  {
+    "word": "main",
+    "size": 4,
+    "hint_str": "pince",
+    "complexity": 1
+  },
+  {
+    "word": "livré",
+    "size": 5,
+    "hint_str": "emmené",
+    "complexity": 2
+  },
+  {
+    "word": "envoyé",
+    "size": 6,
+    "hint_str": "expédié",
+    "complexity": 2
+  },
+  {
+    "word": "envoyer",
+    "size": 7,
+    "hint_str": "expédier",
+    "complexity": 2
+  },
+  {
+    "word": "bâtiment",
+    "size": 8,
+    "hint_str": "vaisseau",
+    "complexity": 4
+  },
+  {
+    "word": "camarades",
+    "size": 9,
+    "hint_str": "compagnon",
+    "complexity": 4
+  },
+  {
+    "word": "rassembler",
+    "size": 10,
+    "hint_str": "recueillir",
+    "complexity": 4
+  },
+  {
+    "word": "projecteurs",
+    "size": 11,
+    "hint_str": "projo",
+    "complexity": 5
+  },
+  {
+    "word": "protégeaient",
+    "size": 12,
+    "hint_str": "favorisaient",
+    "complexity": 5
+  },
+  {
+    "word": "gazouillement",
+    "size": 13,
+    "hint_str": "gazouillis",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerait",
+    "size": 14,
+    "hint_str": "filmerait",
+    "complexity": 5
+  },
+  {
+    "word": "rassembleraient",
+    "size": 15,
+    "hint_str": "recueilleraient",
+    "complexity": 5
+  },
+  {
+    "word": "job",
+    "size": 3,
+    "hint_str": "boulot",
+    "complexity": 2
+  },
+  {
+    "word": "sens",
+    "size": 4,
+    "hint_str": "pue",
+    "complexity": 1
+  },
+  {
+    "word": "force",
+    "size": 5,
+    "hint_str": "pouvoir",
+    "complexity": 2
+  },
+  {
+    "word": "envoie",
+    "size": 6,
+    "hint_str": "expédie",
+    "complexity": 2
+  },
+  {
+    "word": "couleur",
+    "size": 7,
+    "hint_str": "enseigne",
+    "complexity": 3
+  },
+  {
+    "word": "violence",
+    "size": 8,
+    "hint_str": "brutalité",
+    "complexity": 4
+  },
+  {
+    "word": "surmonter",
+    "size": 9,
+    "hint_str": "vaincre",
+    "complexity": 4
+  },
+  {
+    "word": "discipliné",
+    "size": 10,
+    "hint_str": "sanctionnée",
+    "complexity": 4
+  },
+  {
+    "word": "grenouilles",
+    "size": 11,
+    "hint_str": "batracien",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrons",
+    "size": 12,
+    "hint_str": "filmons",
+    "complexity": 5
+  },
+  {
+    "word": "interdisaient",
+    "size": 13,
+    "hint_str": "prohibaient",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerons",
+    "size": 14,
+    "hint_str": "filmerons",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenteraient",
+    "size": 15,
+    "hint_str": "supplicieraient",
+    "complexity": 5
+  },
+  {
+    "word": "bic",
+    "size": 3,
+    "hint_str": "stylo",
+    "complexity": 2
+  },
+  {
+    "word": "prêt",
+    "size": 4,
+    "hint_str": "emprunt",
+    "complexity": 1
+  },
+  {
+    "word": "jolie",
+    "size": 5,
+    "hint_str": "mignon",
+    "complexity": 2
+  },
+  {
+    "word": "sentir",
+    "size": 6,
+    "hint_str": "exhaler",
+    "complexity": 2
+  },
+  {
+    "word": "chevaux",
+    "size": 7,
+    "hint_str": "équidé",
+    "complexity": 3
+  },
+  {
+    "word": "interdit",
+    "size": 8,
+    "hint_str": "prohibé",
+    "complexity": 4
+  },
+  {
+    "word": "prononcer",
+    "size": 9,
+    "hint_str": "articuler",
+    "complexity": 4
+  },
+  {
+    "word": "grenouille",
+    "size": 10,
+    "hint_str": "batracien",
+    "complexity": 4
+  },
+  {
+    "word": "enregistres",
+    "size": 11,
+    "hint_str": "filmes",
+    "complexity": 5
+  },
+  {
+    "word": "emmerdements",
+    "size": 12,
+    "hint_str": "emmerde",
+    "complexity": 5
+  },
+  {
+    "word": "rassembleront",
+    "size": 13,
+    "hint_str": "recueilleront",
+    "complexity": 5
+  },
+  {
+    "word": "quarantenaires",
+    "size": 14,
+    "hint_str": "quadragénaire",
+    "complexity": 5
+  },
+  {
+    "word": "transpireraient",
+    "size": 15,
+    "hint_str": "sueraient",
+    "complexity": 5
+  },
+  {
+    "word": "ort",
+    "size": 3,
+    "hint_str": "sale",
+    "complexity": 2
+  },
+  {
+    "word": "fort",
+    "size": 4,
+    "hint_str": "gros",
+    "complexity": 1
+  },
+  {
+    "word": "tueur",
+    "size": 5,
+    "hint_str": "bourreau",
+    "complexity": 2
+  },
+  {
+    "word": "cheval",
+    "size": 6,
+    "hint_str": "équidé",
+    "complexity": 2
+  },
+  {
+    "word": "blesser",
+    "size": 7,
+    "hint_str": "offenser",
+    "complexity": 3
+  },
+  {
+    "word": "policier",
+    "size": 8,
+    "hint_str": "argousin",
+    "complexity": 4
+  },
+  {
+    "word": "bâtiments",
+    "size": 9,
+    "hint_str": "vaisseau",
+    "complexity": 4
+  },
+  {
+    "word": "traditions",
+    "size": 10,
+    "hint_str": "coutume",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblent",
+    "size": 11,
+    "hint_str": "recueillent",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrais",
+    "size": 12,
+    "hint_str": "filmais",
+    "complexity": 5
+  },
+  {
+    "word": "protégeraient",
+    "size": 13,
+    "hint_str": "favoriseraient",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerais",
+    "size": 14,
+    "hint_str": "filmerais",
+    "complexity": 5
+  },
+  {
+    "word": "oit",
+    "size": 3,
+    "hint_str": "tézigue",
+    "complexity": 2
+  },
+  {
+    "word": "faim",
+    "size": 4,
+    "hint_str": "appétit",
+    "complexity": 1
+  },
+  {
+    "word": "calme",
+    "size": 5,
+    "hint_str": "quiet",
+    "complexity": 2
+  },
+  {
+    "word": "livres",
+    "size": 6,
+    "hint_str": "emmènes",
+    "complexity": 2
+  },
+  {
+    "word": "envoyez",
+    "size": 7,
+    "hint_str": "expédiez",
+    "complexity": 3
+  },
+  {
+    "word": "humanité",
+    "size": 8,
+    "hint_str": "huma",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblé",
+    "size": 9,
+    "hint_str": "ramassé",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblez",
+    "size": 10,
+    "hint_str": "recueillez",
+    "complexity": 4
+  },
+  {
+    "word": "disputaient",
+    "size": 11,
+    "hint_str": "chamaillaient",
+    "complexity": 5
+  },
+  {
+    "word": "baccalauréat",
+    "size": 12,
+    "hint_str": "bachot",
+    "complexity": 5
+  },
+  {
+    "word": "quarantenaire",
+    "size": 13,
+    "hint_str": "quadragénaire",
+    "complexity": 5
+  },
+  {
+    "word": "enregistreront",
+    "size": 14,
+    "hint_str": "filmeront",
+    "complexity": 5
+  },
+  {
+    "word": "wat",
+    "size": 3,
+    "hint_str": "tézigue",
+    "complexity": 2
+  },
+  {
+    "word": "joli",
+    "size": 4,
+    "hint_str": "mignon",
+    "complexity": 1
+  },
+  {
+    "word": "prêts",
+    "size": 5,
+    "hint_str": "emprunt",
+    "complexity": 2
+  },
+  {
+    "word": "proche",
+    "size": 6,
+    "hint_str": "près",
+    "complexity": 2
+  },
+  {
+    "word": "parlant",
+    "size": 7,
+    "hint_str": "révélateur",
+    "complexity": 3
+  },
+  {
+    "word": "couleurs",
+    "size": 8,
+    "hint_str": "enseigne",
+    "complexity": 4
+  },
+  {
+    "word": "conquérir",
+    "size": 9,
+    "hint_str": "surmonter",
+    "complexity": 4
+  },
+  {
+    "word": "apercevoir",
+    "size": 10,
+    "hint_str": "entrevoir",
+    "complexity": 4
+  },
+  {
+    "word": "pâtisseries",
+    "size": 11,
+    "hint_str": "gâteau",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrera",
+    "size": 12,
+    "hint_str": "filmera",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerons",
+    "size": 13,
+    "hint_str": "recueillerons",
+    "complexity": 5
+  },
+  {
+    "word": "métropolitains",
+    "size": 14,
+    "hint_str": "métro",
+    "complexity": 5
+  },
+  {
+    "word": "sent",
+    "size": 4,
+    "hint_str": "pue",
+    "complexity": 1
+  },
+  {
+    "word": "jeter",
+    "size": 5,
+    "hint_str": "lancer",
+    "complexity": 2
+  },
+  {
+    "word": "mignon",
+    "size": 6,
+    "hint_str": "joli",
+    "complexity": 2
+  },
+  {
+    "word": "proches",
+    "size": 7,
+    "hint_str": "près",
+    "complexity": 3
+  },
+  {
+    "word": "camarade",
+    "size": 8,
+    "hint_str": "compagnon",
+    "complexity": 4
+  },
+  {
+    "word": "sentirais",
+    "size": 9,
+    "hint_str": "empesterais",
+    "complexity": 4
+  },
+  {
+    "word": "pâtisserie",
+    "size": 10,
+    "hint_str": "gâteau",
+    "complexity": 4
+  },
+  {
+    "word": "enregistrez",
+    "size": 11,
+    "hint_str": "filmez",
+    "complexity": 5
+  },
+  {
+    "word": "réunissaient",
+    "size": 12,
+    "hint_str": "rassemblaient",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblèrent",
+    "size": 13,
+    "hint_str": "recueillirent",
+    "complexity": 5
+  },
+  {
+    "word": "surviendraient",
+    "size": 14,
+    "hint_str": "arriveraient",
+    "complexity": 5
+  },
+  {
+    "word": "dame",
+    "size": 4,
+    "hint_str": "lady",
+    "complexity": 1
+  },
+  {
+    "word": "froid",
+    "size": 5,
+    "hint_str": "frette",
+    "complexity": 2
+  },
+  {
+    "word": "blessé",
+    "size": 6,
+    "hint_str": "offensé",
+    "complexity": 2
+  },
+  {
+    "word": "protégé",
+    "size": 7,
+    "hint_str": "favorisé",
+    "complexity": 3
+  },
+  {
+    "word": "ennuyeux",
+    "size": 8,
+    "hint_str": "ennuyant",
+    "complexity": 4
+  },
+  {
+    "word": "néanmoins",
+    "size": 9,
+    "hint_str": "pourtant",
+    "complexity": 4
+  },
+  {
+    "word": "recueillir",
+    "size": 10,
+    "hint_str": "rassembler",
+    "complexity": 4
+  },
+  {
+    "word": "interdisent",
+    "size": 11,
+    "hint_str": "prohibent",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrant",
+    "size": 12,
+    "hint_str": "filmant",
+    "complexity": 5
+  },
+  {
+    "word": "tourmentaient",
+    "size": 13,
+    "hint_str": "suppliciaient",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrèrent",
+    "size": 14,
+    "hint_str": "filmèrent",
+    "complexity": 5
+  },
+  {
+    "word": "chat",
+    "size": 4,
+    "hint_str": "félin",
+    "complexity": 2
+  },
+  {
+    "word": "signe",
+    "size": 5,
+    "hint_str": "trace",
+    "complexity": 2
+  },
+  {
+    "word": "gâteau",
+    "size": 6,
+    "hint_str": "pâtisserie",
+    "complexity": 3
+  },
+  {
+    "word": "sentais",
+    "size": 7,
+    "hint_str": "exhalais",
+    "complexity": 3
+  },
+  {
+    "word": "bizarres",
+    "size": 8,
+    "hint_str": "original",
+    "complexity": 4
+  },
+  {
+    "word": "terrestre",
+    "size": 9,
+    "hint_str": "tellurique",
+    "complexity": 4
+  },
+  {
+    "word": "protégerai",
+    "size": 10,
+    "hint_str": "favoriserai",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblons",
+    "size": 11,
+    "hint_str": "recueillons",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerai",
+    "size": 12,
+    "hint_str": "recueillerai",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerait",
+    "size": 13,
+    "hint_str": "recueillerait",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinerait",
+    "size": 14,
+    "hint_str": "sanctionnerait",
+    "complexity": 5
+  },
+  {
+    "word": "jeté",
+    "size": 4,
+    "hint_str": "lancé",
+    "complexity": 2
+  },
+  {
+    "word": "tante",
+    "size": 5,
+    "hint_str": "tata",
+    "complexity": 2
+  },
+  {
+    "word": "forces",
+    "size": 6,
+    "hint_str": "pouvoir",
+    "complexity": 3
+  },
+  {
+    "word": "meurent",
+    "size": 7,
+    "hint_str": "clamsent",
+    "complexity": 3
+  },
+  {
+    "word": "convient",
+    "size": 8,
+    "hint_str": "invitent",
+    "complexity": 4
+  },
+  {
+    "word": "approprié",
+    "size": 9,
+    "hint_str": "usurpé",
+    "complexity": 4
+  },
+  {
+    "word": "rassembles",
+    "size": 10,
+    "hint_str": "recueilles",
+    "complexity": 4
+  },
+  {
+    "word": "interdisant",
+    "size": 11,
+    "hint_str": "prohibant",
+    "complexity": 5
+  },
+  {
+    "word": "surmonterons",
+    "size": 12,
+    "hint_str": "vaincrons",
+    "complexity": 5
+  },
+  {
+    "word": "nécessitaient",
+    "size": 13,
+    "hint_str": "requéraient",
+    "complexity": 5
+  },
+  {
+    "word": "déboucheraient",
+    "size": 14,
+    "hint_str": "débloqueraient",
+    "complexity": 5
+  },
+  {
+    "word": "hâté",
+    "size": 4,
+    "hint_str": "empressée",
+    "complexity": 2
+  },
+  {
+    "word": "forte",
+    "size": 5,
+    "hint_str": "ferme",
+    "complexity": 3
+  },
+  {
+    "word": "sentez",
+    "size": 6,
+    "hint_str": "exhalez",
+    "complexity": 3
+  },
+  {
+    "word": "travaux",
+    "size": 7,
+    "hint_str": "boulot",
+    "complexity": 3
+  },
+  {
+    "word": "mignonne",
+    "size": 8,
+    "hint_str": "joli",
+    "complexity": 4
+  },
+  {
+    "word": "ennuyeuse",
+    "size": 9,
+    "hint_str": "assommant",
+    "complexity": 4
+  },
+  {
+    "word": "projecteur",
+    "size": 10,
+    "hint_str": "projo",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitent",
+    "size": 11,
+    "hint_str": "requièrent",
+    "complexity": 5
+  },
+  {
+    "word": "sonorisation",
+    "size": 12,
+    "hint_str": "sono",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrerez",
+    "size": 13,
+    "hint_str": "filmerez",
+    "complexity": 5
+  },
+  {
+    "word": "entrecoupaient",
+    "size": 14,
+    "hint_str": "entremêlaient",
+    "complexity": 5
+  },
+  {
+    "word": "plat",
+    "size": 4,
+    "hint_str": "mets",
+    "complexity": 2
+  },
+  {
+    "word": "image",
+    "size": 5,
+    "hint_str": "reflet",
+    "complexity": 3
+  },
+  {
+    "word": "métier",
+    "size": 6,
+    "hint_str": "boulot",
+    "complexity": 3
+  },
+  {
+    "word": "disputé",
+    "size": 7,
+    "hint_str": "querellée",
+    "complexity": 3
+  },
+  {
+    "word": "enverrai",
+    "size": 8,
+    "hint_str": "expédierai",
+    "complexity": 4
+  },
+  {
+    "word": "initiales",
+    "size": 9,
+    "hint_str": "attaque",
+    "complexity": 4
+  },
+  {
+    "word": "présidents",
+    "size": 10,
+    "hint_str": "animateur",
+    "complexity": 4
+  },
+  {
+    "word": "cadavérique",
+    "size": 11,
+    "hint_str": "cadavéreux",
+    "complexity": 5
+  },
+  {
+    "word": "prononceront",
+    "size": 12,
+    "hint_str": "articuleront",
+    "complexity": 5
+  },
+  {
+    "word": "enregistrions",
+    "size": 13,
+    "hint_str": "filmions",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillaient",
+    "size": 14,
+    "hint_str": "griffonnaient",
+    "complexity": 5
+  },
+  {
+    "word": "ouah",
+    "size": 4,
+    "hint_str": "waouh",
+    "complexity": 2
+  },
+  {
+    "word": "meurt",
+    "size": 5,
+    "hint_str": "périt",
+    "complexity": 3
+  },
+  {
+    "word": "casser",
+    "size": 6,
+    "hint_str": "briser",
+    "complexity": 3
+  },
+  {
+    "word": "sociale",
+    "size": 7,
+    "hint_str": "grégaire",
+    "complexity": 3
+  },
+  {
+    "word": "désordre",
+    "size": 8,
+    "hint_str": "pagaille",
+    "complexity": 4
+  },
+  {
+    "word": "nécessité",
+    "size": 9,
+    "hint_str": "requise",
+    "complexity": 4
+  },
+  {
+    "word": "protégeait",
+    "size": 10,
+    "hint_str": "favorisait",
+    "complexity": 4
+  },
+  {
+    "word": "protégerais",
+    "size": 11,
+    "hint_str": "favoriserais",
+    "complexity": 5
+  },
+  {
+    "word": "enregistriez",
+    "size": 12,
+    "hint_str": "filmiez",
+    "complexity": 5
+  },
+  {
+    "word": "nécessiteront",
+    "size": 13,
+    "hint_str": "requerront",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillèrent",
+    "size": 14,
+    "hint_str": "griffonnèrent",
+    "complexity": 5
+  },
+  {
+    "word": "ivre",
+    "size": 4,
+    "hint_str": "bleu",
+    "complexity": 2
+  },
+  {
+    "word": "cassé",
+    "size": 5,
+    "hint_str": "brisé",
+    "complexity": 3
+  },
+  {
+    "word": "images",
+    "size": 6,
+    "hint_str": "reflet",
+    "complexity": 3
+  },
+  {
+    "word": "gâteaux",
+    "size": 7,
+    "hint_str": "pâtisserie",
+    "complexity": 3
+  },
+  {
+    "word": "disputer",
+    "size": 8,
+    "hint_str": "quereller",
+    "complexity": 4
+  },
+  {
+    "word": "protègent",
+    "size": 9,
+    "hint_str": "favorisent",
+    "complexity": 4
+  },
+  {
+    "word": "transpirer",
+    "size": 10,
+    "hint_str": "suer",
+    "complexity": 4
+  },
+  {
+    "word": "protégerait",
+    "size": 11,
+    "hint_str": "favoriserait",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblions",
+    "size": 12,
+    "hint_str": "recueillions",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerais",
+    "size": 13,
+    "hint_str": "recueillerais",
+    "complexity": 5
+  },
+  {
+    "word": "illumineraient",
+    "size": 14,
+    "hint_str": "éclaireraient",
+    "complexity": 5
+  },
+  {
+    "word": "mêlé",
+    "size": 4,
+    "hint_str": "mélangé",
+    "complexity": 2
+  },
+  {
+    "word": "jette",
+    "size": 5,
+    "hint_str": "lance",
+    "complexity": 3
+  },
+  {
+    "word": "sombré",
+    "size": 6,
+    "hint_str": "coulé",
+    "complexity": 3
+  },
+  {
+    "word": "sentait",
+    "size": 7,
+    "hint_str": "exhalait",
+    "complexity": 3
+  },
+  {
+    "word": "envoient",
+    "size": 8,
+    "hint_str": "expédient",
+    "complexity": 4
+  },
+  {
+    "word": "interdire",
+    "size": 9,
+    "hint_str": "prohiber",
+    "complexity": 4
+  },
+  {
+    "word": "bicyclette",
+    "size": 10,
+    "hint_str": "vélo",
+    "complexity": 4
+  },
+  {
+    "word": "protégeront",
+    "size": 11,
+    "hint_str": "favoriseront",
+    "complexity": 5
+  },
+  {
+    "word": "illuminerait",
+    "size": 12,
+    "hint_str": "éclairerait",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenterait",
+    "size": 13,
+    "hint_str": "supplicierait",
+    "complexity": 5
+  },
+  {
+    "word": "prononceraient",
+    "size": 14,
+    "hint_str": "articuleraient",
+    "complexity": 5
+  },
+  {
+    "word": "buts",
+    "size": 4,
+    "hint_str": "fin",
+    "complexity": 2
+  },
+  {
+    "word": "senti",
+    "size": 5,
+    "hint_str": "pué",
+    "complexity": 3
+  },
+  {
+    "word": "faussé",
+    "size": 6,
+    "hint_str": "falsifiée",
+    "complexity": 3
+  },
+  {
+    "word": "fausses",
+    "size": 7,
+    "hint_str": "falsifies",
+    "complexity": 3
+  },
+  {
+    "word": "parcours",
+    "size": 8,
+    "hint_str": "trajet",
+    "complexity": 4
+  },
+  {
+    "word": "protégera",
+    "size": 9,
+    "hint_str": "favorisera",
+    "complexity": 4
+  },
+  {
+    "word": "terrestres",
+    "size": 10,
+    "hint_str": "tellurique",
+    "complexity": 4
+  },
+  {
+    "word": "aperçoivent",
+    "size": 11,
+    "hint_str": "entrevoient",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerai",
+    "size": 12,
+    "hint_str": "rassemblerai",
+    "complexity": 5
+  },
+  {
+    "word": "apercevraient",
+    "size": 13,
+    "hint_str": "entreverraient",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerions",
+    "size": 14,
+    "hint_str": "recueillerions",
+    "complexity": 5
+  },
+  {
+    "word": "fade",
+    "size": 4,
+    "hint_str": "terne",
+    "complexity": 2
+  },
+  {
+    "word": "meurs",
+    "size": 5,
+    "hint_str": "péris",
+    "complexity": 3
+  },
+  {
+    "word": "brûler",
+    "size": 6,
+    "hint_str": "ardre",
+    "complexity": 3
+  },
+  {
+    "word": "vaincre",
+    "size": 7,
+    "hint_str": "battre",
+    "complexity": 3
+  },
+  {
+    "word": "disputes",
+    "size": 8,
+    "hint_str": "querelles",
+    "complexity": 4
+  },
+  {
+    "word": "policière",
+    "size": 9,
+    "hint_str": "argousin",
+    "complexity": 4
+  },
+  {
+    "word": "communisme",
+    "size": 10,
+    "hint_str": "collectivisme",
+    "complexity": 4
+  },
+  {
+    "word": "interdisait",
+    "size": 11,
+    "hint_str": "prohibait",
+    "complexity": 5
+  },
+  {
+    "word": "illuminaient",
+    "size": 12,
+    "hint_str": "éclairaient",
+    "complexity": 5
+  },
+  {
+    "word": "disputeraient",
+    "size": 13,
+    "hint_str": "chamailleraient",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerions",
+    "size": 14,
+    "hint_str": "rassemblerions",
+    "complexity": 5
+  },
+  {
+    "word": "rame",
+    "size": 4,
+    "hint_str": "train",
+    "complexity": 2
+  },
+  {
+    "word": "ayant",
+    "size": 5,
+    "hint_str": "offensant",
+    "complexity": 3
+  },
+  {
+    "word": "signes",
+    "size": 6,
+    "hint_str": "indice",
+    "complexity": 3
+  },
+  {
+    "word": "meubles",
+    "size": 7,
+    "hint_str": "mou",
+    "complexity": 3
+  },
+  {
+    "word": "protégez",
+    "size": 8,
+    "hint_str": "favorisez",
+    "complexity": 4
+  },
+  {
+    "word": "disputent",
+    "size": 9,
+    "hint_str": "querellent",
+    "complexity": 4
+  },
+  {
+    "word": "protégeais",
+    "size": 10,
+    "hint_str": "favorisais",
+    "complexity": 4
+  },
+  {
+    "word": "enverraient",
+    "size": 11,
+    "hint_str": "expédieraient",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblerez",
+    "size": 12,
+    "hint_str": "recueillerez",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerons",
+    "size": 13,
+    "hint_str": "rassemblerons",
+    "complexity": 5
+  },
+  {
+    "word": "surmonteraient",
+    "size": 14,
+    "hint_str": "vaincraient",
+    "complexity": 5
+  },
+  {
+    "word": "jobs",
+    "size": 4,
+    "hint_str": "boulot",
+    "complexity": 2
+  },
+  {
+    "word": "brûlé",
+    "size": 5,
+    "hint_str": "flambé",
+    "complexity": 3
+  },
+  {
+    "word": "livrer",
+    "size": 6,
+    "hint_str": "emmener",
+    "complexity": 3
+  },
+  {
+    "word": "sentent",
+    "size": 7,
+    "hint_str": "exhalent",
+    "complexity": 3
+  },
+  {
+    "word": "interdis",
+    "size": 8,
+    "hint_str": "prohibe",
+    "complexity": 4
+  },
+  {
+    "word": "transpiré",
+    "size": 9,
+    "hint_str": "sué",
+    "complexity": 4
+  },
+  {
+    "word": "tourmenter",
+    "size": 10,
+    "hint_str": "supplicier",
+    "complexity": 4
+  },
+  {
+    "word": "formulation",
+    "size": 11,
+    "hint_str": "tournure",
+    "complexity": 5
+  },
+  {
+    "word": "formulations",
+    "size": 12,
+    "hint_str": "tournure",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenteront",
+    "size": 13,
+    "hint_str": "supplicieront",
+    "complexity": 5
+  },
+  {
+    "word": "jeta",
+    "size": 4,
+    "hint_str": "lança",
+    "complexity": 2
+  },
+  {
+    "word": "crème",
+    "size": 5,
+    "hint_str": "laitage",
+    "complexity": 3
+  },
+  {
+    "word": "jolies",
+    "size": 6,
+    "hint_str": "mignon",
+    "complexity": 3
+  },
+  {
+    "word": "blesses",
+    "size": 7,
+    "hint_str": "offenses",
+    "complexity": 3
+  },
+  {
+    "word": "prononcé",
+    "size": 8,
+    "hint_str": "articulé",
+    "complexity": 4
+  },
+  {
+    "word": "aléatoire",
+    "size": 9,
+    "hint_str": "hasardeux",
+    "complexity": 4
+  },
+  {
+    "word": "protégeant",
+    "size": 10,
+    "hint_str": "favorisant",
+    "complexity": 4
+  },
+  {
+    "word": "protégerons",
+    "size": 11,
+    "hint_str": "favoriserons",
+    "complexity": 5
+  },
+  {
+    "word": "plantureuses",
+    "size": 12,
+    "hint_str": "voluptueux",
+    "complexity": 5
+  },
+  {
+    "word": "enregistreras",
+    "size": 13,
+    "hint_str": "filmeras",
+    "complexity": 5
+  },
+  {
+    "word": "robe",
+    "size": 4,
+    "hint_str": "habit",
+    "complexity": 2
+  },
+  {
+    "word": "fumée",
+    "size": 5,
+    "hint_str": "boucane",
+    "complexity": 3
+  },
+  {
+    "word": "froide",
+    "size": 6,
+    "hint_str": "frette",
+    "complexity": 3
+  },
+  {
+    "word": "sociaux",
+    "size": 7,
+    "hint_str": "grégaire",
+    "complexity": 3
+  },
+  {
+    "word": "sentiras",
+    "size": 8,
+    "hint_str": "empesteras",
+    "complexity": 4
+  },
+  {
+    "word": "violences",
+    "size": 9,
+    "hint_str": "brutalité",
+    "complexity": 4
+  },
+  {
+    "word": "réunissent",
+    "size": 10,
+    "hint_str": "rassemblent",
+    "complexity": 4
+  },
+  {
+    "word": "discipliner",
+    "size": 11,
+    "hint_str": "sanctionner",
+    "complexity": 5
+  },
+  {
+    "word": "prononcerais",
+    "size": 12,
+    "hint_str": "articulerais",
+    "complexity": 5
+  },
+  {
+    "word": "recueillaient",
+    "size": 13,
+    "hint_str": "rassemblaient",
+    "complexity": 5
+  },
+  {
+    "word": "ardu",
+    "size": 4,
+    "hint_str": "brûlé",
+    "complexity": 2
+  },
+  {
+    "word": "dames",
+    "size": 5,
+    "hint_str": "lady",
+    "complexity": 3
+  },
+  {
+    "word": "régime",
+    "size": 6,
+    "hint_str": "diète",
+    "complexity": 3
+  },
+  {
+    "word": "embêter",
+    "size": 7,
+    "hint_str": "énerver",
+    "complexity": 3
+  },
+  {
+    "word": "bavarder",
+    "size": 8,
+    "hint_str": "babiller",
+    "complexity": 4
+  },
+  {
+    "word": "conteneur",
+    "size": 9,
+    "hint_str": "container",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifiant",
+    "size": 10,
+    "hint_str": "graissant",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblant",
+    "size": 11,
+    "hint_str": "recueillant",
+    "complexity": 5
+  },
+  {
+    "word": "prononcerait",
+    "size": 12,
+    "hint_str": "articulerait",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerait",
+    "size": 13,
+    "hint_str": "rassemblerait",
+    "complexity": 5
+  },
+  {
+    "word": "mugi",
+    "size": 4,
+    "hint_str": "meuglé",
+    "complexity": 2
+  },
+  {
+    "word": "chats",
+    "size": 5,
+    "hint_str": "félin",
+    "complexity": 3
+  },
+  {
+    "word": "enculé",
+    "size": 6,
+    "hint_str": "enfoiré",
+    "complexity": 3
+  },
+  {
+    "word": "frangin",
+    "size": 7,
+    "hint_str": "camarade",
+    "complexity": 3
+  },
+  {
+    "word": "mourront",
+    "size": 8,
+    "hint_str": "clameceront",
+    "complexity": 4
+  },
+  {
+    "word": "enverrait",
+    "size": 9,
+    "hint_str": "expédierait",
+    "complexity": 4
+  },
+  {
+    "word": "approprier",
+    "size": 10,
+    "hint_str": "usurper",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitait",
+    "size": 11,
+    "hint_str": "requérait",
+    "complexity": 5
+  },
+  {
+    "word": "surviendrait",
+    "size": 12,
+    "hint_str": "arriverait",
+    "complexity": 5
+  },
+  {
+    "word": "approprieront",
+    "size": 13,
+    "hint_str": "usurperont",
+    "complexity": 5
+  },
+  {
+    "word": "fève",
+    "size": 4,
+    "hint_str": "haricot",
+    "complexity": 2
+  },
+  {
+    "word": "forts",
+    "size": 5,
+    "hint_str": "ferme",
+    "complexity": 3
+  },
+  {
+    "word": "réunis",
+    "size": 6,
+    "hint_str": "rassemble",
+    "complexity": 3
+  },
+  {
+    "word": "sombres",
+    "size": 7,
+    "hint_str": "coules",
+    "complexity": 3
+  },
+  {
+    "word": "abeilles",
+    "size": 8,
+    "hint_str": "insecte",
+    "complexity": 4
+  },
+  {
+    "word": "recueilli",
+    "size": 9,
+    "hint_str": "rassemblé",
+    "complexity": 4
+  },
+  {
+    "word": "aléatoires",
+    "size": 10,
+    "hint_str": "hasardeux",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblait",
+    "size": 11,
+    "hint_str": "recueillait",
+    "complexity": 5
+  },
+  {
+    "word": "embêteraient",
+    "size": 12,
+    "hint_str": "agaceraient",
+    "complexity": 5
+  },
+  {
+    "word": "interdiraient",
+    "size": 13,
+    "hint_str": "prohiberaient",
+    "complexity": 5
+  },
+  {
+    "word": "arde",
+    "size": 4,
+    "hint_str": "brûle",
+    "complexity": 2
+  },
+  {
+    "word": "jetez",
+    "size": 5,
+    "hint_str": "lancez",
+    "complexity": 3
+  },
+  {
+    "word": "tueurs",
+    "size": 6,
+    "hint_str": "bourreau",
+    "complexity": 3
+  },
+  {
+    "word": "mourrai",
+    "size": 7,
+    "hint_str": "clamserai",
+    "complexity": 3
+  },
+  {
+    "word": "mourrais",
+    "size": 8,
+    "hint_str": "clamecerais",
+    "complexity": 4
+  },
+  {
+    "word": "pionniers",
+    "size": 9,
+    "hint_str": "précurseur",
+    "complexity": 4
+  },
+  {
+    "word": "ennuyeuses",
+    "size": 10,
+    "hint_str": "rébarbatif",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitant",
+    "size": 11,
+    "hint_str": "requérant",
+    "complexity": 5
+  },
+  {
+    "word": "illumineront",
+    "size": 12,
+    "hint_str": "éclaireront",
+    "complexity": 5
+  },
+  {
+    "word": "recueilleront",
+    "size": 13,
+    "hint_str": "rassembleront",
+    "complexity": 5
+  },
+  {
+    "word": "bics",
+    "size": 4,
+    "hint_str": "stylo",
+    "complexity": 2
+  },
+  {
+    "word": "brave",
+    "size": 5,
+    "hint_str": "preux",
+    "complexity": 3
+  },
+  {
+    "word": "mourra",
+    "size": 6,
+    "hint_str": "crèvera",
+    "complexity": 3
+  },
+  {
+    "word": "mourant",
+    "size": 7,
+    "hint_str": "clamsant",
+    "complexity": 3
+  },
+  {
+    "word": "envoyait",
+    "size": 8,
+    "hint_str": "expédiait",
+    "complexity": 4
+  },
+  {
+    "word": "disputait",
+    "size": 9,
+    "hint_str": "querellait",
+    "complexity": 4
+  },
+  {
+    "word": "actualités",
+    "size": 10,
+    "hint_str": "nouvelles",
+    "complexity": 4
+  },
+  {
+    "word": "surviennent",
+    "size": 11,
+    "hint_str": "arrivent",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillait",
+    "size": 12,
+    "hint_str": "griffonnait",
+    "complexity": 5
+  },
+  {
+    "word": "recueillirent",
+    "size": 13,
+    "hint_str": "rassemblèrent",
+    "complexity": 5
+  },
+  {
+    "word": "hâta",
+    "size": 4,
+    "hint_str": "empressa",
+    "complexity": 2
+  },
+  {
+    "word": "cruel",
+    "size": 5,
+    "hint_str": "féroce",
+    "complexity": 3
+  },
+  {
+    "word": "fidèle",
+    "size": 6,
+    "hint_str": "loyal",
+    "complexity": 3
+  },
+  {
+    "word": "envoies",
+    "size": 7,
+    "hint_str": "expédies",
+    "complexity": 3
+  },
+  {
+    "word": "requiert",
+    "size": 8,
+    "hint_str": "demande",
+    "complexity": 4
+  },
+  {
+    "word": "enverront",
+    "size": 9,
+    "hint_str": "expédieront",
+    "complexity": 4
+  },
+  {
+    "word": "mourraient",
+    "size": 10,
+    "hint_str": "succomberaient",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentent",
+    "size": 11,
+    "hint_str": "supplicient",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenterai",
+    "size": 12,
+    "hint_str": "supplicierai",
+    "complexity": 5
+  },
+  {
+    "word": "transpiraient",
+    "size": 13,
+    "hint_str": "suaient",
+    "complexity": 5
+  },
+  {
+    "word": "mêla",
+    "size": 4,
+    "hint_str": "mélangea",
+    "complexity": 2
+  },
+  {
+    "word": "mêler",
+    "size": 5,
+    "hint_str": "mélanger",
+    "complexity": 3
+  },
+  {
+    "word": "chatte",
+    "size": 6,
+    "hint_str": "félin",
+    "complexity": 3
+  },
+  {
+    "word": "mourrez",
+    "size": 7,
+    "hint_str": "clamserez",
+    "complexity": 3
+  },
+  {
+    "word": "mourrait",
+    "size": 8,
+    "hint_str": "clamecerait",
+    "complexity": 4
+  },
+  {
+    "word": "bourgeois",
+    "size": 9,
+    "hint_str": "bourge",
+    "complexity": 4
+  },
+  {
+    "word": "interdîtes",
+    "size": 10,
+    "hint_str": "prohibâtes",
+    "complexity": 4
+  },
+  {
+    "word": "bicyclettes",
+    "size": 11,
+    "hint_str": "vélo",
+    "complexity": 5
+  },
+  {
+    "word": "cadavériques",
+    "size": 12,
+    "hint_str": "cadavéreux",
+    "complexity": 5
+  },
+  {
+    "word": "transpirerais",
+    "size": 13,
+    "hint_str": "suerais",
+    "complexity": 5
+  },
+  {
+    "word": "bard",
+    "size": 4,
+    "hint_str": "bayard",
+    "complexity": 2
+  },
+  {
+    "word": "meure",
+    "size": 5,
+    "hint_str": "périsse",
+    "complexity": 3
+  },
+  {
+    "word": "embêté",
+    "size": 6,
+    "hint_str": "agacé",
+    "complexity": 3
+  },
+  {
+    "word": "boulots",
+    "size": 7,
+    "hint_str": "taf",
+    "complexity": 3
+  },
+  {
+    "word": "diffuser",
+    "size": 8,
+    "hint_str": "streamer",
+    "complexity": 4
+  },
+  {
+    "word": "enverrais",
+    "size": 9,
+    "hint_str": "expédierais",
+    "complexity": 4
+  },
+  {
+    "word": "transpires",
+    "size": 10,
+    "hint_str": "sues",
+    "complexity": 4
+  },
+  {
+    "word": "disciplines",
+    "size": 11,
+    "hint_str": "sanctionnes",
+    "complexity": 5
+  },
+  {
+    "word": "dévergondage",
+    "size": 12,
+    "hint_str": "libertinage",
+    "complexity": 5
+  },
+  {
+    "word": "appropriaient",
+    "size": 13,
+    "hint_str": "usurpaient",
+    "complexity": 5
+  },
+  {
+    "word": "quêté",
+    "size": 5,
+    "hint_str": "cherchée",
+    "complexity": 3
+  },
+  {
+    "word": "réduit",
+    "size": 6,
+    "hint_str": "alcôve",
+    "complexity": 3
+  },
+  {
+    "word": "mignons",
+    "size": 7,
+    "hint_str": "joli",
+    "complexity": 3
+  },
+  {
+    "word": "sociales",
+    "size": 8,
+    "hint_str": "grégaire",
+    "complexity": 4
+  },
+  {
+    "word": "tourmenté",
+    "size": 9,
+    "hint_str": "supplicié",
+    "complexity": 4
+  },
+  {
+    "word": "conteneurs",
+    "size": 10,
+    "hint_str": "container",
+    "complexity": 4
+  },
+  {
+    "word": "sentiraient",
+    "size": 11,
+    "hint_str": "empesteraient",
+    "complexity": 5
+  },
+  {
+    "word": "prononçaient",
+    "size": 12,
+    "hint_str": "articulaient",
+    "complexity": 5
+  },
+  {
+    "word": "approprierais",
+    "size": 13,
+    "hint_str": "usurperais",
+    "complexity": 5
+  },
+  {
+    "word": "vitre",
+    "size": 5,
+    "hint_str": "verre",
+    "complexity": 3
+  },
+  {
+    "word": "réunir",
+    "size": 6,
+    "hint_str": "rassembler",
+    "complexity": 3
+  },
+  {
+    "word": "cruelle",
+    "size": 7,
+    "hint_str": "pénible",
+    "complexity": 3
+  },
+  {
+    "word": "obsèques",
+    "size": 8,
+    "hint_str": "funéraille",
+    "complexity": 4
+  },
+  {
+    "word": "mignonnes",
+    "size": 9,
+    "hint_str": "joli",
+    "complexity": 4
+  },
+  {
+    "word": "embêterait",
+    "size": 10,
+    "hint_str": "importunerait",
+    "complexity": 4
+  },
+  {
+    "word": "transpirent",
+    "size": 11,
+    "hint_str": "suent",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillais",
+    "size": 12,
+    "hint_str": "griffonnais",
+    "complexity": 5
+  },
+  {
+    "word": "approprierait",
+    "size": 13,
+    "hint_str": "usurperait",
+    "complexity": 5
+  },
+  {
+    "word": "plats",
+    "size": 5,
+    "hint_str": "mets",
+    "complexity": 3
+  },
+  {
+    "word": "social",
+    "size": 6,
+    "hint_str": "grégaire",
+    "complexity": 3
+  },
+  {
+    "word": "mourras",
+    "size": 7,
+    "hint_str": "clamseras",
+    "complexity": 3
+  },
+  {
+    "word": "sentirez",
+    "size": 8,
+    "hint_str": "empesterez",
+    "complexity": 4
+  },
+  {
+    "word": "sentirait",
+    "size": 9,
+    "hint_str": "empesterait",
+    "complexity": 4
+  },
+  {
+    "word": "bourgeoise",
+    "size": 10,
+    "hint_str": "bourge",
+    "complexity": 4
+  },
+  {
+    "word": "transpirant",
+    "size": 11,
+    "hint_str": "suant",
+    "complexity": 5
+  },
+  {
+    "word": "surmonterais",
+    "size": 12,
+    "hint_str": "vaincrais",
+    "complexity": 5
+  },
+  {
+    "word": "approprièrent",
+    "size": 13,
+    "hint_str": "usurpèrent",
+    "complexity": 5
+  },
+  {
+    "word": "bisou",
+    "size": 5,
+    "hint_str": "baiser",
+    "complexity": 3
+  },
+  {
+    "word": "fortes",
+    "size": 6,
+    "hint_str": "ferme",
+    "complexity": 3
+  },
+  {
+    "word": "enverra",
+    "size": 7,
+    "hint_str": "expédiera",
+    "complexity": 3
+  },
+  {
+    "word": "protèges",
+    "size": 8,
+    "hint_str": "favorises",
+    "complexity": 4
+  },
+  {
+    "word": "enverrons",
+    "size": 9,
+    "hint_str": "expédierons",
+    "complexity": 4
+  },
+  {
+    "word": "protégeons",
+    "size": 10,
+    "hint_str": "favorisons",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblera",
+    "size": 11,
+    "hint_str": "recueillera",
+    "complexity": 5
+  },
+  {
+    "word": "surviendront",
+    "size": 12,
+    "hint_str": "arriveront",
+    "complexity": 5
+  },
+  {
+    "word": "baccalauréats",
+    "size": 13,
+    "hint_str": "bachot",
+    "complexity": 5
+  },
+  {
+    "word": "jolis",
+    "size": 5,
+    "hint_str": "mignon",
+    "complexity": 3
+  },
+  {
+    "word": "jetons",
+    "size": 6,
+    "hint_str": "lançons",
+    "complexity": 3
+  },
+  {
+    "word": "couvent",
+    "size": 7,
+    "hint_str": "cajolent",
+    "complexity": 3
+  },
+  {
+    "word": "envoyons",
+    "size": 8,
+    "hint_str": "expédions",
+    "complexity": 4
+  },
+  {
+    "word": "sentaient",
+    "size": 9,
+    "hint_str": "empestaient",
+    "complexity": 4
+  },
+  {
+    "word": "dérivation",
+    "size": 10,
+    "hint_str": "préfixation",
+    "complexity": 4
+  },
+  {
+    "word": "recueillons",
+    "size": 11,
+    "hint_str": "rassemblons",
+    "complexity": 5
+  },
+  {
+    "word": "blesseraient",
+    "size": 12,
+    "hint_str": "offenseraient",
+    "complexity": 5
+  },
+  {
+    "word": "diffuseraient",
+    "size": 13,
+    "hint_str": "streameraient",
+    "complexity": 5
+  },
+  {
+    "word": "halte",
+    "size": 5,
+    "hint_str": "pause",
+    "complexity": 3
+  },
+  {
+    "word": "vapeur",
+    "size": 6,
+    "hint_str": "boucane",
+    "complexity": 3
+  },
+  {
+    "word": "hostile",
+    "size": 7,
+    "hint_str": "ennemi",
+    "complexity": 3
+  },
+  {
+    "word": "mourrons",
+    "size": 8,
+    "hint_str": "clamecerons",
+    "complexity": 4
+  },
+  {
+    "word": "aperçoive",
+    "size": 9,
+    "hint_str": "entrevoie",
+    "complexity": 4
+  },
+  {
+    "word": "envoyaient",
+    "size": 10,
+    "hint_str": "expédiaient",
+    "complexity": 4
+  },
+  {
+    "word": "transpirait",
+    "size": 11,
+    "hint_str": "suait",
+    "complexity": 5
+  },
+  {
+    "word": "déboucherait",
+    "size": 12,
+    "hint_str": "débloquerait",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinions",
+    "size": 13,
+    "hint_str": "sanctionnions",
+    "complexity": 5
+  },
+  {
+    "word": "parts",
+    "size": 5,
+    "hint_str": "partie",
+    "complexity": 3
+  },
+  {
+    "word": "aperçu",
+    "size": 6,
+    "hint_str": "entrevu",
+    "complexity": 3
+  },
+  {
+    "word": "infecte",
+    "size": 7,
+    "hint_str": "immonde",
+    "complexity": 3
+  },
+  {
+    "word": "fouetter",
+    "size": 8,
+    "hint_str": "flageller",
+    "complexity": 4
+  },
+  {
+    "word": "jetterais",
+    "size": 9,
+    "hint_str": "lancerais",
+    "complexity": 4
+  },
+  {
+    "word": "gazouillis",
+    "size": 10,
+    "hint_str": "gazouillement",
+    "complexity": 4
+  },
+  {
+    "word": "apercevront",
+    "size": 11,
+    "hint_str": "entreverront",
+    "complexity": 5
+  },
+  {
+    "word": "prononcerons",
+    "size": 12,
+    "hint_str": "articulerons",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillerai",
+    "size": 13,
+    "hint_str": "griffonnerai",
+    "complexity": 5
+  },
+  {
+    "word": "robes",
+    "size": 5,
+    "hint_str": "habit",
+    "complexity": 3
+  },
+  {
+    "word": "vaincu",
+    "size": 6,
+    "hint_str": "battu",
+    "complexity": 3
+  },
+  {
+    "word": "anxiété",
+    "size": 7,
+    "hint_str": "inquiétude",
+    "complexity": 3
+  },
+  {
+    "word": "envoyant",
+    "size": 8,
+    "hint_str": "expédiant",
+    "complexity": 4
+  },
+  {
+    "word": "mouraient",
+    "size": 9,
+    "hint_str": "succombaient",
+    "complexity": 4
+  },
+  {
+    "word": "appropries",
+    "size": 10,
+    "hint_str": "usurpes",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentait",
+    "size": 11,
+    "hint_str": "suppliciait",
+    "complexity": 5
+  },
+  {
+    "word": "surmonterait",
+    "size": 12,
+    "hint_str": "vaincrait",
+    "complexity": 5
+  },
+  {
+    "word": "nécessiterais",
+    "size": 13,
+    "hint_str": "requerrais",
+    "complexity": 5
+  },
+  {
+    "word": "sente",
+    "size": 5,
+    "hint_str": "pue",
+    "complexity": 3
+  },
+  {
+    "word": "calmes",
+    "size": 6,
+    "hint_str": "serein",
+    "complexity": 3
+  },
+  {
+    "word": "abeille",
+    "size": 7,
+    "hint_str": "insecte",
+    "complexity": 3
+  },
+  {
+    "word": "sentirai",
+    "size": 8,
+    "hint_str": "empesterai",
+    "complexity": 4
+  },
+  {
+    "word": "illuminer",
+    "size": 9,
+    "hint_str": "éclairer",
+    "complexity": 4
+  },
+  {
+    "word": "blesserait",
+    "size": 10,
+    "hint_str": "offenserait",
+    "complexity": 4
+  },
+  {
+    "word": "gribouiller",
+    "size": 11,
+    "hint_str": "griffonner",
+    "complexity": 5
+  },
+  {
+    "word": "disputerions",
+    "size": 12,
+    "hint_str": "chamaillerions",
+    "complexity": 5
+  },
+  {
+    "word": "nécessitèrent",
+    "size": 13,
+    "hint_str": "requirent",
+    "complexity": 5
+  },
+  {
+    "word": "grade",
+    "size": 5,
+    "hint_str": "degré",
+    "complexity": 3
+  },
+  {
+    "word": "bisous",
+    "size": 6,
+    "hint_str": "baiser",
+    "complexity": 3
+  },
+  {
+    "word": "enculés",
+    "size": 7,
+    "hint_str": "enfoiré",
+    "complexity": 3
+  },
+  {
+    "word": "surmonté",
+    "size": 8,
+    "hint_str": "vaincu",
+    "complexity": 4
+  },
+  {
+    "word": "disputons",
+    "size": 9,
+    "hint_str": "querellons",
+    "complexity": 4
+  },
+  {
+    "word": "conquérant",
+    "size": 10,
+    "hint_str": "surmontant",
+    "complexity": 4
+  },
+  {
+    "word": "transpirais",
+    "size": 11,
+    "hint_str": "suais",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillant",
+    "size": 12,
+    "hint_str": "griffonnant",
+    "complexity": 5
+  },
+  {
+    "word": "purifieraient",
+    "size": 13,
+    "hint_str": "épureraient",
+    "complexity": 5
+  },
+  {
+    "word": "réuni",
+    "size": 5,
+    "hint_str": "rassemblé",
+    "complexity": 3
+  },
+  {
+    "word": "cassez",
+    "size": 6,
+    "hint_str": "brisez",
+    "complexity": 3
+  },
+  {
+    "word": "jogging",
+    "size": 7,
+    "hint_str": "footing",
+    "complexity": 3
+  },
+  {
+    "word": "aperçois",
+    "size": 8,
+    "hint_str": "entrevois",
+    "complexity": 4
+  },
+  {
+    "word": "disputiez",
+    "size": 9,
+    "hint_str": "querelliez",
+    "complexity": 4
+  },
+  {
+    "word": "réunissons",
+    "size": 10,
+    "hint_str": "rassemblons",
+    "complexity": 4
+  },
+  {
+    "word": "jetteraient",
+    "size": 11,
+    "hint_str": "lanceraient",
+    "complexity": 5
+  },
+  {
+    "word": "combleraient",
+    "size": 12,
+    "hint_str": "rempliraient",
+    "complexity": 5
+  },
+  {
+    "word": "rassembleriez",
+    "size": 13,
+    "hint_str": "recueilleriez",
+    "complexity": 5
+  },
+  {
+    "word": "mêlez",
+    "size": 5,
+    "hint_str": "mélangez",
+    "complexity": 3
+  },
+  {
+    "word": "braves",
+    "size": 6,
+    "hint_str": "honnête",
+    "complexity": 3
+  },
+  {
+    "word": "brûlant",
+    "size": 7,
+    "hint_str": "flambant",
+    "complexity": 3
+  },
+  {
+    "word": "hostiles",
+    "size": 8,
+    "hint_str": "ennemi",
+    "complexity": 4
+  },
+  {
+    "word": "recueille",
+    "size": 9,
+    "hint_str": "rassemble",
+    "complexity": 4
+  },
+  {
+    "word": "requièrent",
+    "size": 10,
+    "hint_str": "nécessitent",
+    "complexity": 4
+  },
+  {
+    "word": "plantureuse",
+    "size": 11,
+    "hint_str": "voluptueux",
+    "complexity": 5
+  },
+  {
+    "word": "conquéraient",
+    "size": 12,
+    "hint_str": "surmontaient",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerais",
+    "size": 13,
+    "hint_str": "rassemblerais",
+    "complexity": 5
+  },
+  {
+    "word": "plate",
+    "size": 5,
+    "hint_str": "nul",
+    "complexity": 3
+  },
+  {
+    "word": "jettes",
+    "size": 6,
+    "hint_str": "lances",
+    "complexity": 3
+  },
+  {
+    "word": "diffusé",
+    "size": 7,
+    "hint_str": "streamés",
+    "complexity": 3
+  },
+  {
+    "word": "anarchie",
+    "size": 8,
+    "hint_str": "chaos",
+    "complexity": 4
+  },
+  {
+    "word": "déboucher",
+    "size": 9,
+    "hint_str": "débloquer",
+    "complexity": 4
+  },
+  {
+    "word": "transpirez",
+    "size": 10,
+    "hint_str": "suez",
+    "complexity": 4
+  },
+  {
+    "word": "recueillent",
+    "size": 11,
+    "hint_str": "rassemblent",
+    "complexity": 5
+  },
+  {
+    "word": "débouchaient",
+    "size": 12,
+    "hint_str": "débloquaient",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenterais",
+    "size": 13,
+    "hint_str": "supplicierais",
+    "complexity": 5
+  },
+  {
+    "word": "poire",
+    "size": 5,
+    "hint_str": "pigeon",
+    "complexity": 3
+  },
+  {
+    "word": "vitres",
+    "size": 6,
+    "hint_str": "carreau",
+    "complexity": 3
+  },
+  {
+    "word": "emprunt",
+    "size": 7,
+    "hint_str": "prêt",
+    "complexity": 3
+  },
+  {
+    "word": "jetterai",
+    "size": 8,
+    "hint_str": "lancerai",
+    "complexity": 4
+  },
+  {
+    "word": "vaincrons",
+    "size": 9,
+    "hint_str": "surmonterons",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentez",
+    "size": 10,
+    "hint_str": "suppliciez",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitera",
+    "size": 11,
+    "hint_str": "requerra",
+    "complexity": 5
+  },
+  {
+    "word": "entrecoupent",
+    "size": 12,
+    "hint_str": "entremêlent",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenteriez",
+    "size": 13,
+    "hint_str": "supplicieriez",
+    "complexity": 5
+  },
+  {
+    "word": "mêles",
+    "size": 5,
+    "hint_str": "mélanges",
+    "complexity": 3
+  },
+  {
+    "word": "brûlez",
+    "size": 6,
+    "hint_str": "flambez",
+    "complexity": 3
+  },
+  {
+    "word": "froides",
+    "size": 7,
+    "hint_str": "frette",
+    "complexity": 3
+  },
+  {
+    "word": "initiale",
+    "size": 8,
+    "hint_str": "attaque",
+    "complexity": 4
+  },
+  {
+    "word": "prononcez",
+    "size": 9,
+    "hint_str": "articulez",
+    "complexity": 4
+  },
+  {
+    "word": "blesserais",
+    "size": 10,
+    "hint_str": "offenserais",
+    "complexity": 4
+  },
+  {
+    "word": "prononcerai",
+    "size": 11,
+    "hint_str": "articulerai",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillent",
+    "size": 12,
+    "hint_str": "griffonnent",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenterons",
+    "size": 13,
+    "hint_str": "supplicierons",
+    "complexity": 5
+  },
+  {
+    "word": "ivres",
+    "size": 5,
+    "hint_str": "aviné",
+    "complexity": 3
+  },
+  {
+    "word": "casses",
+    "size": 6,
+    "hint_str": "brises",
+    "complexity": 3
+  },
+  {
+    "word": "combler",
+    "size": 7,
+    "hint_str": "remplir",
+    "complexity": 3
+  },
+  {
+    "word": "aperçoit",
+    "size": 8,
+    "hint_str": "entrevoit",
+    "complexity": 4
+  },
+  {
+    "word": "réunissez",
+    "size": 9,
+    "hint_str": "rassemblez",
+    "complexity": 4
+  },
+  {
+    "word": "surmontera",
+    "size": 10,
+    "hint_str": "vaincra",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblais",
+    "size": 11,
+    "hint_str": "recueillais",
+    "complexity": 5
+  },
+  {
+    "word": "surmonteront",
+    "size": 12,
+    "hint_str": "vaincront",
+    "complexity": 5
+  },
+  {
+    "word": "tourmentèrent",
+    "size": 13,
+    "hint_str": "supplicièrent",
+    "complexity": 5
+  },
+  {
+    "word": "truie",
+    "size": 5,
+    "hint_str": "cochon",
+    "complexity": 3
+  },
+  {
+    "word": "tampon",
+    "size": 6,
+    "hint_str": "bouchon",
+    "complexity": 3
+  },
+  {
+    "word": "jettent",
+    "size": 7,
+    "hint_str": "lancent",
+    "complexity": 3
+  },
+  {
+    "word": "frangine",
+    "size": 8,
+    "hint_str": "camarade",
+    "complexity": 4
+  },
+  {
+    "word": "prononces",
+    "size": 9,
+    "hint_str": "articules",
+    "complexity": 4
+  },
+  {
+    "word": "interdisez",
+    "size": 10,
+    "hint_str": "prohibez",
+    "complexity": 4
+  },
+  {
+    "word": "disputeront",
+    "size": 11,
+    "hint_str": "chamailleront",
+    "complexity": 5
+  },
+  {
+    "word": "apercevaient",
+    "size": 12,
+    "hint_str": "entrevoyaient",
+    "complexity": 5
+  },
+  {
+    "word": "transpirerait",
+    "size": 13,
+    "hint_str": "suerait",
+    "complexity": 5
+  },
+  {
+    "word": "niqué",
+    "size": 5,
+    "hint_str": "limé",
+    "complexity": 3
+  },
+  {
+    "word": "sentes",
+    "size": 6,
+    "hint_str": "exhales",
+    "complexity": 3
+  },
+  {
+    "word": "fidèles",
+    "size": 7,
+    "hint_str": "loyal",
+    "complexity": 3
+  },
+  {
+    "word": "embêtant",
+    "size": 8,
+    "hint_str": "emmerdant",
+    "complexity": 4
+  },
+  {
+    "word": "sentiriez",
+    "size": 9,
+    "hint_str": "empesteriez",
+    "complexity": 4
+  },
+  {
+    "word": "réunissant",
+    "size": 10,
+    "hint_str": "rassemblant",
+    "complexity": 4
+  },
+  {
+    "word": "interdirait",
+    "size": 11,
+    "hint_str": "prohiberait",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinais",
+    "size": 12,
+    "hint_str": "sanctionnais",
+    "complexity": 5
+  },
+  {
+    "word": "envol",
+    "size": 5,
+    "hint_str": "essor",
+    "complexity": 3
+  },
+  {
+    "word": "comblé",
+    "size": 6,
+    "hint_str": "rempli",
+    "complexity": 3
+  },
+  {
+    "word": "conquis",
+    "size": 7,
+    "hint_str": "vaincu",
+    "complexity": 3
+  },
+  {
+    "word": "disputez",
+    "size": 8,
+    "hint_str": "querellez",
+    "complexity": 4
+  },
+  {
+    "word": "brûlaient",
+    "size": 9,
+    "hint_str": "flambaient",
+    "complexity": 4
+  },
+  {
+    "word": "illuminent",
+    "size": 10,
+    "hint_str": "éclairent",
+    "complexity": 4
+  },
+  {
+    "word": "apercevrait",
+    "size": 11,
+    "hint_str": "entreverrait",
+    "complexity": 5
+  },
+  {
+    "word": "interdissent",
+    "size": 12,
+    "hint_str": "prohibassent",
+    "complexity": 5
+  },
+  {
+    "word": "fente",
+    "size": 5,
+    "hint_str": "fissure",
+    "complexity": 3
+  },
+  {
+    "word": "tantôt",
+    "size": 6,
+    "hint_str": "parfois",
+    "complexity": 3
+  },
+  {
+    "word": "brûlent",
+    "size": 7,
+    "hint_str": "flambent",
+    "complexity": 3
+  },
+  {
+    "word": "purifier",
+    "size": 8,
+    "hint_str": "épurer",
+    "complexity": 4
+  },
+  {
+    "word": "sentiront",
+    "size": 9,
+    "hint_str": "empesteront",
+    "complexity": 4
+  },
+  {
+    "word": "prononcent",
+    "size": 10,
+    "hint_str": "articulent",
+    "complexity": 4
+  },
+  {
+    "word": "protégeriez",
+    "size": 11,
+    "hint_str": "favoriseriez",
+    "complexity": 5
+  },
+  {
+    "word": "protégerions",
+    "size": 12,
+    "hint_str": "favoriserions",
+    "complexity": 5
+  },
+  {
+    "word": "atome",
+    "size": 5,
+    "hint_str": "ion",
+    "complexity": 3
+  },
+  {
+    "word": "mourez",
+    "size": 6,
+    "hint_str": "crevez",
+    "complexity": 3
+  },
+  {
+    "word": "sentira",
+    "size": 7,
+    "hint_str": "exhalera",
+    "complexity": 3
+  },
+  {
+    "word": "blessant",
+    "size": 8,
+    "hint_str": "offensant",
+    "complexity": 4
+  },
+  {
+    "word": "embêterai",
+    "size": 9,
+    "hint_str": "emmerderai",
+    "complexity": 4
+  },
+  {
+    "word": "prononçant",
+    "size": 10,
+    "hint_str": "articulant",
+    "complexity": 4
+  },
+  {
+    "word": "surmonteras",
+    "size": 11,
+    "hint_str": "vaincras",
+    "complexity": 5
+  },
+  {
+    "word": "rassembleras",
+    "size": 12,
+    "hint_str": "recueilleras",
+    "complexity": 5
+  },
+  {
+    "word": "belge",
+    "size": 5,
+    "hint_str": "belgique",
+    "complexity": 3
+  },
+  {
+    "word": "réunit",
+    "size": 6,
+    "hint_str": "rassemble",
+    "complexity": 3
+  },
+  {
+    "word": "sponsor",
+    "size": 7,
+    "hint_str": "caution",
+    "complexity": 3
+  },
+  {
+    "word": "sponsors",
+    "size": 8,
+    "hint_str": "caution",
+    "complexity": 4
+  },
+  {
+    "word": "protégiez",
+    "size": 9,
+    "hint_str": "favorisiez",
+    "complexity": 4
+  },
+  {
+    "word": "recueillis",
+    "size": 10,
+    "hint_str": "rassemblai",
+    "complexity": 4
+  },
+  {
+    "word": "emmerdement",
+    "size": 11,
+    "hint_str": "emmerde",
+    "complexity": 5
+  },
+  {
+    "word": "recueillerez",
+    "size": 12,
+    "hint_str": "rassemblerez",
+    "complexity": 5
+  },
+  {
+    "word": "taser",
+    "size": 5,
+    "hint_str": "AIE",
+    "complexity": 3
+  },
+  {
+    "word": "leurre",
+    "size": 6,
+    "hint_str": "appât",
+    "complexity": 3
+  },
+  {
+    "word": "sucette",
+    "size": 7,
+    "hint_str": "suçon",
+    "complexity": 3
+  },
+  {
+    "word": "habileté",
+    "size": 8,
+    "hint_str": "capacité",
+    "complexity": 4
+  },
+  {
+    "word": "jetteront",
+    "size": 9,
+    "hint_str": "lanceront",
+    "complexity": 4
+  },
+  {
+    "word": "réunissait",
+    "size": 10,
+    "hint_str": "rassemblait",
+    "complexity": 4
+  },
+  {
+    "word": "interdisons",
+    "size": 11,
+    "hint_str": "prohibons",
+    "complexity": 5
+  },
+  {
+    "word": "transpireras",
+    "size": 12,
+    "hint_str": "sueras",
+    "complexity": 5
+  },
+  {
+    "word": "boudé",
+    "size": 5,
+    "hint_str": "râlé",
+    "complexity": 3
+  },
+  {
+    "word": "suisse",
+    "size": 6,
+    "hint_str": "tamia",
+    "complexity": 3
+  },
+  {
+    "word": "sentiez",
+    "size": 7,
+    "hint_str": "exhaliez",
+    "complexity": 3
+  },
+  {
+    "word": "envoyais",
+    "size": 8,
+    "hint_str": "expédiais",
+    "complexity": 4
+  },
+  {
+    "word": "diffusent",
+    "size": 9,
+    "hint_str": "streament",
+    "complexity": 4
+  },
+  {
+    "word": "nécessiter",
+    "size": 10,
+    "hint_str": "requérir",
+    "complexity": 4
+  },
+  {
+    "word": "surmonterez",
+    "size": 11,
+    "hint_str": "vaincrez",
+    "complexity": 5
+  },
+  {
+    "word": "transpirerez",
+    "size": 12,
+    "hint_str": "suerez",
+    "complexity": 5
+  },
+  {
+    "word": "rames",
+    "size": 5,
+    "hint_str": "train",
+    "complexity": 3
+  },
+  {
+    "word": "niquer",
+    "size": 6,
+    "hint_str": "baiser",
+    "complexity": 3
+  },
+  {
+    "word": "tampons",
+    "size": 7,
+    "hint_str": "bouchon",
+    "complexity": 3
+  },
+  {
+    "word": "illuminé",
+    "size": 8,
+    "hint_str": "éclairé",
+    "complexity": 4
+  },
+  {
+    "word": "apercevra",
+    "size": 9,
+    "hint_str": "entreverra",
+    "complexity": 4
+  },
+  {
+    "word": "protégerez",
+    "size": 10,
+    "hint_str": "favoriserez",
+    "complexity": 4
+  },
+  {
+    "word": "diffuserons",
+    "size": 11,
+    "hint_str": "streamerons",
+    "complexity": 5
+  },
+  {
+    "word": "antiputrides",
+    "size": 12,
+    "hint_str": "antiseptique",
+    "complexity": 5
+  },
+  {
+    "word": "hâter",
+    "size": 5,
+    "hint_str": "empresser",
+    "complexity": 3
+  },
+  {
+    "word": "mourut",
+    "size": 6,
+    "hint_str": "creva",
+    "complexity": 3
+  },
+  {
+    "word": "mourait",
+    "size": 7,
+    "hint_str": "clamsait",
+    "complexity": 3
+  },
+  {
+    "word": "infectes",
+    "size": 8,
+    "hint_str": "répugnant",
+    "complexity": 4
+  },
+  {
+    "word": "jetterait",
+    "size": 9,
+    "hint_str": "lancerait",
+    "complexity": 4
+  },
+  {
+    "word": "disputions",
+    "size": 10,
+    "hint_str": "chamaillions",
+    "complexity": 4
+  },
+  {
+    "word": "hiéroglyphe",
+    "size": 11,
+    "hint_str": "idéogramme",
+    "complexity": 5
+  },
+  {
+    "word": "approprierai",
+    "size": 12,
+    "hint_str": "usurperai",
+    "complexity": 5
+  },
+  {
+    "word": "couvé",
+    "size": 5,
+    "hint_str": "gâté",
+    "complexity": 3
+  },
+  {
+    "word": "froids",
+    "size": 6,
+    "hint_str": "frette",
+    "complexity": 3
+  },
+  {
+    "word": "foutoir",
+    "size": 7,
+    "hint_str": "bordel",
+    "complexity": 3
+  },
+  {
+    "word": "blessent",
+    "size": 8,
+    "hint_str": "offensent",
+    "complexity": 4
+  },
+  {
+    "word": "casserais",
+    "size": 9,
+    "hint_str": "briserais",
+    "complexity": 4
+  },
+  {
+    "word": "nécessites",
+    "size": 10,
+    "hint_str": "requiers",
+    "complexity": 4
+  },
+  {
+    "word": "approprient",
+    "size": 11,
+    "hint_str": "usurpent",
+    "complexity": 5
+  },
+  {
+    "word": "approprieras",
+    "size": 12,
+    "hint_str": "usurperas",
+    "complexity": 5
+  },
+  {
+    "word": "waouh",
+    "size": 5,
+    "hint_str": "ouah",
+    "complexity": 3
+  },
+  {
+    "word": "cruels",
+    "size": 6,
+    "hint_str": "féroce",
+    "complexity": 3
+  },
+  {
+    "word": "cassent",
+    "size": 7,
+    "hint_str": "brisent",
+    "complexity": 3
+  },
+  {
+    "word": "pionnier",
+    "size": 8,
+    "hint_str": "précurseur",
+    "complexity": 4
+  },
+  {
+    "word": "brûleront",
+    "size": 9,
+    "hint_str": "flamberont",
+    "complexity": 4
+  },
+  {
+    "word": "prononcera",
+    "size": 10,
+    "hint_str": "articulera",
+    "complexity": 4
+  },
+  {
+    "word": "brûleraient",
+    "size": 11,
+    "hint_str": "flamberaient",
+    "complexity": 5
+  },
+  {
+    "word": "diffuserions",
+    "size": 12,
+    "hint_str": "streamerions",
+    "complexity": 5
+  },
+  {
+    "word": "aïeux",
+    "size": 5,
+    "hint_str": "anciens",
+    "complexity": 3
+  },
+  {
+    "word": "atomes",
+    "size": 6,
+    "hint_str": "isotope",
+    "complexity": 3
+  },
+  {
+    "word": "brûlait",
+    "size": 7,
+    "hint_str": "flambait",
+    "complexity": 3
+  },
+  {
+    "word": "attarder",
+    "size": 8,
+    "hint_str": "retarder",
+    "complexity": 4
+  },
+  {
+    "word": "désordres",
+    "size": 9,
+    "hint_str": "pagaille",
+    "complexity": 4
+  },
+  {
+    "word": "protégeras",
+    "size": 10,
+    "hint_str": "favoriseras",
+    "complexity": 4
+  },
+  {
+    "word": "disputerait",
+    "size": 11,
+    "hint_str": "chamaillerait",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinait",
+    "size": 12,
+    "hint_str": "sanctionnait",
+    "complexity": 5
+  },
+  {
+    "word": "fèves",
+    "size": 5,
+    "hint_str": "haricot",
+    "complexity": 3
+  },
+  {
+    "word": "jument",
+    "size": 6,
+    "hint_str": "équidé",
+    "complexity": 3
+  },
+  {
+    "word": "sombrer",
+    "size": 7,
+    "hint_str": "couler",
+    "complexity": 3
+  },
+  {
+    "word": "morpions",
+    "size": 8,
+    "hint_str": "morbaque",
+    "complexity": 4
+  },
+  {
+    "word": "apartheid",
+    "size": 9,
+    "hint_str": "séparation",
+    "complexity": 4
+  },
+  {
+    "word": "illuminait",
+    "size": 10,
+    "hint_str": "éclairait",
+    "complexity": 4
+  },
+  {
+    "word": "apercevrais",
+    "size": 11,
+    "hint_str": "entreverrais",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinent",
+    "size": 12,
+    "hint_str": "sanctionnent",
+    "complexity": 5
+  },
+  {
+    "word": "hâtez",
+    "size": 5,
+    "hint_str": "empressez",
+    "complexity": 3
+  },
+  {
+    "word": "tantes",
+    "size": 6,
+    "hint_str": "matante",
+    "complexity": 3
+  },
+  {
+    "word": "potence",
+    "size": 7,
+    "hint_str": "gibet",
+    "complexity": 3
+  },
+  {
+    "word": "sucettes",
+    "size": 8,
+    "hint_str": "suçon",
+    "complexity": 4
+  },
+  {
+    "word": "blesserai",
+    "size": 9,
+    "hint_str": "offenserai",
+    "complexity": 4
+  },
+  {
+    "word": "apercevras",
+    "size": 10,
+    "hint_str": "entreverras",
+    "complexity": 4
+  },
+  {
+    "word": "rassembliez",
+    "size": 11,
+    "hint_str": "recueilliez",
+    "complexity": 5
+  },
+  {
+    "word": "disciplinera",
+    "size": 12,
+    "hint_str": "sanctionnera",
+    "complexity": 5
+  },
+  {
+    "word": "gombo",
+    "size": 5,
+    "hint_str": "okra",
+    "complexity": 3
+  },
+  {
+    "word": "meuble",
+    "size": 6,
+    "hint_str": "mou",
+    "complexity": 3
+  },
+  {
+    "word": "brûlera",
+    "size": 7,
+    "hint_str": "flambera",
+    "complexity": 3
+  },
+  {
+    "word": "succéder",
+    "size": 8,
+    "hint_str": "suivre",
+    "complexity": 4
+  },
+  {
+    "word": "casserait",
+    "size": 9,
+    "hint_str": "briserait",
+    "complexity": 4
+  },
+  {
+    "word": "embêterais",
+    "size": 10,
+    "hint_str": "importunerais",
+    "complexity": 4
+  },
+  {
+    "word": "interdirais",
+    "size": 11,
+    "hint_str": "prohiberais",
+    "complexity": 5
+  },
+  {
+    "word": "discipliniez",
+    "size": 12,
+    "hint_str": "sanctionniez",
+    "complexity": 5
+  },
+  {
+    "word": "brava",
+    "size": 5,
+    "hint_str": "affronta",
+    "complexity": 3
+  },
+  {
+    "word": "livrez",
+    "size": 6,
+    "hint_str": "emmenez",
+    "complexity": 3
+  },
+  {
+    "word": "sentant",
+    "size": 7,
+    "hint_str": "exhalant",
+    "complexity": 3
+  },
+  {
+    "word": "cruelles",
+    "size": 8,
+    "hint_str": "pénible",
+    "complexity": 4
+  },
+  {
+    "word": "disputant",
+    "size": 9,
+    "hint_str": "querellant",
+    "complexity": 4
+  },
+  {
+    "word": "prononçait",
+    "size": 10,
+    "hint_str": "articulait",
+    "complexity": 4
+  },
+  {
+    "word": "interdisais",
+    "size": 11,
+    "hint_str": "prohibais",
+    "complexity": 5
+  },
+  {
+    "word": "déboucherons",
+    "size": 12,
+    "hint_str": "débloquerons",
+    "complexity": 5
+  },
+  {
+    "word": "fades",
+    "size": 5,
+    "hint_str": "terne",
+    "complexity": 3
+  },
+  {
+    "word": "fouine",
+    "size": 6,
+    "hint_str": "angon",
+    "complexity": 3
+  },
+  {
+    "word": "mourais",
+    "size": 7,
+    "hint_str": "clamsais",
+    "complexity": 3
+  },
+  {
+    "word": "livrerai",
+    "size": 8,
+    "hint_str": "dénoncerai",
+    "complexity": 4
+  },
+  {
+    "word": "alcootest",
+    "size": 9,
+    "hint_str": "éthylotest",
+    "complexity": 4
+  },
+  {
+    "word": "gribouillé",
+    "size": 10,
+    "hint_str": "griffonné",
+    "complexity": 4
+  },
+  {
+    "word": "succédaient",
+    "size": 11,
+    "hint_str": "suivaient",
+    "complexity": 5
+  },
+  {
+    "word": "déboucheront",
+    "size": 12,
+    "hint_str": "débloqueront",
+    "complexity": 5
+  },
+  {
+    "word": "vainc",
+    "size": 5,
+    "hint_str": "bat",
+    "complexity": 3
+  },
+  {
+    "word": "tueuse",
+    "size": 6,
+    "hint_str": "bourreau",
+    "complexity": 3
+  },
+  {
+    "word": "blessez",
+    "size": 7,
+    "hint_str": "offensez",
+    "complexity": 3
+  },
+  {
+    "word": "survient",
+    "size": 8,
+    "hint_str": "arrive",
+    "complexity": 4
+  },
+  {
+    "word": "moururent",
+    "size": 9,
+    "hint_str": "succombèrent",
+    "complexity": 4
+  },
+  {
+    "word": "illuminera",
+    "size": 10,
+    "hint_str": "éclairera",
+    "complexity": 4
+  },
+  {
+    "word": "recueillait",
+    "size": 11,
+    "hint_str": "rassemblait",
+    "complexity": 5
+  },
+  {
+    "word": "fausseraient",
+    "size": 12,
+    "hint_str": "falsifieraient",
+    "complexity": 5
+  },
+  {
+    "word": "faims",
+    "size": 5,
+    "hint_str": "appétit",
+    "complexity": 3
+  },
+  {
+    "word": "brûles",
+    "size": 6,
+    "hint_str": "flambes",
+    "complexity": 3
+  },
+  {
+    "word": "vapeurs",
+    "size": 7,
+    "hint_str": "boucane",
+    "complexity": 3
+  },
+  {
+    "word": "casserai",
+    "size": 8,
+    "hint_str": "briserai",
+    "complexity": 4
+  },
+  {
+    "word": "apercevez",
+    "size": 9,
+    "hint_str": "entrevoyez",
+    "complexity": 4
+  },
+  {
+    "word": "apercevait",
+    "size": 10,
+    "hint_str": "entrevoyait",
+    "complexity": 4
+  },
+  {
+    "word": "surmonterai",
+    "size": 11,
+    "hint_str": "vaincrai",
+    "complexity": 5
+  },
+  {
+    "word": "flagellaient",
+    "size": 12,
+    "hint_str": "fouettaient",
+    "complexity": 5
+  },
+  {
+    "word": "brûla",
+    "size": 5,
+    "hint_str": "flamba",
+    "complexity": 3
+  },
+  {
+    "word": "meures",
+    "size": 6,
+    "hint_str": "crèves",
+    "complexity": 3
+  },
+  {
+    "word": "réduits",
+    "size": 7,
+    "hint_str": "alcôve",
+    "complexity": 3
+  },
+  {
+    "word": "blessera",
+    "size": 8,
+    "hint_str": "offensera",
+    "complexity": 4
+  },
+  {
+    "word": "conquiert",
+    "size": 9,
+    "hint_str": "surmonte",
+    "complexity": 4
+  },
+  {
+    "word": "aperçoives",
+    "size": 10,
+    "hint_str": "entrevoies",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentera",
+    "size": 11,
+    "hint_str": "suppliciera",
+    "complexity": 5
+  },
+  {
+    "word": "flagellerais",
+    "size": 12,
+    "hint_str": "fouetterais",
+    "complexity": 5
+  },
+  {
+    "word": "heurt",
+    "size": 5,
+    "hint_str": "accrochage",
+    "complexity": 3
+  },
+  {
+    "word": "jetait",
+    "size": 6,
+    "hint_str": "lançait",
+    "complexity": 3
+  },
+  {
+    "word": "jettera",
+    "size": 7,
+    "hint_str": "lancera",
+    "complexity": 3
+  },
+  {
+    "word": "embêtait",
+    "size": 8,
+    "hint_str": "emmerdait",
+    "complexity": 4
+  },
+  {
+    "word": "interdise",
+    "size": 9,
+    "hint_str": "prohibe",
+    "complexity": 4
+  },
+  {
+    "word": "envoyèrent",
+    "size": 10,
+    "hint_str": "expédièrent",
+    "complexity": 4
+  },
+  {
+    "word": "conquièrent",
+    "size": 11,
+    "hint_str": "surmontent",
+    "complexity": 5
+  },
+  {
+    "word": "flagelleront",
+    "size": 12,
+    "hint_str": "fouetteront",
+    "complexity": 5
+  },
+  {
+    "word": "cassa",
+    "size": 5,
+    "hint_str": "brisa",
+    "complexity": 3
+  },
+  {
+    "word": "requis",
+    "size": 6,
+    "hint_str": "exigé",
+    "complexity": 3
+  },
+  {
+    "word": "métiers",
+    "size": 7,
+    "hint_str": "travail",
+    "complexity": 3
+  },
+  {
+    "word": "enverrez",
+    "size": 8,
+    "hint_str": "expédierez",
+    "complexity": 4
+  },
+  {
+    "word": "succèdent",
+    "size": 9,
+    "hint_str": "suivent",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentes",
+    "size": 10,
+    "hint_str": "supplicies",
+    "complexity": 4
+  },
+  {
+    "word": "recueillant",
+    "size": 11,
+    "hint_str": "rassemblant",
+    "complexity": 5
+  },
+  {
+    "word": "flagellèrent",
+    "size": 12,
+    "hint_str": "fouettèrent",
+    "complexity": 5
+  },
+  {
+    "word": "livra",
+    "size": 5,
+    "hint_str": "emmena",
+    "complexity": 3
+  },
+  {
+    "word": "ardent",
+    "size": 6,
+    "hint_str": "brûlent",
+    "complexity": 3
+  },
+  {
+    "word": "prêcher",
+    "size": 7,
+    "hint_str": "sermonner",
+    "complexity": 3
+  },
+  {
+    "word": "embêtera",
+    "size": 8,
+    "hint_str": "emmerdera",
+    "complexity": 4
+  },
+  {
+    "word": "brûlerait",
+    "size": 9,
+    "hint_str": "flamberait",
+    "complexity": 4
+  },
+  {
+    "word": "embêtaient",
+    "size": 10,
+    "hint_str": "importunaient",
+    "complexity": 4
+  },
+  {
+    "word": "diffuseront",
+    "size": 11,
+    "hint_str": "streameront",
+    "complexity": 5
+  },
+  {
+    "word": "gribouillons",
+    "size": 12,
+    "hint_str": "griffonnons",
+    "complexity": 5
+  },
+  {
+    "word": "disez",
+    "size": 5,
+    "hint_str": "dites",
+    "complexity": 3
+  },
+  {
+    "word": "jetant",
+    "size": 6,
+    "hint_str": "lançant",
+    "complexity": 3
+  },
+  {
+    "word": "embêtez",
+    "size": 7,
+    "hint_str": "énervez",
+    "complexity": 3
+  },
+  {
+    "word": "débouché",
+    "size": 8,
+    "hint_str": "débloqué",
+    "complexity": 4
+  },
+  {
+    "word": "réunirons",
+    "size": 9,
+    "hint_str": "rassemblerons",
+    "complexity": 4
+  },
+  {
+    "word": "protégions",
+    "size": 10,
+    "hint_str": "favorisions",
+    "complexity": 4
+  },
+  {
+    "word": "réunissions",
+    "size": 11,
+    "hint_str": "rassemblions",
+    "complexity": 5
+  },
+  {
+    "word": "illumineriez",
+    "size": 12,
+    "hint_str": "éclaireriez",
+    "complexity": 5
+  },
+  {
+    "word": "marri",
+    "size": 5,
+    "hint_str": "fâché",
+    "complexity": 3
+  },
+  {
+    "word": "sultan",
+    "size": 6,
+    "hint_str": "soudan",
+    "complexity": 3
+  },
+  {
+    "word": "embêtes",
+    "size": 7,
+    "hint_str": "énerves",
+    "complexity": 3
+  },
+  {
+    "word": "breuvage",
+    "size": 8,
+    "hint_str": "boisson",
+    "complexity": 4
+  },
+  {
+    "word": "bavardons",
+    "size": 9,
+    "hint_str": "babillons",
+    "complexity": 4
+  },
+  {
+    "word": "blesseront",
+    "size": 10,
+    "hint_str": "offenseront",
+    "complexity": 4
+  },
+  {
+    "word": "prononceras",
+    "size": 11,
+    "hint_str": "articuleras",
+    "complexity": 5
+  },
+  {
+    "word": "illuminerons",
+    "size": 12,
+    "hint_str": "éclairerons",
+    "complexity": 5
+  },
+  {
+    "word": "jetai",
+    "size": 5,
+    "hint_str": "lançai",
+    "complexity": 3
+  },
+  {
+    "word": "infect",
+    "size": 6,
+    "hint_str": "immonde",
+    "complexity": 3
+  },
+  {
+    "word": "magnéto",
+    "size": 7,
+    "hint_str": "magnétophone",
+    "complexity": 3
+  },
+  {
+    "word": "enverras",
+    "size": 8,
+    "hint_str": "expédieras",
+    "complexity": 4
+  },
+  {
+    "word": "bavardait",
+    "size": 9,
+    "hint_str": "babillait",
+    "complexity": 4
+  },
+  {
+    "word": "diffusions",
+    "size": 10,
+    "hint_str": "streamions",
+    "complexity": 4
+  },
+  {
+    "word": "dérivations",
+    "size": 11,
+    "hint_str": "préfixation",
+    "complexity": 5
+  },
+  {
+    "word": "illuminèrent",
+    "size": 12,
+    "hint_str": "éclairèrent",
+    "complexity": 5
+  },
+  {
+    "word": "jalon",
+    "size": 5,
+    "hint_str": "marque",
+    "complexity": 3
+  },
+  {
+    "word": "cruche",
+    "size": 6,
+    "hint_str": "carafe",
+    "complexity": 3
+  },
+  {
+    "word": "livrent",
+    "size": 7,
+    "hint_str": "emmènent",
+    "complexity": 3
+  },
+  {
+    "word": "emprunts",
+    "size": 8,
+    "hint_str": "prêt",
+    "complexity": 4
+  },
+  {
+    "word": "bavardent",
+    "size": 9,
+    "hint_str": "babillent",
+    "complexity": 4
+  },
+  {
+    "word": "embêteront",
+    "size": 10,
+    "hint_str": "importuneront",
+    "complexity": 4
+  },
+  {
+    "word": "prononcerez",
+    "size": 11,
+    "hint_str": "articulerez",
+    "complexity": 5
+  },
+  {
+    "word": "nécessiterai",
+    "size": 12,
+    "hint_str": "requerrai",
+    "complexity": 5
+  },
+  {
+    "word": "mugit",
+    "size": 5,
+    "hint_str": "meugle",
+    "complexity": 3
+  },
+  {
+    "word": "poires",
+    "size": 6,
+    "hint_str": "pigeon",
+    "complexity": 3
+  },
+  {
+    "word": "sentons",
+    "size": 7,
+    "hint_str": "exhalons",
+    "complexity": 3
+  },
+  {
+    "word": "embêtent",
+    "size": 8,
+    "hint_str": "emmerdent",
+    "complexity": 4
+  },
+  {
+    "word": "disputera",
+    "size": 9,
+    "hint_str": "querellera",
+    "complexity": 4
+  },
+  {
+    "word": "recueillez",
+    "size": 10,
+    "hint_str": "rassemblez",
+    "complexity": 4
+  },
+  {
+    "word": "succèderont",
+    "size": 11,
+    "hint_str": "suivront",
+    "complexity": 5
+  },
+  {
+    "word": "prononceriez",
+    "size": 12,
+    "hint_str": "articuleriez",
+    "complexity": 5
+  },
+  {
+    "word": "mugir",
+    "size": 5,
+    "hint_str": "meugler",
+    "complexity": 3
+  },
+  {
+    "word": "bouder",
+    "size": 6,
+    "hint_str": "râler",
+    "complexity": 3
+  },
+  {
+    "word": "bavardé",
+    "size": 7,
+    "hint_str": "babillée",
+    "complexity": 3
+  },
+  {
+    "word": "jetaient",
+    "size": 8,
+    "hint_str": "lançaient",
+    "complexity": 4
+  },
+  {
+    "word": "brûlerais",
+    "size": 9,
+    "hint_str": "flamberais",
+    "complexity": 4
+  },
+  {
+    "word": "apercevrez",
+    "size": 10,
+    "hint_str": "entreverrez",
+    "complexity": 4
+  },
+  {
+    "word": "appropriant",
+    "size": 11,
+    "hint_str": "usurpant",
+    "complexity": 5
+  },
+  {
+    "word": "prononcèrent",
+    "size": 12,
+    "hint_str": "articulèrent",
+    "complexity": 5
+  },
+  {
+    "word": "hâtes",
+    "size": 5,
+    "hint_str": "empresses",
+    "complexity": 3
+  },
+  {
+    "word": "envoya",
+    "size": 6,
+    "hint_str": "expédia",
+    "complexity": 3
+  },
+  {
+    "word": "attardé",
+    "size": 7,
+    "hint_str": "retardé",
+    "complexity": 3
+  },
+  {
+    "word": "frangins",
+    "size": 8,
+    "hint_str": "camarade",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifier",
+    "size": 9,
+    "hint_str": "graisser",
+    "complexity": 4
+  },
+  {
+    "word": "prononçons",
+    "size": 10,
+    "hint_str": "articulons",
+    "complexity": 4
+  },
+  {
+    "word": "recueillera",
+    "size": 11,
+    "hint_str": "rassemblera",
+    "complexity": 5
+  },
+  {
+    "word": "rassemblâmes",
+    "size": 12,
+    "hint_str": "recueillîmes",
+    "complexity": 5
+  },
+  {
+    "word": "bards",
+    "size": 5,
+    "hint_str": "bayard",
+    "complexity": 3
+  },
+  {
+    "word": "report",
+    "size": 6,
+    "hint_str": "ajournement",
+    "complexity": 3
+  },
+  {
+    "word": "mêlasse",
+    "size": 7,
+    "hint_str": "mélangeasse",
+    "complexity": 3
+  },
+  {
+    "word": "brûlerai",
+    "size": 8,
+    "hint_str": "flamberai",
+    "complexity": 4
+  },
+  {
+    "word": "blesseras",
+    "size": 9,
+    "hint_str": "offenseras",
+    "complexity": 4
+  },
+  {
+    "word": "apercevant",
+    "size": 10,
+    "hint_str": "entrevoyant",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderons",
+    "size": 11,
+    "hint_str": "babillerons",
+    "complexity": 5
+  },
+  {
+    "word": "recueilleras",
+    "size": 12,
+    "hint_str": "rassembleras",
+    "complexity": 5
+  },
+  {
+    "word": "bauge",
+    "size": 5,
+    "hint_str": "torchis",
+    "complexity": 3
+  },
+  {
+    "word": "sentis",
+    "size": 6,
+    "hint_str": "exhalai",
+    "complexity": 3
+  },
+  {
+    "word": "mourons",
+    "size": 7,
+    "hint_str": "clamsons",
+    "complexity": 3
+  },
+  {
+    "word": "attardes",
+    "size": 8,
+    "hint_str": "retardes",
+    "complexity": 4
+  },
+  {
+    "word": "disputais",
+    "size": 9,
+    "hint_str": "querellais",
+    "complexity": 4
+  },
+  {
+    "word": "surmontent",
+    "size": 10,
+    "hint_str": "vainquent",
+    "complexity": 4
+  },
+  {
+    "word": "conquerrons",
+    "size": 11,
+    "hint_str": "surmonterons",
+    "complexity": 5
+  },
+  {
+    "word": "recueillions",
+    "size": 12,
+    "hint_str": "rassemblions",
+    "complexity": 5
+  },
+  {
+    "word": "ardez",
+    "size": 5,
+    "hint_str": "brûlez",
+    "complexity": 3
+  },
+  {
+    "word": "crèmes",
+    "size": 6,
+    "hint_str": "laitage",
+    "complexity": 3
+  },
+  {
+    "word": "brûlons",
+    "size": 7,
+    "hint_str": "flambons",
+    "complexity": 3
+  },
+  {
+    "word": "envoyiez",
+    "size": 8,
+    "hint_str": "expédiiez",
+    "complexity": 4
+  },
+  {
+    "word": "illumines",
+    "size": 9,
+    "hint_str": "éclaires",
+    "complexity": 4
+  },
+  {
+    "word": "interdirai",
+    "size": 10,
+    "hint_str": "prohiberai",
+    "complexity": 4
+  },
+  {
+    "word": "interdiront",
+    "size": 11,
+    "hint_str": "prohiberont",
+    "complexity": 5
+  },
+  {
+    "word": "requerraient",
+    "size": 12,
+    "hint_str": "nécessiteraient",
+    "complexity": 5
+  },
+  {
+    "word": "jetât",
+    "size": 5,
+    "hint_str": "lançât",
+    "complexity": 3
+  },
+  {
+    "word": "plates",
+    "size": 6,
+    "hint_str": "nul",
+    "complexity": 3
+  },
+  {
+    "word": "fouetté",
+    "size": 7,
+    "hint_str": "flagellé",
+    "complexity": 3
+  },
+  {
+    "word": "diffusez",
+    "size": 8,
+    "hint_str": "streamez",
+    "complexity": 4
+  },
+  {
+    "word": "diffusera",
+    "size": 9,
+    "hint_str": "streamera",
+    "complexity": 4
+  },
+  {
+    "word": "apercevais",
+    "size": 10,
+    "hint_str": "entrevoyais",
+    "complexity": 4
+  },
+  {
+    "word": "succédèrent",
+    "size": 11,
+    "hint_str": "suivirent",
+    "complexity": 5
+  },
+  {
+    "word": "surmontaient",
+    "size": 12,
+    "hint_str": "vainquaient",
+    "complexity": 5
+  },
+  {
+    "word": "ardes",
+    "size": 5,
+    "hint_str": "brûles",
+    "complexity": 3
+  },
+  {
+    "word": "mêlons",
+    "size": 6,
+    "hint_str": "mélangeons",
+    "complexity": 3
+  },
+  {
+    "word": "vaincra",
+    "size": 7,
+    "hint_str": "battra",
+    "complexity": 3
+  },
+  {
+    "word": "survenir",
+    "size": 8,
+    "hint_str": "arriver",
+    "complexity": 4
+  },
+  {
+    "word": "mourrions",
+    "size": 9,
+    "hint_str": "succomberions",
+    "complexity": 4
+  },
+  {
+    "word": "surviendra",
+    "size": 10,
+    "hint_str": "arrivera",
+    "complexity": 4
+  },
+  {
+    "word": "disputèrent",
+    "size": 11,
+    "hint_str": "chamaillèrent",
+    "complexity": 5
+  },
+  {
+    "word": "surmonteriez",
+    "size": 12,
+    "hint_str": "vaincriez",
+    "complexity": 5
+  },
+  {
+    "word": "ardre",
+    "size": 5,
+    "hint_str": "brûler",
+    "complexity": 3
+  },
+  {
+    "word": "prêché",
+    "size": 6,
+    "hint_str": "sermonné",
+    "complexity": 3
+  },
+  {
+    "word": "cassons",
+    "size": 7,
+    "hint_str": "brisons",
+    "complexity": 3
+  },
+  {
+    "word": "mourriez",
+    "size": 8,
+    "hint_str": "clameceriez",
+    "complexity": 4
+  },
+  {
+    "word": "livreront",
+    "size": 9,
+    "hint_str": "dénonceront",
+    "complexity": 4
+  },
+  {
+    "word": "éthylotest",
+    "size": 10,
+    "hint_str": "alcootest",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentant",
+    "size": 11,
+    "hint_str": "suppliciant",
+    "complexity": 5
+  },
+  {
+    "word": "surmontèrent",
+    "size": 12,
+    "hint_str": "vainquirent",
+    "complexity": 5
+  },
+  {
+    "word": "bissé",
+    "size": 5,
+    "hint_str": "doublé",
+    "complexity": 3
+  },
+  {
+    "word": "mêlent",
+    "size": 6,
+    "hint_str": "mélangent",
+    "complexity": 3
+  },
+  {
+    "word": "régimes",
+    "size": 7,
+    "hint_str": "diète",
+    "complexity": 3
+  },
+  {
+    "word": "brûleras",
+    "size": 8,
+    "hint_str": "flamberas",
+    "complexity": 4
+  },
+  {
+    "word": "grimpeurs",
+    "size": 9,
+    "hint_str": "arriviste",
+    "complexity": 4
+  },
+  {
+    "word": "apercevons",
+    "size": 10,
+    "hint_str": "entrevoyons",
+    "complexity": 4
+  },
+  {
+    "word": "diffusaient",
+    "size": 11,
+    "hint_str": "streamaient",
+    "complexity": 5
+  },
+  {
+    "word": "tourmenteras",
+    "size": 12,
+    "hint_str": "supplicieras",
+    "complexity": 5
+  },
+  {
+    "word": "bouda",
+    "size": 5,
+    "hint_str": "râla",
+    "complexity": 3
+  },
+  {
+    "word": "jetais",
+    "size": 6,
+    "hint_str": "lançais",
+    "complexity": 3
+  },
+  {
+    "word": "purifié",
+    "size": 7,
+    "hint_str": "épuré",
+    "complexity": 3
+  },
+  {
+    "word": "parlante",
+    "size": 8,
+    "hint_str": "révélateur",
+    "complexity": 4
+  },
+  {
+    "word": "diffusant",
+    "size": 9,
+    "hint_str": "streamant",
+    "complexity": 4
+  },
+  {
+    "word": "débouchent",
+    "size": 10,
+    "hint_str": "débloquent",
+    "complexity": 4
+  },
+  {
+    "word": "disputerais",
+    "size": 11,
+    "hint_str": "chamaillerais",
+    "complexity": 5
+  },
+  {
+    "word": "transpirions",
+    "size": 12,
+    "hint_str": "suions",
+    "complexity": 5
+  },
+  {
+    "word": "couva",
+    "size": 5,
+    "hint_str": "gâta",
+    "complexity": 3
+  },
+  {
+    "word": "sentit",
+    "size": 6,
+    "hint_str": "exhala",
+    "complexity": 3
+  },
+  {
+    "word": "suisses",
+    "size": 7,
+    "hint_str": "tamia",
+    "complexity": 3
+  },
+  {
+    "word": "divagues",
+    "size": 8,
+    "hint_str": "délires",
+    "complexity": 4
+  },
+  {
+    "word": "pionnière",
+    "size": 9,
+    "hint_str": "précurseur",
+    "complexity": 4
+  },
+  {
+    "word": "disputerai",
+    "size": 10,
+    "hint_str": "chamaillerai",
+    "complexity": 4
+  },
+  {
+    "word": "bavardaient",
+    "size": 11,
+    "hint_str": "babillaient",
+    "complexity": 5
+  },
+  {
+    "word": "hâtai",
+    "size": 5,
+    "hint_str": "empressai",
+    "complexity": 3
+  },
+  {
+    "word": "braver",
+    "size": 6,
+    "hint_str": "affronter",
+    "complexity": 3
+  },
+  {
+    "word": "cassera",
+    "size": 7,
+    "hint_str": "brisera",
+    "complexity": 3
+  },
+  {
+    "word": "brûlerez",
+    "size": 8,
+    "hint_str": "flamberez",
+    "complexity": 4
+  },
+  {
+    "word": "brûlerons",
+    "size": 9,
+    "hint_str": "flamberons",
+    "complexity": 4
+  },
+  {
+    "word": "fouetterai",
+    "size": 10,
+    "hint_str": "flagellerai",
+    "complexity": 4
+  },
+  {
+    "word": "diffuserait",
+    "size": 11,
+    "hint_str": "streamerait",
+    "complexity": 5
+  },
+  {
+    "word": "jetas",
+    "size": 5,
+    "hint_str": "lanças",
+    "complexity": 3
+  },
+  {
+    "word": "belges",
+    "size": 6,
+    "hint_str": "belgique",
+    "complexity": 3
+  },
+  {
+    "word": "survenu",
+    "size": 7,
+    "hint_str": "arrivé",
+    "complexity": 3
+  },
+  {
+    "word": "réunisse",
+    "size": 8,
+    "hint_str": "rassemble",
+    "complexity": 4
+  },
+  {
+    "word": "flageller",
+    "size": 9,
+    "hint_str": "fouetter",
+    "complexity": 4
+  },
+  {
+    "word": "surmontant",
+    "size": 10,
+    "hint_str": "vainquant",
+    "complexity": 4
+  },
+  {
+    "word": "réuniraient",
+    "size": 11,
+    "hint_str": "rassembleraient",
+    "complexity": 5
+  },
+  {
+    "word": "mugis",
+    "size": 5,
+    "hint_str": "meugle",
+    "complexity": 3
+  },
+  {
+    "word": "couver",
+    "size": 6,
+    "hint_str": "chérir",
+    "complexity": 3
+  },
+  {
+    "word": "panache",
+    "size": 7,
+    "hint_str": "bravoure",
+    "complexity": 3
+  },
+  {
+    "word": "divaguer",
+    "size": 8,
+    "hint_str": "délirer",
+    "complexity": 4
+  },
+  {
+    "word": "livrerons",
+    "size": 9,
+    "hint_str": "dénoncerons",
+    "complexity": 4
+  },
+  {
+    "word": "débouchera",
+    "size": 10,
+    "hint_str": "débloquera",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentais",
+    "size": 11,
+    "hint_str": "suppliciais",
+    "complexity": 5
+  },
+  {
+    "word": "jetiez",
+    "size": 6,
+    "hint_str": "lanciez",
+    "complexity": 3
+  },
+  {
+    "word": "aperçus",
+    "size": 7,
+    "hint_str": "entrevis",
+    "complexity": 3
+  },
+  {
+    "word": "enfanter",
+    "size": 8,
+    "hint_str": "accoucher",
+    "complexity": 4
+  },
+  {
+    "word": "diffusons",
+    "size": 9,
+    "hint_str": "streamons",
+    "complexity": 4
+  },
+  {
+    "word": "prononçais",
+    "size": 10,
+    "hint_str": "articulais",
+    "complexity": 4
+  },
+  {
+    "word": "casseraient",
+    "size": 11,
+    "hint_str": "briseraient",
+    "complexity": 5
+  },
+  {
+    "word": "grades",
+    "size": 6,
+    "hint_str": "degré",
+    "complexity": 3
+  },
+  {
+    "word": "livrera",
+    "size": 7,
+    "hint_str": "emmènera",
+    "complexity": 3
+  },
+  {
+    "word": "blessait",
+    "size": 8,
+    "hint_str": "offensait",
+    "complexity": 4
+  },
+  {
+    "word": "attardons",
+    "size": 9,
+    "hint_str": "retardons",
+    "complexity": 4
+  },
+  {
+    "word": "comblerait",
+    "size": 10,
+    "hint_str": "remplirait",
+    "complexity": 4
+  },
+  {
+    "word": "succèderait",
+    "size": 11,
+    "hint_str": "suivrait",
+    "complexity": 5
+  },
+  {
+    "word": "boudes",
+    "size": 6,
+    "hint_str": "râles",
+    "complexity": 3
+  },
+  {
+    "word": "livrait",
+    "size": 7,
+    "hint_str": "emmenait",
+    "complexity": 3
+  },
+  {
+    "word": "vaincrai",
+    "size": 8,
+    "hint_str": "surmonterai",
+    "complexity": 4
+  },
+  {
+    "word": "calorique",
+    "size": 9,
+    "hint_str": "calorifique",
+    "complexity": 4
+  },
+  {
+    "word": "bavardions",
+    "size": 10,
+    "hint_str": "babillions",
+    "complexity": 4
+  },
+  {
+    "word": "appropriait",
+    "size": 11,
+    "hint_str": "usurpait",
+    "complexity": 5
+  },
+  {
+    "word": "convié",
+    "size": 6,
+    "hint_str": "invité",
+    "complexity": 3
+  },
+  {
+    "word": "leurres",
+    "size": 7,
+    "hint_str": "appât",
+    "complexity": 3
+  },
+  {
+    "word": "sentions",
+    "size": 8,
+    "hint_str": "empestions",
+    "complexity": 4
+  },
+  {
+    "word": "interdira",
+    "size": 9,
+    "hint_str": "prohibera",
+    "complexity": 4
+  },
+  {
+    "word": "blesseriez",
+    "size": 10,
+    "hint_str": "offenseriez",
+    "complexity": 4
+  },
+  {
+    "word": "disputerons",
+    "size": 11,
+    "hint_str": "chamaillerons",
+    "complexity": 5
+  },
+  {
+    "word": "fentes",
+    "size": 6,
+    "hint_str": "fissure",
+    "complexity": 3
+  },
+  {
+    "word": "cassait",
+    "size": 7,
+    "hint_str": "brisait",
+    "complexity": 3
+  },
+  {
+    "word": "requière",
+    "size": 8,
+    "hint_str": "demande",
+    "complexity": 4
+  },
+  {
+    "word": "habiletés",
+    "size": 9,
+    "hint_str": "capacité",
+    "complexity": 4
+  },
+  {
+    "word": "illuminant",
+    "size": 10,
+    "hint_str": "éclairant",
+    "complexity": 4
+  },
+  {
+    "word": "gribouilles",
+    "size": 11,
+    "hint_str": "griffonnes",
+    "complexity": 5
+  },
+  {
+    "word": "marrie",
+    "size": 6,
+    "hint_str": "contrit",
+    "complexity": 3
+  },
+  {
+    "word": "divagué",
+    "size": 7,
+    "hint_str": "déliré",
+    "complexity": 3
+  },
+  {
+    "word": "requiers",
+    "size": 8,
+    "hint_str": "demande",
+    "complexity": 4
+  },
+  {
+    "word": "jetterons",
+    "size": 9,
+    "hint_str": "lancerons",
+    "complexity": 4
+  },
+  {
+    "word": "recueillit",
+    "size": 10,
+    "hint_str": "rassembla",
+    "complexity": 4
+  },
+  {
+    "word": "gribouillez",
+    "size": 11,
+    "hint_str": "griffonnez",
+    "complexity": 5
+  },
+  {
+    "word": "cancan",
+    "size": 6,
+    "hint_str": "ragot",
+    "complexity": 3
+  },
+  {
+    "word": "cassant",
+    "size": 7,
+    "hint_str": "brisant",
+    "complexity": 3
+  },
+  {
+    "word": "grimpeur",
+    "size": 8,
+    "hint_str": "arriviste",
+    "complexity": 4
+  },
+  {
+    "word": "rassembla",
+    "size": 9,
+    "hint_str": "ramassa",
+    "complexity": 4
+  },
+  {
+    "word": "diffuserai",
+    "size": 10,
+    "hint_str": "streamerai",
+    "complexity": 4
+  },
+  {
+    "word": "fouettaient",
+    "size": 11,
+    "hint_str": "flagellaient",
+    "complexity": 5
+  },
+  {
+    "word": "taquet",
+    "size": 6,
+    "hint_str": "cheville",
+    "complexity": 3
+  },
+  {
+    "word": "réunira",
+    "size": 7,
+    "hint_str": "rassemblera",
+    "complexity": 3
+  },
+  {
+    "word": "jetteras",
+    "size": 8,
+    "hint_str": "lanceras",
+    "complexity": 4
+  },
+  {
+    "word": "succèdera",
+    "size": 9,
+    "hint_str": "suivra",
+    "complexity": 4
+  },
+  {
+    "word": "enregistra",
+    "size": 10,
+    "hint_str": "filma",
+    "complexity": 4
+  },
+  {
+    "word": "fouetterais",
+    "size": 11,
+    "hint_str": "flagellerais",
+    "complexity": 5
+  },
+  {
+    "word": "mêlant",
+    "size": 6,
+    "hint_str": "mélangeant",
+    "complexity": 3
+  },
+  {
+    "word": "fausser",
+    "size": 7,
+    "hint_str": "falsifier",
+    "complexity": 3
+  },
+  {
+    "word": "diffuses",
+    "size": 8,
+    "hint_str": "streames",
+    "complexity": 4
+  },
+  {
+    "word": "diffusait",
+    "size": 9,
+    "hint_str": "streamait",
+    "complexity": 4
+  },
+  {
+    "word": "aperceviez",
+    "size": 10,
+    "hint_str": "entrevoyiez",
+    "complexity": 4
+  },
+  {
+    "word": "livreraient",
+    "size": 11,
+    "hint_str": "porteraient",
+    "complexity": 5
+  },
+  {
+    "word": "hâtons",
+    "size": 6,
+    "hint_str": "empressons",
+    "complexity": 3
+  },
+  {
+    "word": "livrons",
+    "size": 7,
+    "hint_str": "emmenons",
+    "complexity": 3
+  },
+  {
+    "word": "occident",
+    "size": 8,
+    "hint_str": "ponant",
+    "complexity": 4
+  },
+  {
+    "word": "divaguait",
+    "size": 9,
+    "hint_str": "délirait",
+    "complexity": 4
+  },
+  {
+    "word": "caloriques",
+    "size": 10,
+    "hint_str": "calorifique",
+    "complexity": 4
+  },
+  {
+    "word": "survenaient",
+    "size": 11,
+    "hint_str": "arrivaient",
+    "complexity": 5
+  },
+  {
+    "word": "heurts",
+    "size": 6,
+    "hint_str": "accrochage",
+    "complexity": 3
+  },
+  {
+    "word": "perdrix",
+    "size": 7,
+    "hint_str": "caille",
+    "complexity": 3
+  },
+  {
+    "word": "requérir",
+    "size": 8,
+    "hint_str": "demander",
+    "complexity": 4
+  },
+  {
+    "word": "casseront",
+    "size": 9,
+    "hint_str": "briseront",
+    "complexity": 4
+  },
+  {
+    "word": "attarderai",
+    "size": 10,
+    "hint_str": "retarderai",
+    "complexity": 4
+  },
+  {
+    "word": "apercevrons",
+    "size": 11,
+    "hint_str": "entreverrons",
+    "complexity": 5
+  },
+  {
+    "word": "niques",
+    "size": 6,
+    "hint_str": "baises",
+    "complexity": 3
+  },
+  {
+    "word": "livrant",
+    "size": 7,
+    "hint_str": "emmenant",
+    "complexity": 3
+  },
+  {
+    "word": "vaincras",
+    "size": 8,
+    "hint_str": "surmonteras",
+    "complexity": 4
+  },
+  {
+    "word": "enverriez",
+    "size": 9,
+    "hint_str": "expédieriez",
+    "complexity": 4
+  },
+  {
+    "word": "sentirions",
+    "size": 10,
+    "hint_str": "empesterions",
+    "complexity": 4
+  },
+  {
+    "word": "fouetteront",
+    "size": 11,
+    "hint_str": "flagelleront",
+    "complexity": 5
+  },
+  {
+    "word": "sombra",
+    "size": 6,
+    "hint_str": "coula",
+    "complexity": 3
+  },
+  {
+    "word": "livrais",
+    "size": 7,
+    "hint_str": "emmenais",
+    "complexity": 3
+  },
+  {
+    "word": "parlants",
+    "size": 8,
+    "hint_str": "révélateur",
+    "complexity": 4
+  },
+  {
+    "word": "réuniront",
+    "size": 9,
+    "hint_str": "rassembleront",
+    "complexity": 4
+  },
+  {
+    "word": "aperçurent",
+    "size": 10,
+    "hint_str": "entrevirent",
+    "complexity": 4
+  },
+  {
+    "word": "illumineras",
+    "size": 11,
+    "hint_str": "éclaireras",
+    "complexity": 5
+  },
+  {
+    "word": "quêtes",
+    "size": 6,
+    "hint_str": "cherches",
+    "complexity": 3
+  },
+  {
+    "word": "prêchez",
+    "size": 7,
+    "hint_str": "sermonnez",
+    "complexity": 3
+  },
+  {
+    "word": "comblera",
+    "size": 8,
+    "hint_str": "remplira",
+    "complexity": 4
+  },
+  {
+    "word": "cassaient",
+    "size": 9,
+    "hint_str": "brisaient",
+    "complexity": 4
+  },
+  {
+    "word": "appropriez",
+    "size": 10,
+    "hint_str": "usurpez",
+    "complexity": 4
+  },
+  {
+    "word": "interdisiez",
+    "size": 11,
+    "hint_str": "prohibiez",
+    "complexity": 5
+  },
+  {
+    "word": "asexué",
+    "size": 6,
+    "hint_str": "asexuel",
+    "complexity": 3
+  },
+  {
+    "word": "morpion",
+    "size": 7,
+    "hint_str": "morbaque",
+    "complexity": 3
+  },
+  {
+    "word": "divaguez",
+    "size": 8,
+    "hint_str": "délirez",
+    "complexity": 4
+  },
+  {
+    "word": "livraient",
+    "size": 9,
+    "hint_str": "dénonçaient",
+    "complexity": 4
+  },
+  {
+    "word": "débouchait",
+    "size": 10,
+    "hint_str": "débloquait",
+    "complexity": 4
+  },
+  {
+    "word": "recueillais",
+    "size": 11,
+    "hint_str": "rassemblais",
+    "complexity": 5
+  },
+  {
+    "word": "mêlait",
+    "size": 6,
+    "hint_str": "mélangeait",
+    "complexity": 3
+  },
+  {
+    "word": "prêches",
+    "size": 7,
+    "hint_str": "sermonnes",
+    "complexity": 3
+  },
+  {
+    "word": "fouettez",
+    "size": 8,
+    "hint_str": "flagellez",
+    "complexity": 4
+  },
+  {
+    "word": "surmontes",
+    "size": 9,
+    "hint_str": "vaincs",
+    "complexity": 4
+  },
+  {
+    "word": "blessaient",
+    "size": 10,
+    "hint_str": "offensaient",
+    "complexity": 4
+  },
+  {
+    "word": "transpirera",
+    "size": 11,
+    "hint_str": "suera",
+    "complexity": 5
+  },
+  {
+    "word": "truies",
+    "size": 6,
+    "hint_str": "cochon",
+    "complexity": 3
+  },
+  {
+    "word": "survint",
+    "size": 7,
+    "hint_str": "arriva",
+    "complexity": 3
+  },
+  {
+    "word": "prêchait",
+    "size": 8,
+    "hint_str": "sermonnait",
+    "complexity": 4
+  },
+  {
+    "word": "survienne",
+    "size": 9,
+    "hint_str": "arrive",
+    "complexity": 4
+  },
+  {
+    "word": "débouchant",
+    "size": 10,
+    "hint_str": "débloquant",
+    "complexity": 4
+  },
+  {
+    "word": "transpiriez",
+    "size": 11,
+    "hint_str": "suiez",
+    "complexity": 5
+  },
+  {
+    "word": "checké",
+    "size": 6,
+    "hint_str": "vérifié",
+    "complexity": 3
+  },
+  {
+    "word": "mouriez",
+    "size": 7,
+    "hint_str": "clamsiez",
+    "complexity": 3
+  },
+  {
+    "word": "bavardez",
+    "size": 8,
+    "hint_str": "babillez",
+    "complexity": 4
+  },
+  {
+    "word": "bavardant",
+    "size": 9,
+    "hint_str": "babillant",
+    "complexity": 4
+  },
+  {
+    "word": "prononciez",
+    "size": 10,
+    "hint_str": "articuliez",
+    "complexity": 4
+  },
+  {
+    "word": "conquerront",
+    "size": 11,
+    "hint_str": "surmonteront",
+    "complexity": 5
+  },
+  {
+    "word": "mêlera",
+    "size": 6,
+    "hint_str": "mélangera",
+    "complexity": 3
+  },
+  {
+    "word": "aperçut",
+    "size": 7,
+    "hint_str": "entrevit",
+    "complexity": 3
+  },
+  {
+    "word": "prêchent",
+    "size": 8,
+    "hint_str": "sermonnent",
+    "complexity": 4
+  },
+  {
+    "word": "parlantes",
+    "size": 9,
+    "hint_str": "révélateur",
+    "complexity": 4
+  },
+  {
+    "word": "sombrerait",
+    "size": 10,
+    "hint_str": "coulerait",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderais",
+    "size": 11,
+    "hint_str": "babillerais",
+    "complexity": 5
+  },
+  {
+    "word": "boudez",
+    "size": 6,
+    "hint_str": "râlez",
+    "complexity": 3
+  },
+  {
+    "word": "cassais",
+    "size": 7,
+    "hint_str": "brisais",
+    "complexity": 3
+  },
+  {
+    "word": "casseras",
+    "size": 8,
+    "hint_str": "briseras",
+    "complexity": 4
+  },
+  {
+    "word": "vaincront",
+    "size": 9,
+    "hint_str": "surmonteront",
+    "complexity": 4
+  },
+  {
+    "word": "disputerez",
+    "size": 10,
+    "hint_str": "chamaillerez",
+    "complexity": 4
+  },
+  {
+    "word": "enregistrai",
+    "size": 11,
+    "hint_str": "filmai",
+    "complexity": 5
+  },
+  {
+    "word": "couves",
+    "size": 6,
+    "hint_str": "chéris",
+    "complexity": 3
+  },
+  {
+    "word": "combles",
+    "size": 7,
+    "hint_str": "remplis",
+    "complexity": 3
+  },
+  {
+    "word": "travails",
+    "size": 8,
+    "hint_str": "boulot",
+    "complexity": 4
+  },
+  {
+    "word": "livrerais",
+    "size": 9,
+    "hint_str": "dénoncerais",
+    "complexity": 4
+  },
+  {
+    "word": "recueilles",
+    "size": 10,
+    "hint_str": "rassembles",
+    "complexity": 4
+  },
+  {
+    "word": "interdirent",
+    "size": 11,
+    "hint_str": "prohibèrent",
+    "complexity": 5
+  },
+  {
+    "word": "mêlais",
+    "size": 6,
+    "hint_str": "mélangeais",
+    "complexity": 3
+  },
+  {
+    "word": "succédé",
+    "size": 7,
+    "hint_str": "suivi",
+    "complexity": 3
+  },
+  {
+    "word": "livrerez",
+    "size": 8,
+    "hint_str": "dénoncerez",
+    "complexity": 4
+  },
+  {
+    "word": "livrerait",
+    "size": 9,
+    "hint_str": "dénoncerait",
+    "complexity": 4
+  },
+  {
+    "word": "surmontons",
+    "size": 10,
+    "hint_str": "vainquons",
+    "complexity": 4
+  },
+  {
+    "word": "interdirons",
+    "size": 11,
+    "hint_str": "prohiberons",
+    "complexity": 5
+  },
+  {
+    "word": "mêliez",
+    "size": 6,
+    "hint_str": "mélangiez",
+    "complexity": 3
+  },
+  {
+    "word": "argents",
+    "size": 7,
+    "hint_str": "artiche",
+    "complexity": 3
+  },
+  {
+    "word": "fouettes",
+    "size": 8,
+    "hint_str": "flagelles",
+    "complexity": 4
+  },
+  {
+    "word": "simiesque",
+    "size": 9,
+    "hint_str": "simien",
+    "complexity": 4
+  },
+  {
+    "word": "combleront",
+    "size": 10,
+    "hint_str": "rempliront",
+    "complexity": 4
+  },
+  {
+    "word": "apercevions",
+    "size": 11,
+    "hint_str": "entrevoyions",
+    "complexity": 5
+  },
+  {
+    "word": "tasers",
+    "size": 6,
+    "hint_str": "AIE",
+    "complexity": 3
+  },
+  {
+    "word": "enfanté",
+    "size": 7,
+    "hint_str": "accouché",
+    "complexity": 3
+  },
+  {
+    "word": "purifiez",
+    "size": 8,
+    "hint_str": "épurez",
+    "complexity": 4
+  },
+  {
+    "word": "surmontez",
+    "size": 9,
+    "hint_str": "vainquez",
+    "complexity": 4
+  },
+  {
+    "word": "conquerrai",
+    "size": 10,
+    "hint_str": "surmonterai",
+    "complexity": 4
+  },
+  {
+    "word": "appropriera",
+    "size": 11,
+    "hint_str": "usurpera",
+    "complexity": 5
+  },
+  {
+    "word": "rogner",
+    "size": 6,
+    "hint_str": "massicot",
+    "complexity": 3
+  },
+  {
+    "word": "culbute",
+    "size": 7,
+    "hint_str": "chute",
+    "complexity": 3
+  },
+  {
+    "word": "attardez",
+    "size": 8,
+    "hint_str": "retardez",
+    "complexity": 4
+  },
+  {
+    "word": "débouches",
+    "size": 9,
+    "hint_str": "débloques",
+    "complexity": 4
+  },
+  {
+    "word": "funéraille",
+    "size": 10,
+    "hint_str": "obsèque",
+    "complexity": 4
+  },
+  {
+    "word": "attarderons",
+    "size": 11,
+    "hint_str": "retarderons",
+    "complexity": 5
+  },
+  {
+    "word": "jalons",
+    "size": 6,
+    "hint_str": "marque",
+    "complexity": 3
+  },
+  {
+    "word": "brûlais",
+    "size": 7,
+    "hint_str": "flambais",
+    "complexity": 3
+  },
+  {
+    "word": "embêtais",
+    "size": 8,
+    "hint_str": "emmerdais",
+    "complexity": 4
+  },
+  {
+    "word": "sentirons",
+    "size": 9,
+    "hint_str": "empesterons",
+    "complexity": 4
+  },
+  {
+    "word": "réunissiez",
+    "size": 10,
+    "hint_str": "rassembliez",
+    "complexity": 4
+  },
+  {
+    "word": "attarderont",
+    "size": 11,
+    "hint_str": "retarderont",
+    "complexity": 5
+  },
+  {
+    "word": "blessa",
+    "size": 6,
+    "hint_str": "offensa",
+    "complexity": 3
+  },
+  {
+    "word": "trinité",
+    "size": 7,
+    "hint_str": "triade",
+    "complexity": 3
+  },
+  {
+    "word": "sombrera",
+    "size": 8,
+    "hint_str": "coulera",
+    "complexity": 4
+  },
+  {
+    "word": "attardent",
+    "size": 9,
+    "hint_str": "retardent",
+    "complexity": 4
+  },
+  {
+    "word": "succèderas",
+    "size": 10,
+    "hint_str": "suivras",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderait",
+    "size": 11,
+    "hint_str": "babillerait",
+    "complexity": 5
+  },
+  {
+    "word": "vaincs",
+    "size": 6,
+    "hint_str": "bats",
+    "complexity": 3
+  },
+  {
+    "word": "mêlerai",
+    "size": 7,
+    "hint_str": "mélangerai",
+    "complexity": 3
+  },
+  {
+    "word": "mourions",
+    "size": 8,
+    "hint_str": "clamecions",
+    "complexity": 4
+  },
+  {
+    "word": "bavardera",
+    "size": 9,
+    "hint_str": "babillera",
+    "complexity": 4
+  },
+  {
+    "word": "simiesques",
+    "size": 10,
+    "hint_str": "simien",
+    "complexity": 4
+  },
+  {
+    "word": "déboucherai",
+    "size": 11,
+    "hint_str": "débloquerai",
+    "complexity": 5
+  },
+  {
+    "word": "couvez",
+    "size": 6,
+    "hint_str": "chérissez",
+    "complexity": 3
+  },
+  {
+    "word": "checker",
+    "size": 7,
+    "hint_str": "vérifier",
+    "complexity": 3
+  },
+  {
+    "word": "purifies",
+    "size": 8,
+    "hint_str": "épures",
+    "complexity": 4
+  },
+  {
+    "word": "débouchez",
+    "size": 9,
+    "hint_str": "débloquez",
+    "complexity": 4
+  },
+  {
+    "word": "apercevrai",
+    "size": 10,
+    "hint_str": "entreverrai",
+    "complexity": 4
+  },
+  {
+    "word": "prononcions",
+    "size": 11,
+    "hint_str": "articulions",
+    "complexity": 5
+  },
+  {
+    "word": "gombos",
+    "size": 6,
+    "hint_str": "okra",
+    "complexity": 3
+  },
+  {
+    "word": "cancans",
+    "size": 7,
+    "hint_str": "commérage",
+    "complexity": 3
+  },
+  {
+    "word": "blessais",
+    "size": 8,
+    "hint_str": "offensais",
+    "complexity": 4
+  },
+  {
+    "word": "fouettent",
+    "size": 9,
+    "hint_str": "flagellent",
+    "complexity": 4
+  },
+  {
+    "word": "blesserons",
+    "size": 10,
+    "hint_str": "offenserons",
+    "complexity": 4
+  },
+  {
+    "word": "attarderais",
+    "size": 11,
+    "hint_str": "retarderais",
+    "complexity": 5
+  },
+  {
+    "word": "beuglé",
+    "size": 6,
+    "hint_str": "meuglé",
+    "complexity": 3
+  },
+  {
+    "word": "comblez",
+    "size": 7,
+    "hint_str": "remplissez",
+    "complexity": 3
+  },
+  {
+    "word": "blessiez",
+    "size": 8,
+    "hint_str": "offensiez",
+    "complexity": 4
+  },
+  {
+    "word": "jetteriez",
+    "size": 9,
+    "hint_str": "lanceriez",
+    "complexity": 4
+  },
+  {
+    "word": "conquérons",
+    "size": 10,
+    "hint_str": "surmontons",
+    "complexity": 4
+  },
+  {
+    "word": "entrecouper",
+    "size": 11,
+    "hint_str": "entremêler",
+    "complexity": 5
+  },
+  {
+    "word": "hâtent",
+    "size": 6,
+    "hint_str": "empressent",
+    "complexity": 3
+  },
+  {
+    "word": "convies",
+    "size": 7,
+    "hint_str": "invites",
+    "complexity": 3
+  },
+  {
+    "word": "comblent",
+    "size": 8,
+    "hint_str": "remplissent",
+    "complexity": 4
+  },
+  {
+    "word": "fouettait",
+    "size": 9,
+    "hint_str": "flagellait",
+    "complexity": 4
+  },
+  {
+    "word": "débouchons",
+    "size": 10,
+    "hint_str": "débloquons",
+    "complexity": 4
+  },
+  {
+    "word": "fouetterait",
+    "size": 11,
+    "hint_str": "flagellerait",
+    "complexity": 5
+  },
+  {
+    "word": "niquez",
+    "size": 6,
+    "hint_str": "baisez",
+    "complexity": 3
+  },
+  {
+    "word": "aéronef",
+    "size": 7,
+    "hint_str": "aérodyne",
+    "complexity": 3
+  },
+  {
+    "word": "jetterez",
+    "size": 8,
+    "hint_str": "lancerez",
+    "complexity": 4
+  },
+  {
+    "word": "illuminez",
+    "size": 9,
+    "hint_str": "éclairez",
+    "complexity": 4
+  },
+  {
+    "word": "fausserait",
+    "size": 10,
+    "hint_str": "falsifierait",
+    "complexity": 4
+  },
+  {
+    "word": "vainquirent",
+    "size": 11,
+    "hint_str": "surmontèrent",
+    "complexity": 5
+  },
+  {
+    "word": "quêter",
+    "size": 6,
+    "hint_str": "chercher",
+    "complexity": 3
+  },
+  {
+    "word": "vitrage",
+    "size": 7,
+    "hint_str": "carreau",
+    "complexity": 3
+  },
+  {
+    "word": "prononça",
+    "size": 8,
+    "hint_str": "articula",
+    "complexity": 4
+  },
+  {
+    "word": "réunirait",
+    "size": 9,
+    "hint_str": "rassemblerait",
+    "complexity": 4
+  },
+  {
+    "word": "interdises",
+    "size": 10,
+    "hint_str": "prohibes",
+    "complexity": 4
+  },
+  {
+    "word": "apercevriez",
+    "size": 11,
+    "hint_str": "entreverriez",
+    "complexity": 5
+  },
+  {
+    "word": "forban",
+    "size": 6,
+    "hint_str": "bandit",
+    "complexity": 3
+  },
+  {
+    "word": "convier",
+    "size": 7,
+    "hint_str": "inviter",
+    "complexity": 3
+  },
+  {
+    "word": "aéronefs",
+    "size": 8,
+    "hint_str": "aérodyne",
+    "complexity": 4
+  },
+  {
+    "word": "purifient",
+    "size": 9,
+    "hint_str": "épurent",
+    "complexity": 4
+  },
+  {
+    "word": "réunissais",
+    "size": 10,
+    "hint_str": "rassemblais",
+    "complexity": 4
+  },
+  {
+    "word": "appropriais",
+    "size": 11,
+    "hint_str": "usurpais",
+    "complexity": 5
+  },
+  {
+    "word": "émacié",
+    "size": 6,
+    "hint_str": "amaigri",
+    "complexity": 3
+  },
+  {
+    "word": "cruches",
+    "size": 7,
+    "hint_str": "carafe",
+    "complexity": 3
+  },
+  {
+    "word": "mêlerais",
+    "size": 8,
+    "hint_str": "mélangerais",
+    "complexity": 4
+  },
+  {
+    "word": "purifiera",
+    "size": 9,
+    "hint_str": "épurera",
+    "complexity": 4
+  },
+  {
+    "word": "blessèrent",
+    "size": 10,
+    "hint_str": "offensèrent",
+    "complexity": 4
+  },
+  {
+    "word": "appropriiez",
+    "size": 11,
+    "hint_str": "usurpiez",
+    "complexity": 5
+  },
+  {
+    "word": "bravez",
+    "size": 6,
+    "hint_str": "affrontez",
+    "complexity": 3
+  },
+  {
+    "word": "infects",
+    "size": 7,
+    "hint_str": "immonde",
+    "complexity": 3
+  },
+  {
+    "word": "vaincrez",
+    "size": 8,
+    "hint_str": "surmonterez",
+    "complexity": 4
+  },
+  {
+    "word": "réunirent",
+    "size": 9,
+    "hint_str": "rassemblèrent",
+    "complexity": 4
+  },
+  {
+    "word": "conquirent",
+    "size": 10,
+    "hint_str": "surmontèrent",
+    "complexity": 4
+  },
+  {
+    "word": "approprions",
+    "size": 11,
+    "hint_str": "usurpons",
+    "complexity": 5
+  },
+  {
+    "word": "brouet",
+    "size": 6,
+    "hint_str": "bouillon",
+    "complexity": 3
+  },
+  {
+    "word": "beugler",
+    "size": 7,
+    "hint_str": "meugler",
+    "complexity": 3
+  },
+  {
+    "word": "bavardes",
+    "size": 8,
+    "hint_str": "babilles",
+    "complexity": 4
+  },
+  {
+    "word": "bavardais",
+    "size": 9,
+    "hint_str": "babillais",
+    "complexity": 4
+  },
+  {
+    "word": "diffuserez",
+    "size": 10,
+    "hint_str": "streamerez",
+    "complexity": 4
+  },
+  {
+    "word": "attardaient",
+    "size": 11,
+    "hint_str": "retardaient",
+    "complexity": 5
+  },
+  {
+    "word": "haltes",
+    "size": 6,
+    "hint_str": "pause",
+    "complexity": 3
+  },
+  {
+    "word": "couvait",
+    "size": 7,
+    "hint_str": "cajolait",
+    "complexity": 3
+  },
+  {
+    "word": "jetèrent",
+    "size": 8,
+    "hint_str": "lancèrent",
+    "complexity": 4
+  },
+  {
+    "word": "blesserez",
+    "size": 9,
+    "hint_str": "offenserez",
+    "complexity": 4
+  },
+  {
+    "word": "plantureux",
+    "size": 10,
+    "hint_str": "voluptueux",
+    "complexity": 4
+  },
+  {
+    "word": "attarderait",
+    "size": 11,
+    "hint_str": "retarderait",
+    "complexity": 5
+  },
+  {
+    "word": "ardant",
+    "size": 6,
+    "hint_str": "brûlant",
+    "complexity": 3
+  },
+  {
+    "word": "bravant",
+    "size": 7,
+    "hint_str": "affrontant",
+    "complexity": 3
+  },
+  {
+    "word": "piailler",
+    "size": 8,
+    "hint_str": "piauler",
+    "complexity": 4
+  },
+  {
+    "word": "breuvages",
+    "size": 9,
+    "hint_str": "boisson",
+    "complexity": 4
+  },
+  {
+    "word": "sombraient",
+    "size": 10,
+    "hint_str": "coulaient",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderont",
+    "size": 11,
+    "hint_str": "babilleront",
+    "complexity": 5
+  },
+  {
+    "word": "marris",
+    "size": 6,
+    "hint_str": "contrit",
+    "complexity": 3
+  },
+  {
+    "word": "jetions",
+    "size": 7,
+    "hint_str": "lancions",
+    "complexity": 3
+  },
+  {
+    "word": "joggings",
+    "size": 8,
+    "hint_str": "footing",
+    "complexity": 4
+  },
+  {
+    "word": "brûlèrent",
+    "size": 9,
+    "hint_str": "flambèrent",
+    "complexity": 4
+  },
+  {
+    "word": "sombrerons",
+    "size": 10,
+    "hint_str": "coulerons",
+    "complexity": 4
+  },
+  {
+    "word": "blesserions",
+    "size": 11,
+    "hint_str": "offenserions",
+    "complexity": 5
+  },
+  {
+    "word": "mourus",
+    "size": 6,
+    "hint_str": "crevai",
+    "complexity": 3
+  },
+  {
+    "word": "conquit",
+    "size": 7,
+    "hint_str": "vainquit",
+    "complexity": 3
+  },
+  {
+    "word": "lubrifié",
+    "size": 8,
+    "hint_str": "graissé",
+    "complexity": 4
+  },
+  {
+    "word": "envoyions",
+    "size": 9,
+    "hint_str": "expédiions",
+    "complexity": 4
+  },
+  {
+    "word": "succèderai",
+    "size": 10,
+    "hint_str": "suivrai",
+    "complexity": 4
+  },
+  {
+    "word": "bouderaient",
+    "size": 11,
+    "hint_str": "râleraient",
+    "complexity": 5
+  },
+  {
+    "word": "prêcha",
+    "size": 6,
+    "hint_str": "sermonna",
+    "complexity": 3
+  },
+  {
+    "word": "niquent",
+    "size": 7,
+    "hint_str": "fourrent",
+    "complexity": 3
+  },
+  {
+    "word": "réunirai",
+    "size": 8,
+    "hint_str": "rassemblerai",
+    "complexity": 4
+  },
+  {
+    "word": "conquiers",
+    "size": 9,
+    "hint_str": "surmonte",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderez",
+    "size": 10,
+    "hint_str": "babillerez",
+    "complexity": 4
+  },
+  {
+    "word": "braveraient",
+    "size": 11,
+    "hint_str": "affronteraient",
+    "complexity": 5
+  },
+  {
+    "word": "écorné",
+    "size": 6,
+    "hint_str": "décorné",
+    "complexity": 3
+  },
+  {
+    "word": "asexuée",
+    "size": 7,
+    "hint_str": "asexuel",
+    "complexity": 3
+  },
+  {
+    "word": "prêchant",
+    "size": 8,
+    "hint_str": "sermonnant",
+    "complexity": 4
+  },
+  {
+    "word": "survenant",
+    "size": 9,
+    "hint_str": "arrivant",
+    "complexity": 4
+  },
+  {
+    "word": "enfanterai",
+    "size": 10,
+    "hint_str": "accoucherai",
+    "complexity": 4
+  },
+  {
+    "word": "cachemirien",
+    "size": 11,
+    "hint_str": "cachemiri",
+    "complexity": 5
+  },
+  {
+    "word": "requit",
+    "size": 6,
+    "hint_str": "exigea",
+    "complexity": 3
+  },
+  {
+    "word": "livriez",
+    "size": 7,
+    "hint_str": "emmeniez",
+    "complexity": 3
+  },
+  {
+    "word": "potences",
+    "size": 8,
+    "hint_str": "gibet",
+    "complexity": 4
+  },
+  {
+    "word": "vaincrais",
+    "size": 9,
+    "hint_str": "surmonterais",
+    "complexity": 4
+  },
+  {
+    "word": "illuminais",
+    "size": 10,
+    "hint_str": "éclairais",
+    "complexity": 4
+  },
+  {
+    "word": "communismes",
+    "size": 11,
+    "hint_str": "collectivisme",
+    "complexity": 5
+  },
+  {
+    "word": "goémon",
+    "size": 6,
+    "hint_str": "varech",
+    "complexity": 3
+  },
+  {
+    "word": "reports",
+    "size": 7,
+    "hint_str": "ajournement",
+    "complexity": 3
+  },
+  {
+    "word": "anxiétés",
+    "size": 8,
+    "hint_str": "inquiétude",
+    "complexity": 4
+  },
+  {
+    "word": "purifiant",
+    "size": 9,
+    "hint_str": "épurant",
+    "complexity": 4
+  },
+  {
+    "word": "survinrent",
+    "size": 10,
+    "hint_str": "arrivèrent",
+    "complexity": 4
+  },
+  {
+    "word": "conquerrais",
+    "size": 11,
+    "hint_str": "surmonterais",
+    "complexity": 5
+  },
+  {
+    "word": "hâtant",
+    "size": 6,
+    "hint_str": "empressant",
+    "complexity": 3
+  },
+  {
+    "word": "décousu",
+    "size": 7,
+    "hint_str": "incohérent",
+    "complexity": 3
+  },
+  {
+    "word": "magnétos",
+    "size": 8,
+    "hint_str": "magnétophone",
+    "complexity": 4
+  },
+  {
+    "word": "vaincrait",
+    "size": 9,
+    "hint_str": "surmonterait",
+    "complexity": 4
+  },
+  {
+    "word": "vélocipède",
+    "size": 10,
+    "hint_str": "bicyclette",
+    "complexity": 4
+  },
+  {
+    "word": "conquerrait",
+    "size": 11,
+    "hint_str": "surmonterait",
+    "complexity": 5
+  },
+  {
+    "word": "hâtait",
+    "size": 6,
+    "hint_str": "empressait",
+    "complexity": 3
+  },
+  {
+    "word": "brûliez",
+    "size": 7,
+    "hint_str": "flambiez",
+    "complexity": 3
+  },
+  {
+    "word": "sombrait",
+    "size": 8,
+    "hint_str": "coulait",
+    "complexity": 4
+  },
+  {
+    "word": "vainquons",
+    "size": 9,
+    "hint_str": "surmontons",
+    "complexity": 4
+  },
+  {
+    "word": "alcootests",
+    "size": 10,
+    "hint_str": "éthylotest",
+    "complexity": 4
+  },
+  {
+    "word": "conquérions",
+    "size": 11,
+    "hint_str": "surmontions",
+    "complexity": 5
+  },
+  {
+    "word": "bisser",
+    "size": 6,
+    "hint_str": "doubler",
+    "complexity": 3
+  },
+  {
+    "word": "clivage",
+    "size": 7,
+    "hint_str": "fissure",
+    "complexity": 3
+  },
+  {
+    "word": "livreras",
+    "size": 8,
+    "hint_str": "dénonceras",
+    "complexity": 4
+  },
+  {
+    "word": "survenait",
+    "size": 9,
+    "hint_str": "arrivait",
+    "complexity": 4
+  },
+  {
+    "word": "embêterons",
+    "size": 10,
+    "hint_str": "importunerons",
+    "complexity": 4
+  },
+  {
+    "word": "diffuserais",
+    "size": 11,
+    "hint_str": "streamerais",
+    "complexity": 5
+  },
+  {
+    "word": "combla",
+    "size": 6,
+    "hint_str": "remplit",
+    "complexity": 3
+  },
+  {
+    "word": "enculée",
+    "size": 7,
+    "hint_str": "enfoiré",
+    "complexity": 3
+  },
+  {
+    "word": "mêlerait",
+    "size": 8,
+    "hint_str": "mélangerait",
+    "complexity": 4
+  },
+  {
+    "word": "casserons",
+    "size": 9,
+    "hint_str": "briserons",
+    "complexity": 4
+  },
+  {
+    "word": "entrecoupé",
+    "size": 10,
+    "hint_str": "entremêlé",
+    "complexity": 4
+  },
+  {
+    "word": "disciplinez",
+    "size": 11,
+    "hint_str": "sanctionnez",
+    "complexity": 5
+  },
+  {
+    "word": "envols",
+    "size": 6,
+    "hint_str": "essor",
+    "complexity": 3
+  },
+  {
+    "word": "cassiez",
+    "size": 7,
+    "hint_str": "brisiez",
+    "complexity": 3
+  },
+  {
+    "word": "sombrent",
+    "size": 8,
+    "hint_str": "coulent",
+    "complexity": 4
+  },
+  {
+    "word": "foutument",
+    "size": 9,
+    "hint_str": "foutrement",
+    "complexity": 4
+  },
+  {
+    "word": "enverrions",
+    "size": 10,
+    "hint_str": "expédierions",
+    "complexity": 4
+  },
+  {
+    "word": "disputeriez",
+    "size": 11,
+    "hint_str": "chamailleriez",
+    "complexity": 5
+  },
+  {
+    "word": "hâtais",
+    "size": 6,
+    "hint_str": "empressais",
+    "complexity": 3
+  },
+  {
+    "word": "marries",
+    "size": 7,
+    "hint_str": "contrit",
+    "complexity": 3
+  },
+  {
+    "word": "flagellé",
+    "size": 8,
+    "hint_str": "fouetté",
+    "complexity": 4
+  },
+  {
+    "word": "piaillent",
+    "size": 9,
+    "hint_str": "piaulent",
+    "complexity": 4
+  },
+  {
+    "word": "prêchaient",
+    "size": 10,
+    "hint_str": "sermonnaient",
+    "complexity": 4
+  },
+  {
+    "word": "divaguaient",
+    "size": 11,
+    "hint_str": "déliraient",
+    "complexity": 5
+  },
+  {
+    "word": "hâtera",
+    "size": 6,
+    "hint_str": "empressera",
+    "complexity": 3
+  },
+  {
+    "word": "sultans",
+    "size": 7,
+    "hint_str": "soudan",
+    "complexity": 3
+  },
+  {
+    "word": "vainquit",
+    "size": 8,
+    "hint_str": "surmonta",
+    "complexity": 4
+  },
+  {
+    "word": "requérant",
+    "size": 9,
+    "hint_str": "demandant",
+    "complexity": 4
+  },
+  {
+    "word": "sombreront",
+    "size": 10,
+    "hint_str": "couleront",
+    "complexity": 4
+  },
+  {
+    "word": "divaguerais",
+    "size": 11,
+    "hint_str": "délirerais",
+    "complexity": 5
+  },
+  {
+    "word": "livrai",
+    "size": 6,
+    "hint_str": "emmenai",
+    "complexity": 3
+  },
+  {
+    "word": "boudent",
+    "size": 7,
+    "hint_str": "râlent",
+    "complexity": 3
+  },
+  {
+    "word": "comblait",
+    "size": 8,
+    "hint_str": "remplissait",
+    "complexity": 4
+  },
+  {
+    "word": "succédant",
+    "size": 9,
+    "hint_str": "suivant",
+    "complexity": 4
+  },
+  {
+    "word": "surmontait",
+    "size": 10,
+    "hint_str": "vainquait",
+    "complexity": 4
+  },
+  {
+    "word": "divaguerait",
+    "size": 11,
+    "hint_str": "délirerait",
+    "complexity": 5
+  },
+  {
+    "word": "ardait",
+    "size": 6,
+    "hint_str": "brûlait",
+    "complexity": 3
+  },
+  {
+    "word": "piaillé",
+    "size": 7,
+    "hint_str": "piaulé",
+    "complexity": 3
+  },
+  {
+    "word": "culbutes",
+    "size": 8,
+    "hint_str": "chute",
+    "complexity": 4
+  },
+  {
+    "word": "conquerra",
+    "size": 9,
+    "hint_str": "surmontera",
+    "complexity": 4
+  },
+  {
+    "word": "flagellent",
+    "size": 10,
+    "hint_str": "fouettent",
+    "complexity": 4
+  },
+  {
+    "word": "divagueront",
+    "size": 11,
+    "hint_str": "délireront",
+    "complexity": 5
+  },
+  {
+    "word": "beugla",
+    "size": 6,
+    "hint_str": "meugla",
+    "complexity": 3
+  },
+  {
+    "word": "succéda",
+    "size": 7,
+    "hint_str": "suivit",
+    "complexity": 3
+  },
+  {
+    "word": "blessons",
+    "size": 8,
+    "hint_str": "offensons",
+    "complexity": 4
+  },
+  {
+    "word": "comblerai",
+    "size": 9,
+    "hint_str": "remplirai",
+    "complexity": 4
+  },
+  {
+    "word": "fouetterez",
+    "size": 10,
+    "hint_str": "flagellerez",
+    "complexity": 4
+  },
+  {
+    "word": "déboucheras",
+    "size": 11,
+    "hint_str": "débloqueras",
+    "complexity": 5
+  },
+  {
+    "word": "bissez",
+    "size": 6,
+    "hint_str": "doublez",
+    "complexity": 3
+  },
+  {
+    "word": "boudait",
+    "size": 7,
+    "hint_str": "râlait",
+    "complexity": 3
+  },
+  {
+    "word": "décousue",
+    "size": 8,
+    "hint_str": "incohérent",
+    "complexity": 4
+  },
+  {
+    "word": "livrèrent",
+    "size": 9,
+    "hint_str": "dénoncèrent",
+    "complexity": 4
+  },
+  {
+    "word": "prêcherais",
+    "size": 10,
+    "hint_str": "sermonnerais",
+    "complexity": 4
+  },
+  {
+    "word": "déboucherez",
+    "size": 11,
+    "hint_str": "débloquerez",
+    "complexity": 5
+  },
+  {
+    "word": "bravas",
+    "size": 6,
+    "hint_str": "affrontas",
+    "complexity": 3
+  },
+  {
+    "word": "bouvier",
+    "size": 7,
+    "hint_str": "vacher",
+    "complexity": 3
+  },
+  {
+    "word": "embêtons",
+    "size": 8,
+    "hint_str": "emmerdons",
+    "complexity": 4
+  },
+  {
+    "word": "attardait",
+    "size": 9,
+    "hint_str": "retardait",
+    "complexity": 4
+  },
+  {
+    "word": "purifierai",
+    "size": 10,
+    "hint_str": "épurerai",
+    "complexity": 4
+  },
+  {
+    "word": "débouchions",
+    "size": 11,
+    "hint_str": "débloquions",
+    "complexity": 5
+  },
+  {
+    "word": "brûlai",
+    "size": 6,
+    "hint_str": "flambai",
+    "complexity": 3
+  },
+  {
+    "word": "asexués",
+    "size": 7,
+    "hint_str": "asexuel",
+    "complexity": 3
+  },
+  {
+    "word": "mêlaient",
+    "size": 8,
+    "hint_str": "mélangeaient",
+    "complexity": 4
+  },
+  {
+    "word": "fouettera",
+    "size": 9,
+    "hint_str": "flagellera",
+    "complexity": 4
+  },
+  {
+    "word": "requerrait",
+    "size": 10,
+    "hint_str": "nécessiterait",
+    "complexity": 4
+  },
+  {
+    "word": "débouchâmes",
+    "size": 11,
+    "hint_str": "débloquâmes",
+    "complexity": 5
+  },
+  {
+    "word": "brûlât",
+    "size": 6,
+    "hint_str": "flambât",
+    "complexity": 3
+  },
+  {
+    "word": "taquets",
+    "size": 7,
+    "hint_str": "cheville",
+    "complexity": 3
+  },
+  {
+    "word": "casserez",
+    "size": 8,
+    "hint_str": "briserez",
+    "complexity": 4
+  },
+  {
+    "word": "humanités",
+    "size": 9,
+    "hint_str": "huma",
+    "complexity": 4
+  },
+  {
+    "word": "comblaient",
+    "size": 10,
+    "hint_str": "remplissaient",
+    "complexity": 4
+  },
+  {
+    "word": "embêterions",
+    "size": 11,
+    "hint_str": "enquiquinerions",
+    "complexity": 5
+  },
+  {
+    "word": "cassai",
+    "size": 6,
+    "hint_str": "brisai",
+    "complexity": 3
+  },
+  {
+    "word": "boudant",
+    "size": 7,
+    "hint_str": "râlant",
+    "complexity": 3
+  },
+  {
+    "word": "sombrons",
+    "size": 8,
+    "hint_str": "coulons",
+    "complexity": 4
+  },
+  {
+    "word": "sentirent",
+    "size": 9,
+    "hint_str": "empestèrent",
+    "complexity": 4
+  },
+  {
+    "word": "conquerrez",
+    "size": 10,
+    "hint_str": "surmonterez",
+    "complexity": 4
+  },
+  {
+    "word": "enfanterais",
+    "size": 11,
+    "hint_str": "accoucherais",
+    "complexity": 5
+  },
+  {
+    "word": "convia",
+    "size": 6,
+    "hint_str": "invita",
+    "complexity": 3
+  },
+  {
+    "word": "envoyai",
+    "size": 7,
+    "hint_str": "expédiai",
+    "complexity": 3
+  },
+  {
+    "word": "panaches",
+    "size": 8,
+    "hint_str": "bravoure",
+    "complexity": 4
+  },
+  {
+    "word": "casseriez",
+    "size": 9,
+    "hint_str": "briseriez",
+    "complexity": 4
+  },
+  {
+    "word": "conquérait",
+    "size": 10,
+    "hint_str": "surmontait",
+    "complexity": 4
+  },
+  {
+    "word": "enfanterait",
+    "size": 11,
+    "hint_str": "accoucherait",
+    "complexity": 5
+  },
+  {
+    "word": "livrât",
+    "size": 6,
+    "hint_str": "emmenât",
+    "complexity": 3
+  },
+  {
+    "word": "niquera",
+    "size": 7,
+    "hint_str": "fourrera",
+    "complexity": 3
+  },
+  {
+    "word": "prêchais",
+    "size": 8,
+    "hint_str": "sermonnais",
+    "complexity": 4
+  },
+  {
+    "word": "requérait",
+    "size": 9,
+    "hint_str": "demandait",
+    "complexity": 4
+  },
+  {
+    "word": "diffuseras",
+    "size": 10,
+    "hint_str": "streameras",
+    "complexity": 4
+  },
+  {
+    "word": "enfanterons",
+    "size": 11,
+    "hint_str": "accoucherons",
+    "complexity": 5
+  },
+  {
+    "word": "queuté",
+    "size": 6,
+    "hint_str": "niqué",
+    "complexity": 3
+  },
+  {
+    "word": "sombrez",
+    "size": 7,
+    "hint_str": "coulez",
+    "complexity": 3
+  },
+  {
+    "word": "sombrant",
+    "size": 8,
+    "hint_str": "coulant",
+    "complexity": 4
+  },
+  {
+    "word": "divaguant",
+    "size": 9,
+    "hint_str": "délirant",
+    "complexity": 4
+  },
+  {
+    "word": "enfanteras",
+    "size": 10,
+    "hint_str": "accoucheras",
+    "complexity": 4
+  },
+  {
+    "word": "enregistrât",
+    "size": 11,
+    "hint_str": "filmât",
+    "complexity": 5
+  },
+  {
+    "word": "salure",
+    "size": 6,
+    "hint_str": "salinité",
+    "complexity": 3
+  },
+  {
+    "word": "boudais",
+    "size": 7,
+    "hint_str": "râlais",
+    "complexity": 3
+  },
+  {
+    "word": "mêleront",
+    "size": 8,
+    "hint_str": "mélangeront",
+    "complexity": 4
+  },
+  {
+    "word": "polygones",
+    "size": 9,
+    "hint_str": "heptagone",
+    "complexity": 4
+  },
+  {
+    "word": "interdiras",
+    "size": 10,
+    "hint_str": "prohiberas",
+    "complexity": 4
+  },
+  {
+    "word": "entrecoupes",
+    "size": 11,
+    "hint_str": "entremêles",
+    "complexity": 5
+  },
+  {
+    "word": "couvant",
+    "size": 7,
+    "hint_str": "cajolant",
+    "complexity": 3
+  },
+  {
+    "word": "comblant",
+    "size": 8,
+    "hint_str": "remplissant",
+    "complexity": 4
+  },
+  {
+    "word": "enfantera",
+    "size": 9,
+    "hint_str": "accouchera",
+    "complexity": 4
+  },
+  {
+    "word": "jetterions",
+    "size": 10,
+    "hint_str": "lancerions",
+    "complexity": 4
+  },
+  {
+    "word": "flagellerai",
+    "size": 11,
+    "hint_str": "fouetterai",
+    "complexity": 5
+  },
+  {
+    "word": "bravent",
+    "size": 7,
+    "hint_str": "affrontent",
+    "complexity": 3
+  },
+  {
+    "word": "polygone",
+    "size": 8,
+    "hint_str": "décagone",
+    "complexity": 4
+  },
+  {
+    "word": "fouettant",
+    "size": 9,
+    "hint_str": "flagellant",
+    "complexity": 4
+  },
+  {
+    "word": "sombrèrent",
+    "size": 10,
+    "hint_str": "coulèrent",
+    "complexity": 4
+  },
+  {
+    "word": "flagellerez",
+    "size": 11,
+    "hint_str": "fouetterez",
+    "complexity": 5
+  },
+  {
+    "word": "couvais",
+    "size": 7,
+    "hint_str": "cajolais",
+    "complexity": 3
+  },
+  {
+    "word": "bouviers",
+    "size": 8,
+    "hint_str": "vacher",
+    "complexity": 4
+  },
+  {
+    "word": "grimpeuse",
+    "size": 9,
+    "hint_str": "arriviste",
+    "complexity": 4
+  },
+  {
+    "word": "succèderez",
+    "size": 10,
+    "hint_str": "suivrez",
+    "complexity": 4
+  },
+  {
+    "word": "fouetterons",
+    "size": 11,
+    "hint_str": "flagellerons",
+    "complexity": 5
+  },
+  {
+    "word": "niquais",
+    "size": 7,
+    "hint_str": "fourrais",
+    "complexity": 3
+  },
+  {
+    "word": "braverai",
+    "size": 8,
+    "hint_str": "affronterai",
+    "complexity": 4
+  },
+  {
+    "word": "purifions",
+    "size": 9,
+    "hint_str": "épurons",
+    "complexity": 4
+  },
+  {
+    "word": "surmontais",
+    "size": 10,
+    "hint_str": "vainquais",
+    "complexity": 4
+  },
+  {
+    "word": "fouettèrent",
+    "size": 11,
+    "hint_str": "flagellèrent",
+    "complexity": 5
+  },
+  {
+    "word": "niquait",
+    "size": 7,
+    "hint_str": "fourrait",
+    "complexity": 3
+  },
+  {
+    "word": "brûlions",
+    "size": 8,
+    "hint_str": "flambions",
+    "complexity": 4
+  },
+  {
+    "word": "diffusais",
+    "size": 9,
+    "hint_str": "streamais",
+    "complexity": 4
+  },
+  {
+    "word": "surmontiez",
+    "size": 10,
+    "hint_str": "vainquiez",
+    "complexity": 4
+  },
+  {
+    "word": "illuminerai",
+    "size": 11,
+    "hint_str": "éclairerai",
+    "complexity": 5
+  },
+  {
+    "word": "faussez",
+    "size": 7,
+    "hint_str": "falsifiez",
+    "complexity": 3
+  },
+  {
+    "word": "décousus",
+    "size": 8,
+    "hint_str": "incohérent",
+    "complexity": 4
+  },
+  {
+    "word": "requérons",
+    "size": 9,
+    "hint_str": "demandons",
+    "complexity": 4
+  },
+  {
+    "word": "beuglaient",
+    "size": 10,
+    "hint_str": "meuglaient",
+    "complexity": 4
+  },
+  {
+    "word": "illuminerez",
+    "size": 11,
+    "hint_str": "éclairerez",
+    "complexity": 5
+  },
+  {
+    "word": "écorner",
+    "size": 7,
+    "hint_str": "décorner",
+    "complexity": 3
+  },
+  {
+    "word": "niquerai",
+    "size": 8,
+    "hint_str": "défoncerai",
+    "complexity": 4
+  },
+  {
+    "word": "attardant",
+    "size": 9,
+    "hint_str": "retardant",
+    "complexity": 4
+  },
+  {
+    "word": "brûlerions",
+    "size": 10,
+    "hint_str": "flamberions",
+    "complexity": 4
+  },
+  {
+    "word": "interdiriez",
+    "size": 11,
+    "hint_str": "prohiberiez",
+    "complexity": 5
+  },
+  {
+    "word": "mêleras",
+    "size": 7,
+    "hint_str": "mélangeras",
+    "complexity": 3
+  },
+  {
+    "word": "succèdes",
+    "size": 8,
+    "hint_str": "suis",
+    "complexity": 4
+  },
+  {
+    "word": "divaguais",
+    "size": 9,
+    "hint_str": "délirais",
+    "complexity": 4
+  },
+  {
+    "word": "comblerons",
+    "size": 10,
+    "hint_str": "remplirons",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifierai",
+    "size": 11,
+    "hint_str": "graisserai",
+    "complexity": 5
+  },
+  {
+    "word": "checkes",
+    "size": 7,
+    "hint_str": "vérifies",
+    "complexity": 3
+  },
+  {
+    "word": "clivages",
+    "size": 8,
+    "hint_str": "fissure",
+    "complexity": 4
+  },
+  {
+    "word": "décousues",
+    "size": 9,
+    "hint_str": "incohérent",
+    "complexity": 4
+  },
+  {
+    "word": "conquerras",
+    "size": 10,
+    "hint_str": "surmonteras",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitais",
+    "size": 11,
+    "hint_str": "requérais",
+    "complexity": 5
+  },
+  {
+    "word": "forbans",
+    "size": 7,
+    "hint_str": "crapule",
+    "complexity": 3
+  },
+  {
+    "word": "faussent",
+    "size": 8,
+    "hint_str": "falsifient",
+    "complexity": 4
+  },
+  {
+    "word": "purifiait",
+    "size": 9,
+    "hint_str": "épurait",
+    "complexity": 4
+  },
+  {
+    "word": "conquières",
+    "size": 10,
+    "hint_str": "surmontes",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitiez",
+    "size": 11,
+    "hint_str": "requériez",
+    "complexity": 5
+  },
+  {
+    "word": "bravons",
+    "size": 7,
+    "hint_str": "affrontons",
+    "complexity": 3
+  },
+  {
+    "word": "illumina",
+    "size": 8,
+    "hint_str": "éclaira",
+    "complexity": 4
+  },
+  {
+    "word": "tourtière",
+    "size": 9,
+    "hint_str": "tourte",
+    "complexity": 4
+  },
+  {
+    "word": "disputeras",
+    "size": 10,
+    "hint_str": "chamailleras",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitons",
+    "size": 11,
+    "hint_str": "requérons",
+    "complexity": 5
+  },
+  {
+    "word": "conviez",
+    "size": 7,
+    "hint_str": "invitez",
+    "complexity": 3
+  },
+  {
+    "word": "comblons",
+    "size": 8,
+    "hint_str": "remplissons",
+    "complexity": 4
+  },
+  {
+    "word": "aperçûmes",
+    "size": 9,
+    "hint_str": "entrevîmes",
+    "complexity": 4
+  },
+  {
+    "word": "flagellait",
+    "size": 10,
+    "hint_str": "fouettait",
+    "complexity": 4
+  },
+  {
+    "word": "piaillaient",
+    "size": 11,
+    "hint_str": "piaulaient",
+    "complexity": 5
+  },
+  {
+    "word": "mêlerez",
+    "size": 7,
+    "hint_str": "mélangerez",
+    "complexity": 3
+  },
+  {
+    "word": "protégea",
+    "size": 8,
+    "hint_str": "favorisa",
+    "complexity": 4
+  },
+  {
+    "word": "bavardiez",
+    "size": 9,
+    "hint_str": "babilliez",
+    "complexity": 4
+  },
+  {
+    "word": "mêleraient",
+    "size": 10,
+    "hint_str": "mélangeraient",
+    "complexity": 4
+  },
+  {
+    "word": "piaillerait",
+    "size": 11,
+    "hint_str": "piaulerait",
+    "complexity": 5
+  },
+  {
+    "word": "niquant",
+    "size": 7,
+    "hint_str": "fourrant",
+    "complexity": 3
+  },
+  {
+    "word": "prêchiez",
+    "size": 8,
+    "hint_str": "sermonniez",
+    "complexity": 4
+  },
+  {
+    "word": "conquérez",
+    "size": 9,
+    "hint_str": "surmontez",
+    "complexity": 4
+  },
+  {
+    "word": "pétaoctets",
+    "size": 10,
+    "hint_str": "Po",
+    "complexity": 4
+  },
+  {
+    "word": "piailleront",
+    "size": 11,
+    "hint_str": "piauleront",
+    "complexity": 5
+  },
+  {
+    "word": "vainque",
+    "size": 7,
+    "hint_str": "batte",
+    "complexity": 3
+  },
+  {
+    "word": "prêchons",
+    "size": 8,
+    "hint_str": "sermonnons",
+    "complexity": 4
+  },
+  {
+    "word": "flagellez",
+    "size": 9,
+    "hint_str": "fouettez",
+    "complexity": 4
+  },
+  {
+    "word": "sombrerais",
+    "size": 10,
+    "hint_str": "coulerais",
+    "complexity": 4
+  },
+  {
+    "word": "protégèrent",
+    "size": 11,
+    "hint_str": "favorisèrent",
+    "complexity": 5
+  },
+  {
+    "word": "bravais",
+    "size": 7,
+    "hint_str": "affrontais",
+    "complexity": 3
+  },
+  {
+    "word": "réunirez",
+    "size": 8,
+    "hint_str": "rassemblerez",
+    "complexity": 4
+  },
+  {
+    "word": "fouettais",
+    "size": 9,
+    "hint_str": "flagellais",
+    "complexity": 4
+  },
+  {
+    "word": "attarderez",
+    "size": 10,
+    "hint_str": "retarderez",
+    "complexity": 4
+  },
+  {
+    "word": "purifiaient",
+    "size": 11,
+    "hint_str": "épuraient",
+    "complexity": 5
+  },
+  {
+    "word": "bravait",
+    "size": 7,
+    "hint_str": "affrontait",
+    "complexity": 3
+  },
+  {
+    "word": "livrions",
+    "size": 8,
+    "hint_str": "dénoncions",
+    "complexity": 4
+  },
+  {
+    "word": "fouettons",
+    "size": 9,
+    "hint_str": "flagellons",
+    "complexity": 4
+  },
+  {
+    "word": "attardions",
+    "size": 10,
+    "hint_str": "retardions",
+    "complexity": 4
+  },
+  {
+    "word": "purifierais",
+    "size": 11,
+    "hint_str": "épurerais",
+    "complexity": 5
+  },
+  {
+    "word": "fouetta",
+    "size": 7,
+    "hint_str": "flagella",
+    "complexity": 3
+  },
+  {
+    "word": "vainquez",
+    "size": 8,
+    "hint_str": "surmontez",
+    "complexity": 4
+  },
+  {
+    "word": "réunirais",
+    "size": 9,
+    "hint_str": "rassemblerais",
+    "complexity": 4
+  },
+  {
+    "word": "bavarderas",
+    "size": 10,
+    "hint_str": "babilleras",
+    "complexity": 4
+  },
+  {
+    "word": "purifierait",
+    "size": 11,
+    "hint_str": "épurerait",
+    "complexity": 5
+  },
+  {
+    "word": "sombrai",
+    "size": 7,
+    "hint_str": "coulai",
+    "complexity": 3
+  },
+  {
+    "word": "sombrais",
+    "size": 8,
+    "hint_str": "coulais",
+    "complexity": 4
+  },
+  {
+    "word": "vainquent",
+    "size": 9,
+    "hint_str": "surmontent",
+    "complexity": 4
+  },
+  {
+    "word": "beugleront",
+    "size": 10,
+    "hint_str": "meugleront",
+    "complexity": 4
+  },
+  {
+    "word": "purifierons",
+    "size": 11,
+    "hint_str": "épurerons",
+    "complexity": 5
+  },
+  {
+    "word": "émacies",
+    "size": 7,
+    "hint_str": "amaigris",
+    "complexity": 3
+  },
+  {
+    "word": "beuglait",
+    "size": 8,
+    "hint_str": "meuglait",
+    "complexity": 4
+  },
+  {
+    "word": "embêteras",
+    "size": 9,
+    "hint_str": "emmerderas",
+    "complexity": 4
+  },
+  {
+    "word": "casserions",
+    "size": 10,
+    "hint_str": "briserions",
+    "complexity": 4
+  },
+  {
+    "word": "purifieront",
+    "size": 11,
+    "hint_str": "épureront",
+    "complexity": 5
+  },
+  {
+    "word": "beuglez",
+    "size": 7,
+    "hint_str": "meuglez",
+    "complexity": 3
+  },
+  {
+    "word": "embêtiez",
+    "size": 8,
+    "hint_str": "emmerdiez",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifies",
+    "size": 9,
+    "hint_str": "graisses",
+    "complexity": 4
+  },
+  {
+    "word": "comblerais",
+    "size": 10,
+    "hint_str": "remplirais",
+    "complexity": 4
+  },
+  {
+    "word": "recréateurs",
+    "size": 11,
+    "hint_str": "récréatif",
+    "complexity": 5
+  },
+  {
+    "word": "checkez",
+    "size": 7,
+    "hint_str": "vérifiez",
+    "complexity": 3
+  },
+  {
+    "word": "faussant",
+    "size": 8,
+    "hint_str": "falsifiant",
+    "complexity": 4
+  },
+  {
+    "word": "purifiais",
+    "size": 9,
+    "hint_str": "épurais",
+    "complexity": 4
+  },
+  {
+    "word": "combleriez",
+    "size": 10,
+    "hint_str": "rempliriez",
+    "complexity": 4
+  },
+  {
+    "word": "recueilliez",
+    "size": 11,
+    "hint_str": "rassembliez",
+    "complexity": 5
+  },
+  {
+    "word": "boudera",
+    "size": 7,
+    "hint_str": "râlera",
+    "complexity": 3
+  },
+  {
+    "word": "glacerie",
+    "size": 8,
+    "hint_str": "crèmerie",
+    "complexity": 4
+  },
+  {
+    "word": "divaguent",
+    "size": 9,
+    "hint_str": "délirent",
+    "complexity": 4
+  },
+  {
+    "word": "conquérais",
+    "size": 10,
+    "hint_str": "surmontais",
+    "complexity": 4
+  },
+  {
+    "word": "requéraient",
+    "size": 11,
+    "hint_str": "nécessitaient",
+    "complexity": 5
+  },
+  {
+    "word": "enfanta",
+    "size": 7,
+    "hint_str": "accoucha",
+    "complexity": 3
+  },
+  {
+    "word": "beuglant",
+    "size": 8,
+    "hint_str": "meuglant",
+    "complexity": 4
+  },
+  {
+    "word": "niquerais",
+    "size": 9,
+    "hint_str": "forniquerais",
+    "complexity": 4
+  },
+  {
+    "word": "conquériez",
+    "size": 10,
+    "hint_str": "surmontiez",
+    "complexity": 4
+  },
+  {
+    "word": "succèderais",
+    "size": 11,
+    "hint_str": "suivrais",
+    "complexity": 5
+  },
+  {
+    "word": "niquons",
+    "size": 7,
+    "hint_str": "fourrons",
+    "complexity": 3
+  },
+  {
+    "word": "enfantes",
+    "size": 8,
+    "hint_str": "accouches",
+    "complexity": 4
+  },
+  {
+    "word": "piaillait",
+    "size": 9,
+    "hint_str": "piaulait",
+    "complexity": 4
+  },
+  {
+    "word": "convierais",
+    "size": 10,
+    "hint_str": "inviterais",
+    "complexity": 4
+  },
+  {
+    "word": "succèderiez",
+    "size": 11,
+    "hint_str": "suivriez",
+    "complexity": 5
+  },
+  {
+    "word": "obsèque",
+    "size": 7,
+    "hint_str": "funéraille",
+    "complexity": 3
+  },
+  {
+    "word": "faussera",
+    "size": 8,
+    "hint_str": "falsifiera",
+    "complexity": 4
+  },
+  {
+    "word": "réunisses",
+    "size": 9,
+    "hint_str": "rassembles",
+    "complexity": 4
+  },
+  {
+    "word": "convierons",
+    "size": 10,
+    "hint_str": "inviterons",
+    "complexity": 4
+  },
+  {
+    "word": "succèderons",
+    "size": 11,
+    "hint_str": "suivrons",
+    "complexity": 5
+  },
+  {
+    "word": "boudiez",
+    "size": 7,
+    "hint_str": "râliez",
+    "complexity": 3
+  },
+  {
+    "word": "mêlerons",
+    "size": 8,
+    "hint_str": "mélangerons",
+    "complexity": 4
+  },
+  {
+    "word": "vainquant",
+    "size": 9,
+    "hint_str": "surmontant",
+    "complexity": 4
+  },
+  {
+    "word": "convièrent",
+    "size": 10,
+    "hint_str": "invitèrent",
+    "complexity": 4
+  },
+  {
+    "word": "surmontions",
+    "size": 11,
+    "hint_str": "vainquions",
+    "complexity": 5
+  },
+  {
+    "word": "boudons",
+    "size": 7,
+    "hint_str": "râlons",
+    "complexity": 3
+  },
+  {
+    "word": "requerra",
+    "size": 8,
+    "hint_str": "demandera",
+    "complexity": 4
+  },
+  {
+    "word": "braverais",
+    "size": 9,
+    "hint_str": "affronterais",
+    "complexity": 4
+  },
+  {
+    "word": "disputâmes",
+    "size": 10,
+    "hint_str": "chamaillâmes",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentiez",
+    "size": 11,
+    "hint_str": "suppliciiez",
+    "complexity": 5
+  },
+  {
+    "word": "hâterai",
+    "size": 7,
+    "hint_str": "empresserai",
+    "complexity": 3
+  },
+  {
+    "word": "surmonta",
+    "size": 8,
+    "hint_str": "vainquit",
+    "complexity": 4
+  },
+  {
+    "word": "conquière",
+    "size": 9,
+    "hint_str": "surmonte",
+    "complexity": 4
+  },
+  {
+    "word": "divaguerai",
+    "size": 10,
+    "hint_str": "délirerai",
+    "complexity": 4
+  },
+  {
+    "word": "tourmentons",
+    "size": 11,
+    "hint_str": "supplicions",
+    "complexity": 5
+  },
+  {
+    "word": "attarda",
+    "size": 7,
+    "hint_str": "retarda",
+    "complexity": 3
+  },
+  {
+    "word": "beuglent",
+    "size": 8,
+    "hint_str": "meuglent",
+    "complexity": 4
+  },
+  {
+    "word": "diffusiez",
+    "size": 9,
+    "hint_str": "streamiez",
+    "complexity": 4
+  },
+  {
+    "word": "divaguerez",
+    "size": 10,
+    "hint_str": "délirerez",
+    "complexity": 4
+  },
+  {
+    "word": "transpirons",
+    "size": 11,
+    "hint_str": "suons",
+    "complexity": 5
+  },
+  {
+    "word": "beugles",
+    "size": 7,
+    "hint_str": "meugles",
+    "complexity": 3
+  },
+  {
+    "word": "comblais",
+    "size": 8,
+    "hint_str": "remplissais",
+    "complexity": 4
+  },
+  {
+    "word": "enfantant",
+    "size": 9,
+    "hint_str": "accouchant",
+    "complexity": 4
+  },
+  {
+    "word": "débouchais",
+    "size": 10,
+    "hint_str": "débloquais",
+    "complexity": 4
+  },
+  {
+    "word": "vaincraient",
+    "size": 11,
+    "hint_str": "surmonteraient",
+    "complexity": 5
+  },
+  {
+    "word": "blessas",
+    "size": 7,
+    "hint_str": "offensas",
+    "complexity": 3
+  },
+  {
+    "word": "conviant",
+    "size": 8,
+    "hint_str": "invitant",
+    "complexity": 4
+  },
+  {
+    "word": "mugissent",
+    "size": 9,
+    "hint_str": "meuglent",
+    "complexity": 4
+  },
+  {
+    "word": "débouchiez",
+    "size": 10,
+    "hint_str": "débloquiez",
+    "complexity": 4
+  },
+  {
+    "word": "vélocipèdes",
+    "size": 11,
+    "hint_str": "bicyclette",
+    "complexity": 5
+  },
+  {
+    "word": "bravera",
+    "size": 7,
+    "hint_str": "affrontera",
+    "complexity": 3
+  },
+  {
+    "word": "couverai",
+    "size": 8,
+    "hint_str": "dorloterai",
+    "complexity": 4
+  },
+  {
+    "word": "prêcherai",
+    "size": 9,
+    "hint_str": "sermonnerai",
+    "complexity": 4
+  },
+  {
+    "word": "embêteriez",
+    "size": 10,
+    "hint_str": "importuneriez",
+    "complexity": 4
+  },
+  {
+    "word": "éthylotests",
+    "size": 11,
+    "hint_str": "alcootest",
+    "complexity": 5
+  },
+  {
+    "word": "braviez",
+    "size": 7,
+    "hint_str": "affrontiez",
+    "complexity": 3
+  },
+  {
+    "word": "mêleriez",
+    "size": 8,
+    "hint_str": "mélangeriez",
+    "complexity": 4
+  },
+  {
+    "word": "succédait",
+    "size": 9,
+    "hint_str": "suivait",
+    "complexity": 4
+  },
+  {
+    "word": "embêtèrent",
+    "size": 10,
+    "hint_str": "importunèrent",
+    "complexity": 4
+  },
+  {
+    "word": "brouets",
+    "size": 7,
+    "hint_str": "bouillon",
+    "complexity": 3
+  },
+  {
+    "word": "réuniras",
+    "size": 8,
+    "hint_str": "rassembleras",
+    "complexity": 4
+  },
+  {
+    "word": "succédiez",
+    "size": 9,
+    "hint_str": "suiviez",
+    "complexity": 4
+  },
+  {
+    "word": "faussaient",
+    "size": 10,
+    "hint_str": "falsifiaient",
+    "complexity": 4
+  },
+  {
+    "word": "couvera",
+    "size": 7,
+    "hint_str": "cajolera",
+    "complexity": 3
+  },
+  {
+    "word": "cassions",
+    "size": 8,
+    "hint_str": "brisions",
+    "complexity": 4
+  },
+  {
+    "word": "brûleriez",
+    "size": 9,
+    "hint_str": "flamberiez",
+    "complexity": 4
+  },
+  {
+    "word": "fausserais",
+    "size": 10,
+    "hint_str": "falsifierais",
+    "complexity": 4
+  },
+  {
+    "word": "couviez",
+    "size": 7,
+    "hint_str": "cajoliez",
+    "complexity": 3
+  },
+  {
+    "word": "foutoirs",
+    "size": 8,
+    "hint_str": "bordel",
+    "complexity": 4
+  },
+  {
+    "word": "enfantent",
+    "size": 9,
+    "hint_str": "accouchent",
+    "complexity": 4
+  },
+  {
+    "word": "fausseront",
+    "size": 10,
+    "hint_str": "falsifieront",
+    "complexity": 4
+  },
+  {
+    "word": "couvons",
+    "size": 7,
+    "hint_str": "cajolons",
+    "complexity": 3
+  },
+  {
+    "word": "bouderas",
+    "size": 8,
+    "hint_str": "râleras",
+    "complexity": 4
+  },
+  {
+    "word": "piaillant",
+    "size": 9,
+    "hint_str": "piaulant",
+    "complexity": 4
+  },
+  {
+    "word": "flagellais",
+    "size": 10,
+    "hint_str": "fouettais",
+    "complexity": 4
+  },
+  {
+    "word": "diffusa",
+    "size": 7,
+    "hint_str": "streama",
+    "complexity": 3
+  },
+  {
+    "word": "faussait",
+    "size": 8,
+    "hint_str": "falsifiait",
+    "complexity": 4
+  },
+  {
+    "word": "prêcheras",
+    "size": 9,
+    "hint_str": "sermonneras",
+    "complexity": 4
+  },
+  {
+    "word": "flagellant",
+    "size": 10,
+    "hint_str": "fouettant",
+    "complexity": 4
+  },
+  {
+    "word": "disputa",
+    "size": 7,
+    "hint_str": "querella",
+    "complexity": 3
+  },
+  {
+    "word": "hâtaient",
+    "size": 8,
+    "hint_str": "empressaient",
+    "complexity": 4
+  },
+  {
+    "word": "sombrerai",
+    "size": 9,
+    "hint_str": "coulerai",
+    "complexity": 4
+  },
+  {
+    "word": "flagellera",
+    "size": 10,
+    "hint_str": "fouettera",
+    "complexity": 4
+  },
+  {
+    "word": "déclose",
+    "size": 7,
+    "hint_str": "ouvre",
+    "complexity": 3
+  },
+  {
+    "word": "mugissez",
+    "size": 8,
+    "hint_str": "meuglez",
+    "complexity": 4
+  },
+  {
+    "word": "sombrerez",
+    "size": 9,
+    "hint_str": "coulerez",
+    "complexity": 4
+  },
+  {
+    "word": "flagelliez",
+    "size": 10,
+    "hint_str": "fouettiez",
+    "complexity": 4
+  },
+  {
+    "word": "embêtai",
+    "size": 7,
+    "hint_str": "énervai",
+    "complexity": 3
+  },
+  {
+    "word": "mêlèrent",
+    "size": 8,
+    "hint_str": "mélangèrent",
+    "complexity": 4
+  },
+  {
+    "word": "attardera",
+    "size": 9,
+    "hint_str": "retardera",
+    "complexity": 4
+  },
+  {
+    "word": "flagellons",
+    "size": 10,
+    "hint_str": "fouettons",
+    "complexity": 4
+  },
+  {
+    "word": "envoyas",
+    "size": 7,
+    "hint_str": "expédias",
+    "complexity": 3
+  },
+  {
+    "word": "asexuées",
+    "size": 8,
+    "hint_str": "asexuel",
+    "complexity": 4
+  },
+  {
+    "word": "comblerez",
+    "size": 9,
+    "hint_str": "remplirez",
+    "complexity": 4
+  },
+  {
+    "word": "fouetteras",
+    "size": 10,
+    "hint_str": "flagelleras",
+    "complexity": 4
+  },
+  {
+    "word": "faussai",
+    "size": 7,
+    "hint_str": "falsifiai",
+    "complexity": 3
+  },
+  {
+    "word": "attardai",
+    "size": 8,
+    "hint_str": "retardai",
+    "complexity": 4
+  },
+  {
+    "word": "convierai",
+    "size": 9,
+    "hint_str": "inviterai",
+    "complexity": 4
+  },
+  {
+    "word": "gribouilla",
+    "size": 10,
+    "hint_str": "griffonna",
+    "complexity": 4
+  },
+  {
+    "word": "faussas",
+    "size": 7,
+    "hint_str": "falsifias",
+    "complexity": 3
+  },
+  {
+    "word": "azotique",
+    "size": 8,
+    "hint_str": "nitrique",
+    "complexity": 4
+  },
+  {
+    "word": "flagelles",
+    "size": 9,
+    "hint_str": "fouettes",
+    "complexity": 4
+  },
+  {
+    "word": "illuminons",
+    "size": 10,
+    "hint_str": "éclairons",
+    "complexity": 4
+  },
+  {
+    "word": "goémons",
+    "size": 7,
+    "hint_str": "varech",
+    "complexity": 3
+  },
+  {
+    "word": "bavardai",
+    "size": 8,
+    "hint_str": "babillai",
+    "complexity": 4
+  },
+  {
+    "word": "livreriez",
+    "size": 9,
+    "hint_str": "dénonceriez",
+    "complexity": 4
+  },
+  {
+    "word": "interdirez",
+    "size": 10,
+    "hint_str": "prohiberez",
+    "complexity": 4
+  },
+  {
+    "word": "jetâmes",
+    "size": 7,
+    "hint_str": "lançâmes",
+    "complexity": 3
+  },
+  {
+    "word": "beuglais",
+    "size": 8,
+    "hint_str": "meuglais",
+    "complexity": 4
+  },
+  {
+    "word": "niquaient",
+    "size": 9,
+    "hint_str": "forniquaient",
+    "complexity": 4
+  },
+  {
+    "word": "interdisse",
+    "size": 10,
+    "hint_str": "prohibasse",
+    "complexity": 4
+  },
+  {
+    "word": "mêlions",
+    "size": 7,
+    "hint_str": "mélangions",
+    "complexity": 3
+  },
+  {
+    "word": "beuglons",
+    "size": 8,
+    "hint_str": "meuglons",
+    "complexity": 4
+  },
+  {
+    "word": "appropria",
+    "size": 9,
+    "hint_str": "usurpa",
+    "complexity": 4
+  },
+  {
+    "word": "livrerions",
+    "size": 10,
+    "hint_str": "transporterions",
+    "complexity": 4
+  },
+  {
+    "word": "niquiez",
+    "size": 7,
+    "hint_str": "fourriez",
+    "complexity": 3
+  },
+  {
+    "word": "bouderai",
+    "size": 8,
+    "hint_str": "râlerai",
+    "complexity": 4
+  },
+  {
+    "word": "attardais",
+    "size": 9,
+    "hint_str": "retardais",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifiais",
+    "size": 10,
+    "hint_str": "graissais",
+    "complexity": 4
+  },
+  {
+    "word": "plançon",
+    "size": 7,
+    "hint_str": "plantard",
+    "complexity": 3
+  },
+  {
+    "word": "braveras",
+    "size": 8,
+    "hint_str": "affronteras",
+    "complexity": 4
+  },
+  {
+    "word": "blessions",
+    "size": 9,
+    "hint_str": "offensions",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifient",
+    "size": 10,
+    "hint_str": "graissent",
+    "complexity": 4
+  },
+  {
+    "word": "purifia",
+    "size": 7,
+    "hint_str": "épura",
+    "complexity": 3
+  },
+  {
+    "word": "bravions",
+    "size": 8,
+    "hint_str": "affrontions",
+    "complexity": 4
+  },
+  {
+    "word": "combleras",
+    "size": 9,
+    "hint_str": "rempliras",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifiera",
+    "size": 10,
+    "hint_str": "graissera",
+    "complexity": 4
+  },
+  {
+    "word": "queuter",
+    "size": 7,
+    "hint_str": "niquer",
+    "complexity": 3
+  },
+  {
+    "word": "brûlâmes",
+    "size": 8,
+    "hint_str": "flambâmes",
+    "complexity": 4
+  },
+  {
+    "word": "divaguiez",
+    "size": 9,
+    "hint_str": "déliriez",
+    "complexity": 4
+  },
+  {
+    "word": "nécessitez",
+    "size": 10,
+    "hint_str": "requérez",
+    "complexity": 4
+  },
+  {
+    "word": "quêtais",
+    "size": 7,
+    "hint_str": "cherchais",
+    "complexity": 3
+  },
+  {
+    "word": "bétaille",
+    "size": 8,
+    "hint_str": "bête",
+    "complexity": 4
+  },
+  {
+    "word": "embêterez",
+    "size": 9,
+    "hint_str": "emmerderez",
+    "complexity": 4
+  },
+  {
+    "word": "paritaires",
+    "size": 10,
+    "hint_str": "égalitaire",
+    "complexity": 4
+  },
+  {
+    "word": "quêtait",
+    "size": 7,
+    "hint_str": "cherchait",
+    "complexity": 3
+  },
+  {
+    "word": "carouges",
+    "size": 8,
+    "hint_str": "caroube",
+    "complexity": 4
+  },
+  {
+    "word": "mugissant",
+    "size": 9,
+    "hint_str": "meuglant",
+    "complexity": 4
+  },
+  {
+    "word": "prêcherait",
+    "size": 10,
+    "hint_str": "sermonnerait",
+    "complexity": 4
+  },
+  {
+    "word": "quêtant",
+    "size": 7,
+    "hint_str": "cherchant",
+    "complexity": 3
+  },
+  {
+    "word": "cassâtes",
+    "size": 8,
+    "hint_str": "brisâtes",
+    "complexity": 4
+  },
+  {
+    "word": "prêcherez",
+    "size": 9,
+    "hint_str": "sermonnerez",
+    "complexity": 4
+  },
+  {
+    "word": "prêcherons",
+    "size": 10,
+    "hint_str": "sermonnerons",
+    "complexity": 4
+  },
+  {
+    "word": "quêtent",
+    "size": 7,
+    "hint_str": "cherchent",
+    "complexity": 3
+  },
+  {
+    "word": "checkais",
+    "size": 8,
+    "hint_str": "vérifiais",
+    "complexity": 4
+  },
+  {
+    "word": "sombreras",
+    "size": 9,
+    "hint_str": "couleras",
+    "complexity": 4
+  },
+  {
+    "word": "prêcheront",
+    "size": 10,
+    "hint_str": "sermonneront",
+    "complexity": 4
+  },
+  {
+    "word": "quêtera",
+    "size": 7,
+    "hint_str": "cherchera",
+    "complexity": 3
+  },
+  {
+    "word": "checkait",
+    "size": 8,
+    "hint_str": "vérifiait",
+    "complexity": 4
+  },
+  {
+    "word": "anarchies",
+    "size": 9,
+    "hint_str": "chaos",
+    "complexity": 4
+  },
+  {
+    "word": "prêchèrent",
+    "size": 10,
+    "hint_str": "sermonnèrent",
+    "complexity": 4
+  },
+  {
+    "word": "quêtons",
+    "size": 7,
+    "hint_str": "cherchons",
+    "complexity": 3
+  },
+  {
+    "word": "checkent",
+    "size": 8,
+    "hint_str": "vérifient",
+    "complexity": 4
+  },
+  {
+    "word": "attardiez",
+    "size": 9,
+    "hint_str": "retardiez",
+    "complexity": 4
+  },
+  {
+    "word": "purifierez",
+    "size": 10,
+    "hint_str": "épurerez",
+    "complexity": 4
+  },
+  {
+    "word": "sultane",
+    "size": 7,
+    "hint_str": "soudan",
+    "complexity": 3
+  },
+  {
+    "word": "checkera",
+    "size": 8,
+    "hint_str": "vérifiera",
+    "complexity": 4
+  },
+  {
+    "word": "boudaient",
+    "size": 9,
+    "hint_str": "râlaient",
+    "complexity": 4
+  },
+  {
+    "word": "purifiions",
+    "size": 10,
+    "hint_str": "épurions",
+    "complexity": 4
+  },
+  {
+    "word": "téteuse",
+    "size": 7,
+    "hint_str": "fayot",
+    "complexity": 3
+  },
+  {
+    "word": "checkons",
+    "size": 8,
+    "hint_str": "vérifions",
+    "complexity": 4
+  },
+  {
+    "word": "bouderais",
+    "size": 9,
+    "hint_str": "râlerais",
+    "complexity": 4
+  },
+  {
+    "word": "rassemblai",
+    "size": 10,
+    "hint_str": "recueillis",
+    "complexity": 4
+  },
+  {
+    "word": "écornes",
+    "size": 7,
+    "hint_str": "décornes",
+    "complexity": 3
+  },
+  {
+    "word": "conviais",
+    "size": 8,
+    "hint_str": "invitais",
+    "complexity": 4
+  },
+  {
+    "word": "bouderont",
+    "size": 9,
+    "hint_str": "râleront",
+    "complexity": 4
+  },
+  {
+    "word": "requerrais",
+    "size": 10,
+    "hint_str": "nécessiterais",
+    "complexity": 4
+  },
+  {
+    "word": "conviait",
+    "size": 8,
+    "hint_str": "invitait",
+    "complexity": 4
+  },
+  {
+    "word": "bravaient",
+    "size": 9,
+    "hint_str": "affrontaient",
+    "complexity": 4
+  },
+  {
+    "word": "requerrons",
+    "size": 10,
+    "hint_str": "nécessiterons",
+    "complexity": 4
+  },
+  {
+    "word": "convions",
+    "size": 8,
+    "hint_str": "invitons",
+    "complexity": 4
+  },
+  {
+    "word": "braverait",
+    "size": 9,
+    "hint_str": "affronterait",
+    "complexity": 4
+  },
+  {
+    "word": "requerront",
+    "size": 10,
+    "hint_str": "nécessiteront",
+    "complexity": 4
+  },
+  {
+    "word": "couverez",
+    "size": 8,
+    "hint_str": "dorloterez",
+    "complexity": 4
+  },
+  {
+    "word": "braveriez",
+    "size": 9,
+    "hint_str": "affronteriez",
+    "complexity": 4
+  },
+  {
+    "word": "réunirions",
+    "size": 10,
+    "hint_str": "rassemblerions",
+    "complexity": 4
+  },
+  {
+    "word": "couvions",
+    "size": 8,
+    "hint_str": "dorlotions",
+    "complexity": 4
+  },
+  {
+    "word": "braverons",
+    "size": 9,
+    "hint_str": "affronterons",
+    "complexity": 4
+  },
+  {
+    "word": "sentissent",
+    "size": 10,
+    "hint_str": "empestassent",
+    "complexity": 4
+  },
+  {
+    "word": "disputai",
+    "size": 8,
+    "hint_str": "querellai",
+    "complexity": 4
+  },
+  {
+    "word": "braveront",
+    "size": 9,
+    "hint_str": "affronteront",
+    "complexity": 4
+  },
+  {
+    "word": "tourtières",
+    "size": 10,
+    "hint_str": "tourte",
+    "complexity": 4
+  },
+  {
+    "word": "déboucha",
+    "size": 8,
+    "hint_str": "débloqua",
+    "complexity": 4
+  },
+  {
+    "word": "bravèrent",
+    "size": 9,
+    "hint_str": "affrontèrent",
+    "complexity": 4
+  },
+  {
+    "word": "transpirai",
+    "size": 10,
+    "hint_str": "suai",
+    "complexity": 4
+  },
+  {
+    "word": "enfantas",
+    "size": 8,
+    "hint_str": "accouchas",
+    "complexity": 4
+  },
+  {
+    "word": "cassasses",
+    "size": 9,
+    "hint_str": "brisasses",
+    "complexity": 4
+  },
+  {
+    "word": "vaincrions",
+    "size": 10,
+    "hint_str": "surmonterions",
+    "complexity": 4
+  },
+  {
+    "word": "enfantez",
+    "size": 8,
+    "hint_str": "accouchez",
+    "complexity": 4
+  },
+  {
+    "word": "checkerai",
+    "size": 9,
+    "hint_str": "vérifierai",
+    "complexity": 4
+  },
+  {
+    "word": "vainquions",
+    "size": 10,
+    "hint_str": "surmontions",
+    "complexity": 4
+  },
+  {
+    "word": "faussais",
+    "size": 8,
+    "hint_str": "falsifiais",
+    "complexity": 4
+  },
+  {
+    "word": "checkeras",
+    "size": 9,
+    "hint_str": "vérifieras",
+    "complexity": 4
+  },
+  {
+    "word": "faussiez",
+    "size": 8,
+    "hint_str": "falsifiiez",
+    "complexity": 4
+  },
+  {
+    "word": "convierez",
+    "size": 9,
+    "hint_str": "inviterez",
+    "complexity": 4
+  },
+  {
+    "word": "faussons",
+    "size": 8,
+    "hint_str": "falsifions",
+    "complexity": 4
+  },
+  {
+    "word": "conviâmes",
+    "size": 9,
+    "hint_str": "invitâmes",
+    "complexity": 4
+  },
+  {
+    "word": "gasconné",
+    "size": 8,
+    "hint_str": "targuée",
+    "complexity": 4
+  },
+  {
+    "word": "couvaient",
+    "size": 9,
+    "hint_str": "bichonnaient",
+    "complexity": 4
+  },
+  {
+    "word": "hâterais",
+    "size": 8,
+    "hint_str": "empresserais",
+    "complexity": 4
+  },
+  {
+    "word": "couverais",
+    "size": 9,
+    "hint_str": "bichonnerais",
+    "complexity": 4
+  },
+  {
+    "word": "hâterait",
+    "size": 8,
+    "hint_str": "empresserait",
+    "complexity": 4
+  },
+  {
+    "word": "couverait",
+    "size": 9,
+    "hint_str": "bichonnerait",
+    "complexity": 4
+  },
+  {
+    "word": "hâterons",
+    "size": 8,
+    "hint_str": "empresserons",
+    "complexity": 4
+  },
+  {
+    "word": "couverons",
+    "size": 9,
+    "hint_str": "bichonnerons",
+    "complexity": 4
+  },
+  {
+    "word": "hâteront",
+    "size": 8,
+    "hint_str": "empresseront",
+    "complexity": 4
+  },
+  {
+    "word": "couveront",
+    "size": 9,
+    "hint_str": "bichonneront",
+    "complexity": 4
+  },
+  {
+    "word": "hâtèrent",
+    "size": 8,
+    "hint_str": "empressèrent",
+    "complexity": 4
+  },
+  {
+    "word": "divaguera",
+    "size": 9,
+    "hint_str": "délirera",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifia",
+    "size": 8,
+    "hint_str": "graissa",
+    "complexity": 4
+  },
+  {
+    "word": "divaguons",
+    "size": 9,
+    "hint_str": "délirons",
+    "complexity": 4
+  },
+  {
+    "word": "mourûmes",
+    "size": 8,
+    "hint_str": "clameçâmes",
+    "complexity": 4
+  },
+  {
+    "word": "enfantais",
+    "size": 9,
+    "hint_str": "accouchais",
+    "complexity": 4
+  },
+  {
+    "word": "mourûtes",
+    "size": 8,
+    "hint_str": "clameçâtes",
+    "complexity": 4
+  },
+  {
+    "word": "enfantait",
+    "size": 9,
+    "hint_str": "accouchait",
+    "complexity": 4
+  },
+  {
+    "word": "mugirent",
+    "size": 8,
+    "hint_str": "meuglèrent",
+    "complexity": 4
+  },
+  {
+    "word": "envoyasse",
+    "size": 9,
+    "hint_str": "expédiasse",
+    "complexity": 4
+  },
+  {
+    "word": "mugiriez",
+    "size": 8,
+    "hint_str": "meugleriez",
+    "complexity": 4
+  },
+  {
+    "word": "envoyâmes",
+    "size": 9,
+    "hint_str": "expédiâmes",
+    "complexity": 4
+  },
+  {
+    "word": "mugiront",
+    "size": 8,
+    "hint_str": "meugleront",
+    "complexity": 4
+  },
+  {
+    "word": "envoyâtes",
+    "size": 9,
+    "hint_str": "expédiâtes",
+    "complexity": 4
+  },
+  {
+    "word": "mêlasses",
+    "size": 8,
+    "hint_str": "mélangeasses",
+    "complexity": 4
+  },
+  {
+    "word": "fausserai",
+    "size": 9,
+    "hint_str": "falsifierai",
+    "complexity": 4
+  },
+  {
+    "word": "niqueras",
+    "size": 8,
+    "hint_str": "défonceras",
+    "complexity": 4
+  },
+  {
+    "word": "fausseras",
+    "size": 9,
+    "hint_str": "falsifieras",
+    "complexity": 4
+  },
+  {
+    "word": "niquerez",
+    "size": 8,
+    "hint_str": "défoncerez",
+    "complexity": 4
+  },
+  {
+    "word": "faussions",
+    "size": 9,
+    "hint_str": "falsifiions",
+    "complexity": 4
+  },
+  {
+    "word": "piailles",
+    "size": 8,
+    "hint_str": "piaules",
+    "complexity": 4
+  },
+  {
+    "word": "fouettiez",
+    "size": 9,
+    "hint_str": "flagelliez",
+    "complexity": 4
+  },
+  {
+    "word": "piaillez",
+    "size": 8,
+    "hint_str": "piaulez",
+    "complexity": 4
+  },
+  {
+    "word": "glaceries",
+    "size": 9,
+    "hint_str": "crèmerie",
+    "complexity": 4
+  },
+  {
+    "word": "plançons",
+    "size": 8,
+    "hint_str": "plantard",
+    "complexity": 4
+  },
+  {
+    "word": "lubrifiez",
+    "size": 9,
+    "hint_str": "graissez",
+    "complexity": 4
+  },
+  {
+    "word": "prêchera",
+    "size": 8,
+    "hint_str": "sermonnera",
+    "complexity": 4
+  },
+  {
+    "word": "mugissait",
+    "size": 9,
+    "hint_str": "meuglait",
+    "complexity": 4
+  },
+  {
+    "word": "rapaillé",
+    "size": 8,
+    "hint_str": "ramassé",
+    "complexity": 4
+  },
+  {
+    "word": "mêlerions",
+    "size": 9,
+    "hint_str": "mélangerions",
+    "complexity": 4
+  },
+  {
+    "word": "requérez",
+    "size": 8,
+    "hint_str": "demandez",
+    "complexity": 4
+  },
+  {
+    "word": "niquerait",
+    "size": 9,
+    "hint_str": "forniquerait",
+    "complexity": 4
+  },
+  {
+    "word": "sombriez",
+    "size": 8,
+    "hint_str": "couliez",
+    "complexity": 4
+  },
+  {
+    "word": "niqueront",
+    "size": 9,
+    "hint_str": "forniqueront",
+    "complexity": 4
+  },
+  {
+    "word": "succédez",
+    "size": 8,
+    "hint_str": "suivez",
+    "complexity": 4
+  },
+  {
+    "word": "nécessita",
+    "size": 9,
+    "hint_str": "requit",
+    "complexity": 4
+  },
+  {
+    "word": "survenez",
+    "size": 8,
+    "hint_str": "arrivez",
+    "complexity": 4
+  },
+  {
+    "word": "paritaire",
+    "size": 9,
+    "hint_str": "égalitaire",
+    "complexity": 4
+  },
+  {
+    "word": "surviens",
+    "size": 8,
+    "hint_str": "arrive",
+    "complexity": 4
+  },
+  {
+    "word": "piaillais",
+    "size": 9,
+    "hint_str": "piaulais",
+    "complexity": 4
+  },
+  {
+    "word": "vainques",
+    "size": 8,
+    "hint_str": "surmontes",
+    "complexity": 4
+  },
+  {
+    "word": "prononçai",
+    "size": 9,
+    "hint_str": "articulai",
+    "complexity": 4
+  },
+  {
+    "word": "vitrages",
+    "size": 8,
+    "hint_str": "carreau",
+    "complexity": 4
+  },
+  {
+    "word": "prononças",
+    "size": 9,
+    "hint_str": "articulas",
+    "complexity": 4
+  },
+  {
+    "word": "écornera",
+    "size": 8,
+    "hint_str": "décornera",
+    "complexity": 4
+  },
+  {
+    "word": "prononçât",
+    "size": 9,
+    "hint_str": "articulât",
+    "complexity": 4
+  },
+  {
+    "word": "émacient",
+    "size": 8,
+    "hint_str": "amaigrissent",
+    "complexity": 4
+  },
+  {
+    "word": "protégeai",
+    "size": 9,
+    "hint_str": "favorisai",
+    "complexity": 4
+  },
+  {
+    "word": "protégeât",
+    "size": 9,
+    "hint_str": "favorisât",
+    "complexity": 4
+  },
+  {
+    "word": "purifiiez",
+    "size": 9,
+    "hint_str": "épuriez",
+    "complexity": 4
+  },
+  {
+    "word": "pétaoctet",
+    "size": 9,
+    "hint_str": "Po",
+    "complexity": 4
+  },
+  {
+    "word": "quêterait",
+    "size": 9,
+    "hint_str": "chercherait",
+    "complexity": 4
+  },
+  {
+    "word": "rapaillez",
+    "size": 9,
+    "hint_str": "ramassez",
+    "complexity": 4
+  },
+  {
+    "word": "requerrai",
+    "size": 9,
+    "hint_str": "demanderai",
+    "complexity": 4
+  },
+  {
+    "word": "requirent",
+    "size": 9,
+    "hint_str": "demandèrent",
+    "complexity": 4
+  },
+  {
+    "word": "requières",
+    "size": 9,
+    "hint_str": "demandes",
+    "complexity": 4
+  },
+  {
+    "word": "requériez",
+    "size": 9,
+    "hint_str": "demandiez",
+    "complexity": 4
+  },
+  {
+    "word": "sombrions",
+    "size": 9,
+    "hint_str": "coulions",
+    "complexity": 4
+  },
+  {
+    "word": "succédais",
+    "size": 9,
+    "hint_str": "suivais",
+    "complexity": 4
+  },
+  {
+    "word": "succédons",
+    "size": 9,
+    "hint_str": "suivons",
+    "complexity": 4
+  },
+  {
+    "word": "surmontai",
+    "size": 9,
+    "hint_str": "vainquis",
+    "complexity": 4
+  },
+  {
+    "word": "tourmenta",
+    "size": 9,
+    "hint_str": "supplicia",
+    "complexity": 4
+  },
+  {
+    "word": "transpira",
+    "size": 9,
+    "hint_str": "sua",
+    "complexity": 4
+  },
+  {
+    "word": "vainquiez",
+    "size": 9,
+    "hint_str": "surmontiez",
+    "complexity": 4
+  }
+]

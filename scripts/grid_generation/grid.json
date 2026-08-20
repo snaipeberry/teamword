@@ -1,0 +1,966 @@
+{
+  "version": 3,
+  "type": "mots-fleches",
+  "rows": 8,
+  "cols": 8,
+  "grid": [
+    [
+      {
+        "type": "clue",
+        "number": 1,
+        "solution": null,
+        "clues": [
+          {
+            "number": 1,
+            "word": "si",
+            "hint_str": "tellement",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              0,
+              1
+            ],
+            "length": 2
+          },
+          {
+            "number": 1,
+            "word": "ho",
+            "hint_str": "surprise brève",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              1,
+              0
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 2,
+        "solution": null,
+        "clues": [
+          {
+            "number": 2,
+            "word": "élu",
+            "hint_str": "gagnant du vote",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              0,
+              5
+            ],
+            "length": 3
+          },
+          {
+            "number": 2,
+            "word": "ès",
+            "hint_str": "dans les",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              1,
+              4
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "é",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "h",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 3,
+        "solution": null,
+        "clues": [
+          {
+            "number": 3,
+            "word": "oracle",
+            "hint_str": "logiciels",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              2,
+              2
+            ],
+            "length": 6
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 4,
+        "solution": null,
+        "clues": [
+          {
+            "number": 4,
+            "word": "renoir",
+            "hint_str": "portraitiste",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              2,
+              3
+            ],
+            "length": 6
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "è",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 5,
+        "solution": null,
+        "clues": [
+          {
+            "number": 5,
+            "word": "ne",
+            "hint_str": "mot de négation",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              2,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 6,
+        "solution": null,
+        "clues": [
+          {
+            "number": 6,
+            "word": "uranus",
+            "hint_str": "géante glacée",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              2,
+              7
+            ],
+            "length": 6
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 7,
+        "solution": null,
+        "clues": [
+          {
+            "number": 7,
+            "word": "ors",
+            "hint_str": "dorures royales",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              2,
+              2
+            ],
+            "length": 3
+          },
+          {
+            "number": 7,
+            "word": "as",
+            "hint_str": "champion",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              3,
+              1
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 8,
+        "solution": null,
+        "clues": [
+          {
+            "number": 8,
+            "word": "nu",
+            "hint_str": "sans vêtement",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              2,
+              6
+            ],
+            "length": 2
+          },
+          {
+            "number": 8,
+            "word": "va",
+            "hint_str": "il se déplace",
+            "complexity": 2,
+            "direction": "V",
+            "start": [
+              3,
+              5
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 9,
+        "solution": null,
+        "clues": [
+          {
+            "number": 9,
+            "word": "are",
+            "hint_str": "cent mètres²",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              3,
+              1
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 10,
+        "solution": null,
+        "clues": [
+          {
+            "number": 10,
+            "word": "ver",
+            "hint_str": "animal rampant",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              3,
+              5
+            ],
+            "length": 3
+          },
+          {
+            "number": 10,
+            "word": "art",
+            "hint_str": "création",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              4,
+              4
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "v",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 11,
+        "solution": null,
+        "clues": [
+          {
+            "number": 11,
+            "word": "sanaa",
+            "hint_str": "Yémen",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              4,
+              1
+            ],
+            "length": 5
+          },
+          {
+            "number": 11,
+            "word": "né",
+            "hint_str": "venu au monde",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              5,
+              0
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 12,
+        "solution": null,
+        "clues": [
+          {
+            "number": 12,
+            "word": "ami",
+            "hint_str": "proche",
+            "complexity": 1,
+            "direction": "V",
+            "start": [
+              5,
+              6
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 13,
+        "solution": null,
+        "clues": [
+          {
+            "number": 13,
+            "word": "cor",
+            "hint_str": "cuivre chasseur",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              5,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "c",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 14,
+        "solution": null,
+        "clues": [
+          {
+            "number": 14,
+            "word": "an",
+            "hint_str": "année",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              5,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "é",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 15,
+        "solution": null,
+        "clues": [
+          {
+            "number": 15,
+            "word": "lit",
+            "hint_str": "meuble à dormir",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              6,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 16,
+        "solution": null,
+        "clues": [
+          {
+            "number": 16,
+            "word": "mu",
+            "hint_str": "Chez les Grecs",
+            "complexity": 1,
+            "direction": "H",
+            "start": [
+              6,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "m",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 17,
+        "solution": null,
+        "clues": [
+          {
+            "number": 17,
+            "word": "fer",
+            "hint_str": "métal solide",
+            "complexity": 2,
+            "direction": "H",
+            "start": [
+              7,
+              1
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "f",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 18,
+        "solution": null,
+        "clues": [
+          {
+            "number": 18,
+            "word": "vis",
+            "hint_str": "objet fileté",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              7,
+              5
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "v",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      }
+    ]
+  ],
+  "words": [
+    {
+      "number": 1,
+      "word": "si",
+      "hint_str": "tellement",
+      "complexity": 1,
+      "row": 0,
+      "col": 1,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 1,
+      "word": "ho",
+      "hint_str": "surprise brève",
+      "complexity": 1,
+      "row": 1,
+      "col": 0,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 2,
+      "word": "élu",
+      "hint_str": "gagnant du vote",
+      "complexity": 2,
+      "row": 0,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 2,
+      "word": "ès",
+      "hint_str": "dans les",
+      "complexity": 2,
+      "row": 1,
+      "col": 4,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 3,
+      "word": "oracle",
+      "hint_str": "logiciels",
+      "complexity": 1,
+      "row": 2,
+      "col": 2,
+      "direction": "V",
+      "length": 6
+    },
+    {
+      "number": 4,
+      "word": "renoir",
+      "hint_str": "portraitiste",
+      "complexity": 1,
+      "row": 2,
+      "col": 3,
+      "direction": "V",
+      "length": 6
+    },
+    {
+      "number": 5,
+      "word": "ne",
+      "hint_str": "mot de négation",
+      "complexity": 1,
+      "row": 2,
+      "col": 6,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 6,
+      "word": "uranus",
+      "hint_str": "géante glacée",
+      "complexity": 2,
+      "row": 2,
+      "col": 7,
+      "direction": "V",
+      "length": 6
+    },
+    {
+      "number": 7,
+      "word": "ors",
+      "hint_str": "dorures royales",
+      "complexity": 3,
+      "row": 2,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 7,
+      "word": "as",
+      "hint_str": "champion",
+      "complexity": 2,
+      "row": 3,
+      "col": 1,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 8,
+      "word": "nu",
+      "hint_str": "sans vêtement",
+      "complexity": 1,
+      "row": 2,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 8,
+      "word": "va",
+      "hint_str": "il se déplace",
+      "complexity": 2,
+      "row": 3,
+      "col": 5,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 9,
+      "word": "are",
+      "hint_str": "cent mètres²",
+      "complexity": 2,
+      "row": 3,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 10,
+      "word": "ver",
+      "hint_str": "animal rampant",
+      "complexity": 1,
+      "row": 3,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 10,
+      "word": "art",
+      "hint_str": "création",
+      "complexity": 1,
+      "row": 4,
+      "col": 4,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 11,
+      "word": "sanaa",
+      "hint_str": "Yémen",
+      "complexity": 1,
+      "row": 4,
+      "col": 1,
+      "direction": "H",
+      "length": 5
+    },
+    {
+      "number": 11,
+      "word": "né",
+      "hint_str": "venu au monde",
+      "complexity": 1,
+      "row": 5,
+      "col": 0,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 12,
+      "word": "ami",
+      "hint_str": "proche",
+      "complexity": 1,
+      "row": 5,
+      "col": 6,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 13,
+      "word": "cor",
+      "hint_str": "cuivre chasseur",
+      "complexity": 1,
+      "row": 5,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 14,
+      "word": "an",
+      "hint_str": "année",
+      "complexity": 1,
+      "row": 5,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 15,
+      "word": "lit",
+      "hint_str": "meuble à dormir",
+      "complexity": 2,
+      "row": 6,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 16,
+      "word": "mu",
+      "hint_str": "Chez les Grecs",
+      "complexity": 1,
+      "row": 6,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 17,
+      "word": "fer",
+      "hint_str": "métal solide",
+      "complexity": 2,
+      "row": 7,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 18,
+      "word": "vis",
+      "hint_str": "objet fileté",
+      "complexity": 3,
+      "row": 7,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    }
+  ],
+  "stats": {
+    "words": 24,
+    "letters": 43,
+    "clues": 21,
+    "black": 0,
+    "dead_clues": 3,
+    "avg_word_length": 3.04,
+    "coverage": 0.6719,
+    "score": 1983.62
+  }
+}

@@ -1,0 +1,966 @@
+{
+  "version": 3,
+  "type": "mots-fleches",
+  "rows": 8,
+  "cols": 8,
+  "grid": [
+    [
+      {
+        "type": "clue",
+        "number": 1,
+        "solution": null,
+        "clues": [
+          {
+            "number": 1,
+            "word": "kif",
+            "hint_str": "chanvre fumé",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              0,
+              1
+            ],
+            "length": 3
+          },
+          {
+            "number": 1,
+            "word": "le",
+            "hint_str": "pronom neutre",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              0
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "k",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "f",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 2,
+        "solution": null,
+        "clues": [
+          {
+            "number": 2,
+            "word": "rat",
+            "hint_str": "rongeur urbain",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              0,
+              5
+            ],
+            "length": 3
+          },
+          {
+            "number": 2,
+            "word": "wu",
+            "hint_str": "royaume chinois",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              4
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 3,
+        "solution": null,
+        "clues": [
+          {
+            "number": 3,
+            "word": "fil",
+            "hint_str": "brin de coton",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              2,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 4,
+        "solution": null,
+        "clues": [
+          {
+            "number": 4,
+            "word": "eau",
+            "hint_str": "ça mouille",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              2,
+              3
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "w",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 5,
+        "solution": null,
+        "clues": [
+          {
+            "number": 5,
+            "word": "mou",
+            "hint_str": "peu ferme",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              2,
+              6
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 6,
+        "solution": null,
+        "clues": [
+          {
+            "number": 6,
+            "word": "aa",
+            "hint_str": "rivière du nord",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              2,
+              7
+            ],
+            "length": 2
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 7,
+        "solution": null,
+        "clues": [
+          {
+            "number": 7,
+            "word": "feu",
+            "hint_str": "signal rouge",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              2,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "f",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 8,
+        "solution": null,
+        "clues": [
+          {
+            "number": 8,
+            "word": "ma",
+            "hint_str": "devant féminin",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              2,
+              6
+            ],
+            "length": 2
+          },
+          {
+            "number": 8,
+            "word": "bar",
+            "hint_str": "où l'on trinque",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              3,
+              5
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "m",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 9,
+        "solution": null,
+        "clues": [
+          {
+            "number": 9,
+            "word": "xia",
+            "hint_str": "aube chinoise",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              3,
+              1
+            ],
+            "length": 3
+          },
+          {
+            "number": 9,
+            "word": "col",
+            "hint_str": "entre deux pics",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              4,
+              0
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "x",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 10,
+        "solution": null,
+        "clues": [
+          {
+            "number": 10,
+            "word": "boa",
+            "hint_str": "gros serpent",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              3,
+              5
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "b",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "c",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 11,
+        "solution": null,
+        "clues": [
+          {
+            "number": 11,
+            "word": "lu",
+            "hint_str": "œil sur la page",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              4,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 12,
+        "solution": null,
+        "clues": [
+          {
+            "number": 12,
+            "word": "au",
+            "hint_str": "vers le",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              4,
+              5
+            ],
+            "length": 2
+          },
+          {
+            "number": 12,
+            "word": "os",
+            "hint_str": "sous la chair",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              5,
+              4
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 13,
+        "solution": null,
+        "clues": [
+          {
+            "number": 13,
+            "word": "vu",
+            "hint_str": "œil qui a saisi",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              6,
+              2
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "clue",
+        "number": 14,
+        "solution": null,
+        "clues": [
+          {
+            "number": 14,
+            "word": "or",
+            "hint_str": "métal des rois",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              5,
+              4
+            ],
+            "length": 2
+          },
+          {
+            "number": 14,
+            "word": "il",
+            "hint_str": "sujet masculin",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              6,
+              3
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 15,
+        "solution": null,
+        "clues": [
+          {
+            "number": 15,
+            "word": "du",
+            "hint_str": "un peu de",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              6,
+              7
+            ],
+            "length": 2
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 16,
+        "solution": null,
+        "clues": [
+          {
+            "number": 16,
+            "word": "vis",
+            "hint_str": "objet fileté",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              6,
+              2
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "v",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "d",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 17,
+        "solution": null,
+        "clues": [
+          {
+            "number": 17,
+            "word": "nul",
+            "hint_str": "zéro pointé",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              7,
+              1
+            ],
+            "length": 3
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 18,
+        "solution": null,
+        "clues": [
+          {
+            "number": 18,
+            "word": "bu",
+            "hint_str": "verre vidé",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              7,
+              6
+            ],
+            "length": 2
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "b",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      }
+    ]
+  ],
+  "words": [
+    {
+      "number": 1,
+      "word": "kif",
+      "hint_str": "chanvre fumé",
+      "complexity": 3,
+      "row": 0,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 1,
+      "word": "le",
+      "hint_str": "pronom neutre",
+      "complexity": 3,
+      "row": 1,
+      "col": 0,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 2,
+      "word": "rat",
+      "hint_str": "rongeur urbain",
+      "complexity": 3,
+      "row": 0,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 2,
+      "word": "wu",
+      "hint_str": "royaume chinois",
+      "complexity": 3,
+      "row": 1,
+      "col": 4,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 3,
+      "word": "fil",
+      "hint_str": "brin de coton",
+      "complexity": 3,
+      "row": 2,
+      "col": 2,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 4,
+      "word": "eau",
+      "hint_str": "ça mouille",
+      "complexity": 3,
+      "row": 2,
+      "col": 3,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 5,
+      "word": "mou",
+      "hint_str": "peu ferme",
+      "complexity": 3,
+      "row": 2,
+      "col": 6,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 6,
+      "word": "aa",
+      "hint_str": "rivière du nord",
+      "complexity": 3,
+      "row": 2,
+      "col": 7,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 7,
+      "word": "feu",
+      "hint_str": "signal rouge",
+      "complexity": 3,
+      "row": 2,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 8,
+      "word": "ma",
+      "hint_str": "devant féminin",
+      "complexity": 3,
+      "row": 2,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 8,
+      "word": "bar",
+      "hint_str": "où l'on trinque",
+      "complexity": 3,
+      "row": 3,
+      "col": 5,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 9,
+      "word": "xia",
+      "hint_str": "aube chinoise",
+      "complexity": 3,
+      "row": 3,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 9,
+      "word": "col",
+      "hint_str": "entre deux pics",
+      "complexity": 3,
+      "row": 4,
+      "col": 0,
+      "direction": "V",
+      "length": 3
+    },
+    {
+      "number": 10,
+      "word": "boa",
+      "hint_str": "gros serpent",
+      "complexity": 3,
+      "row": 3,
+      "col": 5,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 11,
+      "word": "lu",
+      "hint_str": "œil sur la page",
+      "complexity": 3,
+      "row": 4,
+      "col": 2,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 12,
+      "word": "au",
+      "hint_str": "vers le",
+      "complexity": 3,
+      "row": 4,
+      "col": 5,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 12,
+      "word": "os",
+      "hint_str": "sous la chair",
+      "complexity": 3,
+      "row": 5,
+      "col": 4,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 13,
+      "word": "vu",
+      "hint_str": "œil qui a saisi",
+      "complexity": 3,
+      "row": 6,
+      "col": 2,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 14,
+      "word": "or",
+      "hint_str": "métal des rois",
+      "complexity": 3,
+      "row": 5,
+      "col": 4,
+      "direction": "H",
+      "length": 2
+    },
+    {
+      "number": 14,
+      "word": "il",
+      "hint_str": "sujet masculin",
+      "complexity": 3,
+      "row": 6,
+      "col": 3,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 15,
+      "word": "du",
+      "hint_str": "un peu de",
+      "complexity": 3,
+      "row": 6,
+      "col": 7,
+      "direction": "V",
+      "length": 2
+    },
+    {
+      "number": 16,
+      "word": "vis",
+      "hint_str": "objet fileté",
+      "complexity": 3,
+      "row": 6,
+      "col": 2,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 17,
+      "word": "nul",
+      "hint_str": "zéro pointé",
+      "complexity": 3,
+      "row": 7,
+      "col": 1,
+      "direction": "H",
+      "length": 3
+    },
+    {
+      "number": 18,
+      "word": "bu",
+      "hint_str": "verre vidé",
+      "complexity": 3,
+      "row": 7,
+      "col": 6,
+      "direction": "H",
+      "length": 2
+    }
+  ],
+  "stats": {
+    "words": 24,
+    "letters": 38,
+    "clues": 26,
+    "black": 0,
+    "dead_clues": 8,
+    "avg_word_length": 2.5,
+    "coverage": 0.5938,
+    "score": -54.5
+  }
+}

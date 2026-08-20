@@ -1,15 +1,20 @@
 import { useMemo, useState } from 'react';
-import { GameStateProvider, hasLiveblocksKey, useGameState } from './state/GameState';
+import {
+  GameStateProvider,
+  SessionProvider,
+  hasLiveblocksKey,
+  useGameState,
+  useRound,
+} from './state/GameState';
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { Scoreboard } from './components/Scoreboard';
 import { SoundToggle } from './components/SoundToggle';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
 import { getOrCreateSessionCode } from './lib/sessionCode';
+import { seedFor } from './lib/puzzleApi';
 
-const PUZZLE_ID = 'demo';
-
-function GameHeader({ title }: { title: string }) {
+function GameHeader({ title, round }: { title: string; round: number }) {
   const game = useGameState();
   return (
     <header className="flex w-full max-w-[480px] animate-pop-in flex-col items-center gap-1 px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
@@ -20,8 +25,9 @@ function GameHeader({ title }: { title: string }) {
         </h1>
         <SoundToggle />
       </div>
-      <p className="text-xs font-semibold text-white/70">
-        {game.multiplayer ? '🟢 Partie en direct' : 'Mode local — ajoutez une clé Liveblocks pour jouer à plusieurs'}
+      <p className="flex items-center gap-2 text-xs font-semibold text-white/70">
+        <span className="rounded-full bg-white/15 px-2 py-0.5">Grille {round + 1}</span>
+        <span>{game.multiplayer ? '🟢 En direct' : 'Mode local'}</span>
       </p>
     </header>
   );
@@ -64,32 +70,50 @@ function LoadingScreen() {
   );
 }
 
+/**
+ * Sous la session : la manche partagée détermine quelle grille charger, donc
+ * ce composant doit vivre à l'intérieur du provider de session.
+ */
+function Round({ sessionId }: { sessionId: string }) {
+  const { round } = useRound();
+  const seed = seedFor(sessionId, round);
+  const { puzzle, loading, error } = usePuzzle(seed);
+
+  if (loading || !puzzle) return <LoadingScreen />;
+
+  return (
+    // `key` force un remontage complet au changement de grille : sinon la
+    // sélection de case et les animations de la grille précédente
+    // survivraient à l'arrivée de la nouvelle.
+    <GameStateProvider key={puzzle.id} puzzle={puzzle}>
+      <GameHeader title={puzzle.title} round={round} />
+      {hasLiveblocksKey && <SessionInviteBar sessionId={sessionId} />}
+      {error && (
+        <p className="mb-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs text-amber-100">
+          Serveur de grilles injoignable — grille de démonstration
+        </p>
+      )}
+      <Scoreboard />
+      <CrosswordGrid puzzle={puzzle} />
+    </GameStateProvider>
+  );
+}
+
 export default function App() {
-  const { puzzle, loading, error } = usePuzzle(PUZZLE_ID);
-  // Stable for the component's lifetime; reads `?session=` from the URL or mints
-  // one and writes it back, so the address bar becomes the shareable invite link.
-  const sessionId = useMemo(() => (hasLiveblocksKey ? getOrCreateSessionCode() : null), []);
+  // Stable pour la durée de vie du composant : lit `?session=` dans l'URL ou
+  // en génère un et l'y réécrit, de sorte que la barre d'adresse devienne le
+  // lien d'invitation.
+  const sessionId = useMemo(
+    () => (hasLiveblocksKey ? getOrCreateSessionCode() : 'solo'),
+    [],
+  );
 
   return (
     <div className="flex min-h-screen flex-col items-center pb-10">
       <AuroraBackground />
-      {loading && <LoadingScreen />}
-      {!loading && puzzle && (
-        <GameStateProvider
-          roomId={sessionId ? `mots-fleches-${puzzle.id}-${sessionId}` : `mots-fleches-${puzzle.id}`}
-          puzzle={puzzle}
-        >
-          <GameHeader title={puzzle.title} />
-          {sessionId && <SessionInviteBar sessionId={sessionId} />}
-          {error && (
-            <p className="mb-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs text-amber-100">
-              Grille de secours (Supabase indisponible)
-            </p>
-          )}
-          <Scoreboard />
-          <CrosswordGrid puzzle={puzzle} />
-        </GameStateProvider>
-      )}
+      <SessionProvider sessionId={sessionId}>
+        <Round sessionId={sessionId} />
+      </SessionProvider>
     </div>
   );
 }

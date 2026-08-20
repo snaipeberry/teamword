@@ -1,0 +1,989 @@
+{
+  "version": 2,
+  "type": "mots-fleches",
+  "rows": 10,
+  "cols": 12,
+  "grid": [
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 1,
+        "solution": null,
+        "clues": [
+          {
+            "number": 1,
+            "word": "witz",
+            "hint_str": "histoire drôle",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              2
+            ],
+            "length": 4
+          }
+        ]
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 2,
+        "solution": null,
+        "clues": [
+          {
+            "number": 2,
+            "word": "prononça",
+            "hint_str": "déclara",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              6
+            ],
+            "length": 8
+          },
+          {
+            "number": 2,
+            "word": "prononças",
+            "hint_str": "déclaras",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              6
+            ],
+            "length": 9
+          }
+        ]
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 3,
+        "solution": null,
+        "clues": [
+          {
+            "number": 3,
+            "word": "apercevez",
+            "hint_str": "discernez",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              8
+            ],
+            "length": 9
+          }
+        ]
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "clue",
+        "number": 4,
+        "solution": null,
+        "clues": [
+          {
+            "number": 4,
+            "word": "jetèrent",
+            "hint_str": "expédièrent",
+            "complexity": 3,
+            "direction": "V",
+            "start": [
+              1,
+              10
+            ],
+            "length": 8
+          }
+        ]
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 5,
+        "solution": null,
+        "clues": [
+          {
+            "number": 5,
+            "word": "zwan",
+            "hint_str": "saucisses boîte",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              1,
+              1
+            ],
+            "length": 4
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "w",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "p",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "j",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "p",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 6,
+        "solution": null,
+        "clues": [
+          {
+            "number": 6,
+            "word": "éthylotest",
+            "hint_str": "souffler dedans",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              3,
+              1
+            ],
+            "length": 10
+          },
+          {
+            "number": 6,
+            "word": "éthylotests",
+            "hint_str": "test du volant",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              3,
+              1
+            ],
+            "length": 11
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "é",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "h",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "y",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "è",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "c",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 7,
+        "solution": null,
+        "clues": [
+          {
+            "number": 7,
+            "word": "surmonterez",
+            "hint_str": "dépasserez",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              6,
+              1
+            ],
+            "length": 11
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "u",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "m",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "r",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "ç",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "v",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "clue",
+        "number": 8,
+        "solution": null,
+        "clues": [
+          {
+            "number": 8,
+            "word": "comblaient",
+            "hint_str": "bouchaient",
+            "complexity": 3,
+            "direction": "H",
+            "start": [
+              8,
+              1
+            ],
+            "length": 10
+          }
+        ]
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "c",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "o",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "m",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "b",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "l",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "a",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "i",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "e",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "n",
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "t",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ],
+    [
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "s",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "letter",
+        "number": null,
+        "solution": "z",
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      },
+      {
+        "type": "black",
+        "number": null,
+        "solution": null,
+        "clues": []
+      }
+    ]
+  ],
+  "words": [
+    {
+      "number": 2,
+      "word": "prononça",
+      "hint_str": "déclara",
+      "complexity": 3,
+      "row": 1,
+      "col": 6,
+      "direction": "V",
+      "length": 8
+    },
+    {
+      "number": 6,
+      "word": "éthylotest",
+      "hint_str": "souffler dedans",
+      "complexity": 3,
+      "row": 3,
+      "col": 1,
+      "direction": "H",
+      "length": 10
+    },
+    {
+      "number": 7,
+      "word": "surmonterez",
+      "hint_str": "dépasserez",
+      "complexity": 3,
+      "row": 6,
+      "col": 1,
+      "direction": "H",
+      "length": 11
+    },
+    {
+      "number": 4,
+      "word": "jetèrent",
+      "hint_str": "expédièrent",
+      "complexity": 3,
+      "row": 1,
+      "col": 10,
+      "direction": "V",
+      "length": 8
+    },
+    {
+      "number": 8,
+      "word": "comblaient",
+      "hint_str": "bouchaient",
+      "complexity": 3,
+      "row": 8,
+      "col": 1,
+      "direction": "H",
+      "length": 10
+    },
+    {
+      "number": 2,
+      "word": "prononças",
+      "hint_str": "déclaras",
+      "complexity": 3,
+      "row": 1,
+      "col": 6,
+      "direction": "V",
+      "length": 9
+    },
+    {
+      "number": 3,
+      "word": "apercevez",
+      "hint_str": "discernez",
+      "complexity": 3,
+      "row": 1,
+      "col": 8,
+      "direction": "V",
+      "length": 9
+    },
+    {
+      "number": 6,
+      "word": "éthylotests",
+      "hint_str": "test du volant",
+      "complexity": 3,
+      "row": 3,
+      "col": 1,
+      "direction": "H",
+      "length": 11
+    },
+    {
+      "number": 1,
+      "word": "witz",
+      "hint_str": "histoire drôle",
+      "complexity": 3,
+      "row": 1,
+      "col": 2,
+      "direction": "V",
+      "length": 4
+    },
+    {
+      "number": 5,
+      "word": "zwan",
+      "hint_str": "saucisses boîte",
+      "complexity": 3,
+      "row": 1,
+      "col": 1,
+      "direction": "H",
+      "length": 4
+    }
+  ],
+  "stats": {
+    "words": 10,
+    "letters": 55,
+    "clues": 8,
+    "black": 57,
+    "crossings": 22,
+    "coverage": 0.4583,
+    "compactness": 0.5556,
+    "isolated_black": 1,
+    "score": 12353.33
+  }
+}

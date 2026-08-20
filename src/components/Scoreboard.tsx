@@ -51,8 +51,15 @@ export function Scoreboard() {
               </span>
               {!p.online && <span className="shrink-0 text-[10px] text-white/50">hors ligne</span>}
             </span>
-            <span className="shrink-0 font-display text-sm font-semibold tabular-nums">
-              <AnimatedNumber value={p.score} /> mot{p.score === 1 ? '' : 's'}
+            <span className="flex shrink-0 items-center gap-2 font-display text-sm font-semibold tabular-nums">
+              {p.hints > 0 && (
+                <span className="text-xs font-medium text-white/60" title="lettres révélées">
+                  💡{p.hints}
+                </span>
+              )}
+              <span>
+                <AnimatedNumber value={p.score} /> mot{p.score === 1 ? '' : 's'}
+              </span>
             </span>
           </motion.div>
         );
