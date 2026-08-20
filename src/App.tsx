@@ -11,7 +11,7 @@ import { Scoreboard } from './components/Scoreboard';
 import { SoundToggle } from './components/SoundToggle';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
-import { getOrCreateSessionCode } from './lib/sessionCode';
+import { buildInviteUrl, getOrCreateSessionCode } from './lib/sessionCode';
 import { seedFor } from './lib/puzzleApi';
 
 function GameHeader({ title, round }: { title: string; round: number }) {
@@ -37,7 +37,9 @@ function SessionInviteBar({ sessionId }: { sessionId: string }) {
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(window.location.href);
+    // Surtout pas window.location.href : sur une preview Vercel, cette URL
+    // est protégée et forcerait l'invité à se connecter à Vercel.
+    await navigator.clipboard.writeText(buildInviteUrl(sessionId));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
