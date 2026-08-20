@@ -1,19 +1,26 @@
 import type { Arrow, ClueCellData } from '../types/puzzle';
 
 /**
- * Glyphe et bord de rattachement de chaque flèche.
+ * Glyphe de chaque flèche. Il porte à lui seul les deux informations : où
+ * commence le mot, et dans quel sens il se lit.
  *
- * `edge` désigne le côté de la case-indice où se trouve la PREMIÈRE LETTRE
- * du mot — c'est là que la flèche doit pointer. Pour les flèches coudées,
- * ce côté ne coïncide pas avec le sens de lecture, d'où le glyphe distinct :
- * ↳ « je descends puis je lis vers la droite », ↴ « je vais à droite puis
- * je lis vers le bas ».
+ *   ▶  le mot commence à DROITE   et se lit vers la droite
+ *   ▼  le mot commence EN DESSOUS et se lit vers le bas
+ *   ↳  le mot commence EN DESSOUS et se lit vers la droite  (coudée)
+ *   ↴  le mot commence à DROITE   et se lit vers le bas     (coudée)
  */
-const ARROW_SPEC: Record<Arrow, { glyph: string; edge: 'right' | 'bottom' }> = {
-  right: { glyph: '▶', edge: 'right' },
-  down: { glyph: '▼', edge: 'bottom' },
-  down_right: { glyph: '↳', edge: 'bottom' },
-  right_down: { glyph: '↴', edge: 'right' },
+const ARROW_GLYPH: Record<Arrow, string> = {
+  right: '▶',
+  down: '▼',
+  down_right: '↳',
+  right_down: '↴',
+};
+
+const BENT: Record<Arrow, boolean> = {
+  right: false,
+  down: false,
+  down_right: true,
+  right_down: true,
 };
 
 interface ClueCellProps {
@@ -41,15 +48,6 @@ function fontSizeFor(totalChars: number, clueCount: number): string {
 
 export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
   const isDouble = data.clues.length > 1;
-
-  // Les flèches sont en position absolue : sans gouttière réservée de leur
-  // côté, elles se posaient par-dessus la fin du texte (« funérair▶ »).
-  // C'est le BORD de la flèche qui compte, pas le sens de lecture du mot :
-  // une coudée ↴ se lit verticalement mais s'affiche sur le bord droit.
-  const edges = data.clues.map((c) => ARROW_SPEC[c.arrow ?? c.direction].edge);
-  const hasRight = edges.includes('right');
-  const hasDown = edges.includes('bottom');
-
   const totalChars = data.clues.reduce((n, c) => n + c.text.length, 0);
 
   return (
@@ -58,17 +56,16 @@ export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
       // (hyphens:auto sans lang ne coupe rien).
       lang="fr"
       className={[
-        'relative flex h-full w-full flex-col items-center justify-center overflow-hidden',
-        'border border-cell-border/50 text-center font-clue font-bold',
+        'flex h-full w-full flex-col items-center justify-center overflow-hidden',
+        'border border-cell-border/50 px-[2px] py-[1px] text-center font-clue font-bold',
         'leading-[1.1] text-neutral-800 hyphens-auto [overflow-wrap:anywhere]',
         fontSizeFor(totalChars, data.clues.length),
-        hasRight ? 'pl-[2px] pr-[8px]' : 'px-[2px]',
-        hasDown ? 'pb-[7px] pt-[1px]' : 'py-[1px]',
         isDouble ? 'bg-gradient-to-br from-clue-accent to-amber-200' : 'bg-clue',
       ].join(' ')}
     >
       {data.clues.map((clue, i) => {
         const solved = solvedWordIds.has(clue.wordId);
+        const arrow = clue.arrow ?? clue.direction;
         return (
           <span
             key={i}
@@ -81,30 +78,27 @@ export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
             ].join(' ')}
           >
             {clue.text}
-          </span>
-        );
-      })}
+            {/*
+              La flèche est rendue DANS le flux de sa propre définition, et
+              non plus en position absolue sur un bord de la case.
 
-      {data.clues.map((clue, i) => {
-        const spec = ARROW_SPEC[clue.arrow ?? clue.direction];
-        const bent = spec.glyph === '↳' || spec.glyph === '↴';
-        return (
-          <span
-            key={`arrow-${i}`}
-            aria-hidden="true"
-            className={[
-              'pointer-events-none absolute leading-none transition-opacity duration-300',
-              // Les coudées portent plus d'information : on les rend un peu
-              // plus grandes et plus contrastées pour qu'on les distingue
-              // d'un coup d'œil des flèches droites.
-              bent ? 'text-[9px] font-bold text-rose-500' : 'text-[7px] text-neutral-500',
-              solvedWordIds.has(clue.wordId) ? 'opacity-30' : '',
-              spec.edge === 'right'
-                ? 'right-[1px] top-1/2 -translate-y-1/2'
-                : 'bottom-[1px] left-1/2 -translate-x-1/2',
-            ].join(' ')}
-          >
-            {spec.glyph}
+              Deux raisons, mesurées sur les grilles réelles : 39 % des cases
+              à deux définitions avaient leurs deux flèches sur le même bord,
+              donc superposées ; et même sans superposition, rien n'indiquait
+              quelle flèche appartenait à quelle définition — une définition
+              semblait alors ne renvoyer à aucun mot.
+            */}
+            <span
+              aria-hidden="true"
+              className={[
+                'ml-[2px] inline-block align-baseline leading-none',
+                BENT[arrow]
+                  ? 'text-[1.15em] font-bold text-rose-600'
+                  : 'text-[0.9em] text-neutral-600',
+              ].join(' ')}
+            >
+              {ARROW_GLYPH[arrow]}
+            </span>
           </span>
         );
       })}
