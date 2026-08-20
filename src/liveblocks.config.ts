@@ -31,8 +31,29 @@ declare global {
       hints: LiveMap<string, number>;
       /** cellId -> true pour les cases révélées : un mot terminé par une révélation ne rapporte pas de point. */
       revealed: LiveMap<string, boolean>;
+      /**
+       * playerId -> numéro de grille pour laquelle ce joueur s'est déclaré prêt.
+       *
+       * On stocke le NUMÉRO de grille plutôt qu'un booléen : le drapeau
+       * s'invalide alors tout seul au passage à la grille suivante, sans avoir
+       * à vider la map (et sans risque qu'un « prêt » périmé fasse sauter la
+       * grille suivante dès son affichage).
+       */
+      ready: LiveMap<string, number>;
       /** playerId -> last-known display info, so the scoreboard still shows offline players who scored earlier. */
       players: LiveMap<string, { name: string; color: string }>;
+    };
+    /**
+     * Réactions envoyées en direct. Volontairement éphémères : elles passent
+     * par le canal de diffusion et ne sont jamais écrites dans Storage — une
+     * réaction n'a de sens qu'au moment où elle est envoyée, et la persister
+     * ferait réapparaître de vieux emojis à chaque reconnexion.
+     */
+    RoomEvent: {
+      type: 'reaction';
+      emoji: string;
+      playerId: string;
+      name: string;
     };
   }
 }

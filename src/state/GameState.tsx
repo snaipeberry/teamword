@@ -8,6 +8,8 @@ import {
   useMutation,
   useMyPresence,
   useOthers,
+  useBroadcastEvent,
+  useEventListener,
 } from '@liveblocks/react/suspense';
 import { getOrCreatePlayerId, getOrCreatePlayerName } from '../lib/playerName';
 import { wordCellIds } from '../lib/gridGeometry';
@@ -32,6 +34,14 @@ export interface PlayerScore {
   isMe: boolean;
 }
 
+/** Réaction reçue d'un autre joueur, à afficher puis oublier. */
+export interface LiveReaction {
+  id: number;
+  emoji: string;
+  name: string;
+  isMe: boolean;
+}
+
 export interface GameStateApi {
   /** false when no Liveblocks key is configured — grid still fully playable, just single-player/local. */
   multiplayer: boolean;
@@ -46,6 +56,18 @@ export interface GameStateApi {
   setMyActiveCell: (cellId: string | null) => void;
   /** Ranked by words found, descending. Empty outside multiplayer. */
   scoreboard: PlayerScore[];
+
+  /** Se déclarer prêt pour passer à la grille suivante. */
+  setReady: (round: number) => void;
+  /** Vrai quand tous les joueurs EN LIGNE sont prêts pour cette grille. */
+  allReadyFor: (round: number) => boolean;
+  /** Ce joueur s'est-il déclaré prêt pour CETTE grille ? */
+  isReadyFor: (playerId: string, round: number) => boolean;
+
+  /** Diffuse une réaction aux autres joueurs (éphémère, jamais persistée). */
+  sendReaction: (emoji: string) => void;
+  /** Réactions actuellement à l'écran. */
+  reactions: LiveReaction[];
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -64,7 +86,8 @@ export function useGameState(): GameStateApi {
  */
 export interface RoundApi {
   round: number;
-  advanceRound: () => void;
+  /** `fromRound` évite de sauter plusieurs grilles quand tous les clients avancent en même temps. */
+  advanceRound: (fromRound?: number) => void;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -76,6 +99,9 @@ export function useRound(): RoundApi {
 }
 
 const PLAYER_COLORS = ['#F5A623', '#4ECDC4', '#FF6B6B', '#8E7CFF', '#2ECC71'];
+
+/** Durée d'affichage d'une réaction avant disparition. */
+const REACTION_LIFETIME_MS = 2600;
 
 function randomColor(): string {
   return PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
@@ -127,6 +153,15 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
   const { letters, setLetters, revealed, setRevealed } = store;
   const myColor = useMemo(randomColor, []);
 
+  // En solo il n'y a personne à attendre : « prêt » est immédiatement vrai,
+  // et une réaction n'est qu'une petite animation pour soi-même.
+  const [reactions, setReactions] = useState<LiveReaction[]>([]);
+  const pushReaction = useCallback((emoji: string) => {
+    const id = Date.now() + Math.random();
+    setReactions((prev) => [...prev, { id, emoji, name: 'Vous', isMe: true }]);
+    setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), REACTION_LIFETIME_MS);
+  }, []);
+
   const api = useMemo<GameStateApi>(
     () => ({
       multiplayer: false,
@@ -142,8 +177,13 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       myPlayerId: 'local',
       setMyActiveCell: () => {},
       scoreboard: [],
+      setReady: () => {},
+      allReadyFor: () => true,
+      isReadyFor: () => true,
+      sendReaction: pushReaction,
+      reactions,
     }),
-    [letters, revealed, setLetters, setRevealed, myColor],
+    [letters, revealed, setLetters, setRevealed, myColor, pushReaction, reactions],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
@@ -178,8 +218,15 @@ function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
 
   // On repart d'une grille vierge : les lettres de la manche précédente
   // n'ont plus de sens sur la nouvelle. Les scores, eux, se cumulent.
-  const advanceRound = useMutation(({ storage }) => {
-    storage.set('round', (storage.get('round') ?? 0) + 1);
+  //
+  // `fromRound` rend l'appel IDEMPOTENT : tous les clients détectent
+  // « tout le monde est prêt » au même instant et appellent donc cette
+  // mutation en même temps. Sans cette garde, on sauterait deux ou trois
+  // grilles d'un coup.
+  const advanceRound = useMutation(({ storage }, fromRound?: number) => {
+    const current = storage.get('round') ?? 0;
+    if (fromRound !== undefined && current !== fromRound) return;
+    storage.set('round', current + 1);
     // LiveMap n'a pas de .clear() : on supprime clé par clé, en figeant
     // d'abord la liste pour ne pas muter la map pendant qu'on l'itère.
     const lettersMap = storage.get('letters');
@@ -206,6 +253,7 @@ function LiveblocksGameBridge({
   const players = useStorage((root) => root.players);
   const hints = useStorage((root) => root.hints);
   const revealed = useStorage((root) => root.revealed);
+  const ready = useStorage((root) => root.ready);
   const others = useOthers();
   const [myPresence, updateMyPresence] = useMyPresence();
 
@@ -255,6 +303,38 @@ function LiveblocksGameBridge({
     hintsMap.set(playerId, (hintsMap.get(playerId) ?? 0) + 1);
   }, []);
 
+  const setReady = useMutation(({ storage, self }, round: number) => {
+    storage.get('ready').set(self.presence.playerId, round);
+  }, []);
+
+  const broadcast = useBroadcastEvent();
+  const [reactions, setReactions] = useState<LiveReaction[]>([]);
+
+  const pushReaction = useCallback((emoji: string, name: string, isMe: boolean) => {
+    const id = Date.now() + Math.random();
+    setReactions((prev) => [...prev, { id, emoji, name, isMe }]);
+    setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), REACTION_LIFETIME_MS);
+  }, []);
+
+  const sendReaction = useCallback(
+    (emoji: string) => {
+      // Affichage local immédiat : la diffusion ne se renvoie pas à
+      // l'expéditeur, et attendre l'aller-retour rendrait le bouton mou.
+      pushReaction(emoji, 'Vous', true);
+      broadcast({
+        type: 'reaction',
+        emoji,
+        playerId: myPresence.playerId,
+        name: myPresence.name,
+      });
+    },
+    [broadcast, pushReaction, myPresence.playerId, myPresence.name],
+  );
+
+  useEventListener(({ event }) => {
+    if (event.type === 'reaction') pushReaction(event.emoji, event.name, false);
+  });
+
   const registerPlayer = useMutation(({ storage, self }) => {
     storage.get('players').set(self.presence.playerId, {
       name: self.presence.name,
@@ -295,6 +375,27 @@ function LiveblocksGameBridge({
       .sort((a, b) => b.score - a.score || Number(b.isMe) - Number(a.isMe));
   }, [players, scores, hints, others, myPresence]);
 
+  /**
+   * On n'attend que les joueurs EN LIGNE : sinon un joueur parti en cours de
+   * partie bloquerait définitivement la progression des autres.
+   */
+  const allReadyFor = useCallback(
+    (round: number) => {
+      const onlineIds = [myPresence.playerId, ...others.map((o) => o.presence.playerId)];
+      return onlineIds.every((id) => ready.get(id) === round);
+    },
+    [ready, others, myPresence.playerId],
+  );
+
+  /**
+   * Le drapeau « prêt » ne peut pas vivre dans PlayerScore : il n'a de sens
+   * que rapporté à une grille précise, que le tableau des scores ignore.
+   */
+  const isReadyFor = useCallback(
+    (playerId: string, round: number) => ready.get(playerId) === round,
+    [ready],
+  );
+
   const api = useMemo<GameStateApi>(
     () => ({
       multiplayer: true,
@@ -312,8 +413,16 @@ function LiveblocksGameBridge({
       myPlayerId: myPresence.playerId,
       setMyActiveCell: (cellId) => updateMyPresence({ activeCell: cellId }),
       scoreboard,
+      setReady,
+      allReadyFor,
+      isReadyFor,
+      sendReaction,
+      reactions,
     }),
-    [letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence, scoreboard],
+    [
+      letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence,
+      scoreboard, setReady, allReadyFor, isReadyFor, sendReaction, reactions,
+    ],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
@@ -361,6 +470,7 @@ export function SessionProvider({
           scores: new LiveMap(),
           hints: new LiveMap(),
           revealed: new LiveMap(),
+          ready: new LiveMap(),
           players: new LiveMap(),
         }}
       >

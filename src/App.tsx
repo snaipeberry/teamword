@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   GameStateProvider,
   SessionProvider,
@@ -6,41 +6,11 @@ import {
   useRound,
 } from './state/GameState';
 import { CrosswordGrid } from './components/CrosswordGrid';
-import { Scoreboard } from './components/Scoreboard';
+import { TopBar } from './components/TopBar';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
-import { buildInviteUrl, getOrCreateSessionCode } from './lib/sessionCode';
+import { getOrCreateSessionCode } from './lib/sessionCode';
 import { seedFor } from './lib/puzzleApi';
-
-function SessionInviteBar({ sessionId }: { sessionId: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const copyLink = async () => {
-    // Surtout pas window.location.href : sur une preview Vercel, cette URL
-    // est protégée et forcerait l'invité à se connecter à Vercel.
-    await navigator.clipboard.writeText(buildInviteUrl(sessionId));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
-  return (
-    <div
-      className="my-1.5 flex shrink-0 animate-pop-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] text-white/90 shadow-lg backdrop-blur-md"
-      style={{ animationDelay: '0.06s' }}
-    >
-      <span>
-        Partie <strong className="tracking-[0.2em]">{sessionId}</strong>
-      </span>
-      <button
-        type="button"
-        onClick={copyLink}
-        className="rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber px-3 py-1 font-semibold text-white shadow-sm transition active:scale-95"
-      >
-        {copied ? '✓ Copié !' : '🔗 Inviter'}
-      </button>
-    </div>
-  );
-}
 
 function LoadingScreen() {
   return (
@@ -67,14 +37,13 @@ function Round({ sessionId }: { sessionId: string }) {
     // sélection de case et les animations de la grille précédente
     // survivraient à l'arrivée de la nouvelle.
     <GameStateProvider key={puzzle.id} puzzle={puzzle}>
-      {hasLiveblocksKey && <SessionInviteBar sessionId={sessionId} />}
+      <TopBar sessionId={sessionId} round={round} />
       {error && (
-        <p className="mb-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs text-amber-100">
-          Serveur de grilles injoignable — grille de démonstration
+        <p className="mt-1 shrink-0 rounded-full bg-amber-400/20 px-3 py-0.5 text-[10px] text-amber-100">
+          Serveur injoignable — grille de démonstration
         </p>
       )}
-      <Scoreboard />
-      <CrosswordGrid puzzle={puzzle} />
+      <CrosswordGrid puzzle={puzzle} round={round} />
     </GameStateProvider>
   );
 }

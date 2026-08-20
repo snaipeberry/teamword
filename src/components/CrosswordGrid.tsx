@@ -7,6 +7,8 @@ import { ClueCell } from './ClueCell';
 import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
+import { RoundResults } from './RoundResults';
+import { ReactionBar, ReactionOverlay } from './Reactions';
 import {
   hapticTick,
   hapticWin,
@@ -19,13 +21,14 @@ import {
   unlockAudio,
 } from '../lib/sounds';
 
-export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
+export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number }) {
   const game = useGameState();
   const { advanceRound } = useRound();
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
   const [wrongCells, setWrongCells] = useState<Set<string>>(new Set());
   const [celebrating, setCelebrating] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   // Plain state (rather than Framer Motion's initial/animate mount detection) drives the
   // card's entrance animation — under React 18 StrictMode's double-invoked mount, relying
   // on FM's own "is this the first render" tracking left the card stuck at its initial
@@ -157,14 +160,21 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
     }
   }, [isSolved]);
 
-  // Le passage à la manche suivante est déclenché à la FIN de la célébration
-  // (voir onDone de CompletionCelebration) plutôt qu'à la détection de la
-  // victoire : sinon la grille serait remplacée avant que le joueur ait vu
-  // les confettis.
-  const goToNextRound = useCallback(() => {
+  // La célébration ne fait plus avancer d'elle-même : elle cède la place à
+  // l'écran de résultats, qui attend que tout le monde soit prêt. Avancer
+  // automatiquement propulsait un joueur encore en train de lire les scores
+  // sur une grille vierge.
+  const showRoundResults = useCallback(() => {
     setCelebrating(false);
-    advanceRound();
-  }, [advanceRound]);
+    setShowResults(true);
+  }, []);
+
+  const goToNextRound = useCallback(() => {
+    setShowResults(false);
+    // `round` rend l'appel idempotent : tous les clients l'émettent en même
+    // temps dès que le dernier joueur se déclare prêt.
+    advanceRound(round);
+  }, [advanceRound, round]);
 
   const revealActiveCell = useCallback(() => {
     unlockAudio();
@@ -437,12 +447,12 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
         </motion.div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex w-full shrink-0 items-center justify-center gap-1.5 px-1">
         <motion.button
           type="button"
           onClick={revealActiveCell}
           whileTap={{ scale: 0.94 }}
-          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-bold text-white shadow-lg backdrop-blur-md transition"
+          className="flex shrink-0 items-center gap-1 rounded-full border border-white/30 bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur-md transition"
         >
           <span aria-hidden="true">💡</span> Révéler
         </motion.button>
@@ -451,16 +461,21 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
           type="button"
           onClick={checkGrid}
           whileTap={{ scale: 0.94 }}
-          className="flex items-center gap-1.5 rounded-full bg-white px-5 py-1.5 text-xs font-bold text-aurora-violet shadow-xl transition"
+          className="flex shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-aurora-violet shadow-xl transition"
         >
           <span aria-hidden="true">✓</span> Vérifier
         </motion.button>
+
+        <ReactionBar />
       </div>
 
       <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />
 
+      <ReactionOverlay />
+
       <AnimatePresence>
-        {celebrating && <CompletionCelebration onDone={goToNextRound} />}
+        {celebrating && <CompletionCelebration onDone={showRoundResults} />}
+        {showResults && <RoundResults round={round} onAdvance={goToNextRound} />}
       </AnimatePresence>
     </div>
   );
