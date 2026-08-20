@@ -5,3 +5,6 @@ dist-ssr
 .env
 .env.local
 .DS_Store
+
+# artefact de build TypeScript : ne doit pas etre versionne
+tsconfig.tsbuildinfo
