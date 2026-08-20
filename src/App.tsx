@@ -3,24 +3,14 @@ import {
   GameStateProvider,
   SessionProvider,
   hasLiveblocksKey,
-  useGameState,
   useRound,
 } from './state/GameState';
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { Scoreboard } from './components/Scoreboard';
-import { SoundToggle } from './components/SoundToggle';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
 import { buildInviteUrl, getOrCreateSessionCode } from './lib/sessionCode';
 import { seedFor } from './lib/puzzleApi';
-
-function GameHeader({ title, round }: { title: string; round: number }) {
-  const game = useGameState();
-  return (
-    <header className="flex w-full max-w-[480px] shrink-0 animate-pop-in flex-col items-center gap-0.5 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-    </header>
-  );
-}
 
 function SessionInviteBar({ sessionId }: { sessionId: string }) {
   const [copied, setCopied] = useState(false);
@@ -77,7 +67,6 @@ function Round({ sessionId }: { sessionId: string }) {
     // sélection de case et les animations de la grille précédente
     // survivraient à l'arrivée de la nouvelle.
     <GameStateProvider key={puzzle.id} puzzle={puzzle}>
-      <GameHeader title={puzzle.title} round={round} />
       {hasLiveblocksKey && <SessionInviteBar sessionId={sessionId} />}
       {error && (
         <p className="mb-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs text-amber-100">
