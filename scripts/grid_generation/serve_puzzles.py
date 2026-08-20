@@ -206,7 +206,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
 
-        if parsed.path == "/health":
+        # Les alias /api/* alignent le serveur de dev sur la convention Vercel
+        # (une fonction par fichier dans api/), pour que le front appelle
+        # exactement la même URL en local et en production.
+        if parsed.path in ("/health", "/api/health"):
             self._send(
                 200,
                 {
@@ -218,7 +221,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
-        if parsed.path == "/puzzle":
+        if parsed.path in ("/puzzle", "/api/puzzle"):
             params = parse_qs(parsed.query)
             seed = (params.get("seed") or [None])[0]
             try:
@@ -230,7 +233,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(500, {"error": str(exc)})
             return
 
-        self._send(404, {"error": "route inconnue", "routes": ["/health", "/puzzle"]})
+        self._send(404, {"error": "route inconnue", "routes": ["/api/puzzle", "/api/health"]})
 
     def log_message(self, fmt, *args):
         sys.stderr.write(f"[{self.log_date_time_string()}] {fmt % args}\n")

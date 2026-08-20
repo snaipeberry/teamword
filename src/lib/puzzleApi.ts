@@ -9,12 +9,16 @@ export function seedFor(sessionId: string, round: number): string {
   return `${sessionId}-r${round}`;
 }
 
-// `??` ne suffit pas : une variable déclarée mais vide dans .env
-// (`VITE_PUZZLE_API_URL=`) arrive comme chaîne vide, ce qui rendrait l'URL
-// relative — la requête partirait alors vers le serveur de dev, qui répond
-// index.html à toute route inconnue (donc une erreur JSON très obscure).
+// Par défaut : même origine. En production c'est la fonction serverless
+// `api/puzzle.py` ; en développement, le proxy déclaré dans vite.config.ts
+// renvoie /api vers le serveur Python local. Une même URL des deux côtés.
+//
+// `VITE_PUZZLE_API_URL` ne sert qu'à viser un service hébergé ailleurs. Le
+// `.trim()` est indispensable : une variable déclarée mais vide dans .env
+// arrive comme chaîne vide, pas comme undefined, donc `??` ne la rattraperait
+// pas — et un `||` sur une base vide est justement ce qu'on veut ici.
 const configured = import.meta.env.VITE_PUZZLE_API_URL?.trim();
-const API_URL = (configured || 'http://127.0.0.1:8787').replace(/\/$/, '');
+const API_BASE = (configured || '').replace(/\/$/, '');
 
 export interface PuzzlePayload {
   id: string;
@@ -33,7 +37,9 @@ export async function fetchPuzzle(options: {
 }): Promise<PuzzlePayload> {
   const params = new URLSearchParams({ seed: options.seed });
 
-  const response = await fetch(`${API_URL}/puzzle?${params}`, { signal: options.signal });
+  const response = await fetch(`${API_BASE}/api/puzzle?${params}`, {
+    signal: options.signal,
+  });
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     throw new Error(`Serveur de grilles: ${response.status} ${detail}`.trim());

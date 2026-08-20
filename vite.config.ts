@@ -27,5 +27,15 @@ export default defineConfig({
   ],
   server: {
     host: true,
+    // En production, /api/puzzle est servi par la fonction serverless
+    // (api/puzzle.py) sur la même origine. En dev, on redirige vers le
+    // serveur Python local pour que le front appelle exactement la même URL
+    // des deux côtés — pas de variable d'environnement à gérer.
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+      },
+    },
   },
 });

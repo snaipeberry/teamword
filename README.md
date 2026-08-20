@@ -101,9 +101,43 @@ ANTHROPIC_API_KEY=sk-ant-... node scripts/generate-clues.mjs --limit 200
 
 This only drafts `{word, clue}` pairs — it does **not** lay out a grid (placing words so they interlock is a separate constraint-satisfaction problem). For that, see [mots-croises-generateur](https://github.com/Jean-Baptiste-DP/mots-croises-generateur) (Node, French by default) or [motscroises](https://github.com/laurentg/motscroises) (Java, GPLv3 — check license before bundling into a commercial app).
 
-## Deploying
+## Deploying (Vercel)
 
-- **Vercel**: `vercel` from the project root, or connect the repo in the dashboard. Set the same env vars as `.env` in the project settings. Free (Hobby) tier is non-commercial only; a real launch needs Pro ($20/seat/mo).
+Le dépôt se déploie tel quel : `vercel.json` déclare explicitement le preset
+Vite (sans lui, Vercel retombe sur le runtime Node et échoue avec
+« No entrypoint found »), et `api/puzzle.py` devient une fonction serverless.
+
+```
+teamwword/
+├── vercel.json          preset Vite + includeFiles pour la fonction
+├── api/puzzle.py        GET /api/puzzle  (fonction serverless Python)
+├── dist/                site statique (build)
+└── scripts/
+    ├── datasets/…json   dictionnaire (448 Ko, versionné)
+    └── grid_generation/
+        └── banks/…json  squelettes pré-générés (12 Ko, versionnés)
+```
+
+Le front appelle `/api/puzzle` **sur la même origine** — aucune variable
+d'environnement à configurer pour que ça marche. En développement, le proxy
+déclaré dans `vite.config.ts` renvoie `/api` vers le serveur Python local,
+donc l'URL est identique des deux côtés.
+
+Points importants :
+
+- **Les squelettes sont générés en local et commités.** La fonction ne fait
+  que du remplissage : pas de recherche de structure au démarrage à froid.
+  Mesuré : ~60 ms de démarrage (chargement du dictionnaire + index + banc),
+  puis quelques ms par grille.
+- **`includeFiles: "scripts/**"`** est indispensable : sans lui, `scripts/`
+  n'est pas embarqué dans le bundle de la fonction et elle ne trouve ni le
+  dictionnaire ni le banc.
+- **Aucune dépendance Python tierce** — tout est en bibliothèque standard,
+  donc pas de `requirements.txt`.
+- `VITE_PUZZLE_API_URL` ne sert qu'à viser un service hébergé ailleurs ;
+  laissée vide, l'app utilise la même origine.
+- Le palier gratuit (Hobby) est réservé à un usage non commercial ; un vrai
+  lancement demande Pro (20 $/siège/mois).
 - Supabase's free tier auto-pauses projects after a week of inactivity — fine for building, upgrade to Pro ($25/mo) before a real launch.
 
 ## Project structure
