@@ -1,4 +1,15 @@
-import type { Cell, ClueCellPlacement, WordEntry } from '../types/puzzle';
+import type { Arrow, Cell, ClueCellPlacement, Direction, WordEntry } from '../types/puzzle';
+
+/**
+ * Pour chaque flèche : dans quel sens le mot se lit, et où se trouve sa
+ * première lettre par rapport à la case-indice.
+ */
+const ARROW_SPEC: Record<Arrow, { reads: Direction; startOffset: [number, number] }> = {
+  right: { reads: 'right', startOffset: [0, 1] },
+  down: { reads: 'down', startOffset: [1, 0] },
+  down_right: { reads: 'right', startOffset: [1, 0] },
+  right_down: { reads: 'down', startOffset: [0, 1] },
+};
 
 /**
  * Assembles a grid from word placements + clue-cell placements, validating
@@ -27,16 +38,25 @@ export function buildGrid(
       if (!word) {
         throw new Error(`Clue at (${placement.row}, ${placement.col}) references unknown word "${clue.wordId}"`);
       }
-      if (word.direction !== clue.direction) {
+      // Une flèche coudée place l'indice PERPENDICULAIREMENT au mot : la
+      // case de départ et le sens de lecture ne se déduisent donc plus l'un
+      // de l'autre, c'est la flèche qui porte les deux informations.
+      const arrow = clue.arrow ?? clue.direction;
+      const spec = ARROW_SPEC[arrow];
+      if (!spec) {
+        throw new Error(`Clue at (${placement.row}, ${placement.col}) has unknown arrow "${arrow}"`);
+      }
+      if (word.direction !== spec.reads) {
         throw new Error(
-          `Clue at (${placement.row}, ${placement.col}) says "${clue.direction}" but word "${clue.wordId}" runs "${word.direction}"`,
+          `Clue at (${placement.row}, ${placement.col}) has arrow "${arrow}" (mot ${spec.reads}) but word "${clue.wordId}" runs "${word.direction}"`,
         );
       }
-      const expectedRow = clue.direction === 'down' ? placement.row + 1 : placement.row;
-      const expectedCol = clue.direction === 'right' ? placement.col + 1 : placement.col;
+      const expectedRow = placement.row + spec.startOffset[0];
+      const expectedCol = placement.col + spec.startOffset[1];
       if (word.startRow !== expectedRow || word.startCol !== expectedCol) {
         throw new Error(
-          `Clue at (${placement.row}, ${placement.col}) doesn't sit next to where word "${clue.wordId}" actually starts`,
+          `Clue at (${placement.row}, ${placement.col}) with arrow "${arrow}" expects word "${clue.wordId}" ` +
+            `to start at (${expectedRow}, ${expectedCol}) but it starts at (${word.startRow}, ${word.startCol})`,
         );
       }
     }

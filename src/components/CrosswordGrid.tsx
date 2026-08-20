@@ -293,7 +293,9 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   }, [game.others]);
 
   return (
-    <div className="flex w-full flex-col items-center gap-5 px-4 pb-[env(safe-area-inset-bottom)]">
+    // Marge réduite sur téléphone : 32 px de padding coûtaient ~4 px de
+    // largeur à chaque case, ce qui compte beaucoup pour lire les définitions.
+    <div className="flex w-full flex-col items-center gap-5 px-2 pb-[env(safe-area-inset-bottom)] sm:px-4">
       <motion.div
         animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
@@ -303,6 +305,11 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
           className="grid overflow-hidden rounded-[14px] border border-white/40"
           style={{
             gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
+            // Lignes explicitement uniformes : sans cette ligne, les rangées
+            // implicites s'étirent au gré du texte des définitions (mesuré :
+            // 40 à 55 px sur une même grille), ce qui donne des cases de
+            // tailles inégales.
+            gridTemplateRows: `repeat(${puzzle.rows}, 1fr)`,
             aspectRatio: `${puzzle.cols} / ${puzzle.rows}`,
           }}
         >

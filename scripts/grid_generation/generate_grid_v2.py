@@ -68,21 +68,47 @@ class Word:
     complexity: int
 
 
+# Types de flèches, au sens des vraies grilles de mots fléchés.
+#
+# Droites — l'indice est collé au mot, dans son axe :
+#   "right"      →   indice à GAUCHE,     mot horizontal
+#   "down"       ↓   indice AU-DESSUS,    mot vertical
+#
+# Coudées — l'indice est collé au mot, mais perpendiculairement à sa lecture.
+# Elles servent à libérer les bords : sans elles, la colonne 0 ne peut jamais
+# démarrer un mot horizontal (aucune case à sa gauche pour l'indice) et la
+# ligne 0 jamais un mot vertical.
+#   "down_right" ↳   indice AU-DESSUS,    mot horizontal
+#   "right_down" ⤵   indice à GAUCHE,     mot vertical
+ARROW_RIGHT = "right"
+ARROW_DOWN = "down"
+ARROW_DOWN_RIGHT = "down_right"
+ARROW_RIGHT_DOWN = "right_down"
+
+# Position de l'indice relativement à la PREMIÈRE LETTRE du mot.
+_CLUE_OFFSET = {
+    ARROW_RIGHT: (0, -1),
+    ARROW_RIGHT_DOWN: (0, -1),
+    ARROW_DOWN: (-1, 0),
+    ARROW_DOWN_RIGHT: (-1, 0),
+}
+
+
 @dataclass(frozen=True)
 class Slot:
     row: int
     col: int
     direction: str  # 'H' ou 'V'
     length: int
+    arrow: str = ARROW_RIGHT
 
     def cells(self):
         dr, dc = (0, 1) if self.direction == "H" else (1, 0)
         return [(self.row + i * dr, self.col + i * dc) for i in range(self.length)]
 
     def clue_pos(self):
-        if self.direction == "H":
-            return (self.row, self.col - 1)
-        return (self.row - 1, self.col)
+        dr, dc = _CLUE_OFFSET[self.arrow]
+        return (self.row + dr, self.col + dc)
 
 
 # ============================================================
@@ -323,10 +349,24 @@ def generate_skeleton(rows, cols, rng, length_weights, max_len):
             if choose_letter:
                 if not h_open:
                     h_start[r] = c
-                    h_short[r] = c == 0 or (cols - c) < min_viable
+                    # Colonne 0 : aucune case à gauche pour un indice droit,
+                    # mais une flèche coudée ↳ peut le prendre AU-DESSUS —
+                    # encore faut-il que cette case soit bien un indice. Elle
+                    # appartient à la ligne précédente, déjà décidée.
+                    if c == 0:
+                        bent_ok = r >= 1 and not roles[r - 1][0]
+                        h_short[r] = (not bent_ok) or (cols - c) < min_viable
+                    else:
+                        h_short[r] = (cols - c) < min_viable
                 if not v_open:
                     v_start[c] = r
-                    v_short[c] = r == 0 or (rows - r) < min_viable
+                    # Symétrique en ligne 0 : la flèche coudée ⤵ prend son
+                    # indice À GAUCHE, case déjà décidée dans cette même ligne.
+                    if r == 0:
+                        bent_ok = c >= 1 and not roles[0][c - 1]
+                        v_short[c] = (not bent_ok) or (rows - r) < min_viable
+                    else:
+                        v_short[c] = (rows - r) < min_viable
             else:
                 if h_open and h_len_before > 1:
                     closed_count[h_len_before] += 1
@@ -394,7 +434,12 @@ def extract_slots(roles, rows, cols, min_len=2):
                 c += 1
             length = c - start
             if length >= min_len:
-                slots.append(Slot(row=r, col=start, direction="H", length=length))
+                # Un mot horizontal démarrant colonne 0 n'a aucune case à sa
+                # gauche : son indice est au-dessus, avec une flèche coudée.
+                arrow = ARROW_DOWN_RIGHT if start == 0 else ARROW_RIGHT
+                slots.append(
+                    Slot(row=r, col=start, direction="H", length=length, arrow=arrow)
+                )
 
     for c in range(cols):
         r = 0
@@ -407,7 +452,12 @@ def extract_slots(roles, rows, cols, min_len=2):
                 r += 1
             length = r - start
             if length >= min_len:
-                slots.append(Slot(row=start, col=c, direction="V", length=length))
+                # Symétriquement, un mot vertical démarrant ligne 0 prend son
+                # indice à sa gauche.
+                arrow = ARROW_RIGHT_DOWN if start == 0 else ARROW_DOWN
+                slots.append(
+                    Slot(row=start, col=c, direction="V", length=length, arrow=arrow)
+                )
 
     return slots
 
@@ -419,6 +469,34 @@ def extract_slots(roles, rows, cols, min_len=2):
 # Ces deux mesures ne dépendent QUE du squelette, jamais des mots choisis :
 # on peut donc écarter un mauvais squelette avant l'étape de remplissage,
 # qui est de loin la plus coûteuse.
+
+def slots_are_valid(roles, slots, rows, cols):
+    """Vérifie que chaque mot a bien un indice utilisable.
+
+    Les flèches coudées permettent à un indice d'être perpendiculaire au mot
+    qu'il introduit ; il reste que la case visée doit exister, être une
+    case-indice, et ne pas porter plus de deux définitions (au-delà, elle
+    devient illisible dans une case de 46 px).
+    """
+    load = defaultdict(int)
+    seen = set()
+
+    for s in slots:
+        r, c = s.clue_pos()
+        if not (0 <= r < rows and 0 <= c < cols):
+            return False
+        if roles[r][c]:  # c'est une lettre, pas un indice
+            return False
+        # Deux mots ne peuvent pas partager le même indice ET la même flèche :
+        # rien ne permettrait au joueur de les distinguer.
+        key = (r, c, s.arrow)
+        if key in seen:
+            return False
+        seen.add(key)
+        load[(r, c)] += 1
+
+    return all(n <= 2 for n in load.values())
+
 
 def count_isolated_slots(slots):
     """Mots qui ne croisent aucun autre mot.
@@ -705,6 +783,7 @@ def build_cells_and_words(roles, slots, assignment, rows, cols, black_positions=
                         "hint_str": w.hint,
                         "complexity": w.complexity,
                         "direction": s.direction,
+                        "arrow": s.arrow,
                         "start": [s.row, s.col],
                         "length": s.length,
                     }
@@ -957,6 +1036,9 @@ def build_skeleton_bank(
 
         slots = extract_slots(roles, rows, cols)
         if len(slots) < 3 or any(s.length not in viable for s in slots):
+            continue
+
+        if not slots_are_valid(roles, slots, rows, cols):
             continue
 
         # Filtres de qualité : purement structurels, donc évalués avant le

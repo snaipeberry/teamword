@@ -110,6 +110,9 @@ def to_app_puzzle(cells, words_out, rows, cols, puzzle_id, title):
                     {
                         "text": cl["hint_str"],
                         "direction": DIRECTION_MAP[cl["direction"]],
+                        # Flèche coudée éventuelle : l'app doit dessiner un
+                        # glyphe différent et le placer du bon côté.
+                        "arrow": cl.get("arrow", DIRECTION_MAP[cl["direction"]]),
                         "wordId": key_to_id[key],
                     }
                 )
