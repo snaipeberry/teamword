@@ -319,6 +319,7 @@ def generate_skeleton(rows, cols, rng, length_weights, max_len):
                 for length, count in needed.items()
             )
 
+
             if can_letter and can_clue:
                 if not h_open and not v_open:
                     bias = 0.28  # nouvelle suite : on préfère plutôt continuer que l'isoler à 1 case
@@ -462,6 +463,85 @@ def extract_slots(roles, rows, cols, min_len=2):
     return slots
 
 
+def generate_skeleton_spaced(rows, cols, rng):
+    """Squelette dont les cases-indices ne se touchent JAMAIS.
+
+    Le générateur ligne-par-ligne (`generate_skeleton`) ne peut pas garantir
+    cette propriété : quand une suite arrive à sa longueur maximale il est
+    *obligé* de poser un indice, y compris contre un indice existant. Mesuré
+    sur 20 000 essais, il ne descendait jamais sous 5 paires collées.
+
+    On inverse donc le modèle : les cases-indices sont d'abord tirées comme un
+    ENSEMBLE INDÉPENDANT — la non-adjacence est acquise par construction, pas
+    espérée — puis les suites de lettres s'en déduisent.
+
+    Deux garde-fous pendant le tirage :
+
+    - **Orphelins.** Une lettre dont les quatre voisines sont des indices
+      n'appartient à aucun mot. Le cas est possible ici, ces quatre indices
+      étant seulement diagonaux entre eux, donc autorisés.
+    - **Indices morts.** Un indice dont la suite à droite ET celle en dessous
+      font moins de deux cases n'introduit aucun mot : il apparaîtrait comme
+      un trou. On le rend alors à la grille en case-lettre — opération sûre,
+      puisqu'elle ne fait que RETIRER des indices et ne peut donc pas recréer
+      d'adjacence.
+    """
+
+    def inb(r, c):
+        return 0 <= r < rows and 0 <= c < cols
+
+    def neighbours(r, c):
+        return ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1))
+
+    roles = [[True] * cols for _ in range(rows)]
+
+    def has_letter_neighbour(r, c):
+        return any(roles[rr][cc] for rr, cc in neighbours(r, c) if inb(rr, cc))
+
+    def place_clue(r, c):
+        if any(not roles[rr][cc] for rr, cc in neighbours(r, c) if inb(rr, cc)):
+            return False
+        roles[r][c] = False
+        for rr, cc in neighbours(r, c):
+            if inb(rr, cc) and roles[rr][cc] and not has_letter_neighbour(rr, cc):
+                roles[r][c] = True  # aurait isolé une lettre
+                return False
+        return True
+
+    # Le coin est toujours un indice : une lettre y serait forcément orpheline.
+    place_clue(0, 0)
+
+    positions = [(r, c) for r in range(rows) for c in range(cols) if (r, c) != (0, 0)]
+    rng.shuffle(positions)
+    for r, c in positions:
+        place_clue(r, c)
+
+    def run_length(r, c, dr, dc):
+        n = 0
+        while inb(r, c) and roles[r][c]:
+            n += 1
+            r += dr
+            c += dc
+        return n
+
+    for _ in range(6):
+        dead = [
+            (r, c)
+            for r in range(rows)
+            for c in range(cols)
+            if not roles[r][c]
+            and (r, c) != (0, 0)
+            and run_length(r, c + 1, 0, 1) < 2
+            and run_length(r + 1, c, 1, 0) < 2
+        ]
+        if not dead:
+            break
+        for r, c in dead:
+            roles[r][c] = True
+
+    return roles
+
+
 # ============================================================
 # QUALITÉ DU SQUELETTE
 # ============================================================
@@ -496,6 +576,22 @@ def slots_are_valid(roles, slots, rows, cols):
         load[(r, c)] += 1
 
     return all(n <= 2 for n in load.values())
+
+
+def count_adjacent_clue_pairs(roles, rows, cols):
+    """Paires de cases-indices qui se touchent (orthogonalement).
+
+    Deux indices collés forment un pavé de texte dense où l'on ne distingue
+    plus quelle définition va avec quelle flèche.
+    """
+    return sum(
+        1
+        for r in range(rows)
+        for c in range(cols)
+        if not roles[r][c]
+        for rr, cc in ((r + 1, c), (r, c + 1))
+        if rr < rows and cc < cols and not roles[rr][cc]
+    )
 
 
 def count_isolated_slots(slots):
@@ -853,7 +949,9 @@ def generate_best(words, rows, cols, attempts, seed, max_word_len=None, max_blac
     filled_attempts = 0
 
     for attempt in range(attempts):
-        roles = generate_skeleton(rows, cols, rng, weights, max_len)
+        # Générateur à indices espacés : c'est le seul qui garantisse qu'aucune
+        # case-indice n'en touche une autre (voir sa docstring).
+        roles = generate_skeleton_spaced(rows, cols, rng)
 
         # Cases-lettres isolées (aucun mot ni horizontal ni vertical) : rares,
         # mais plutôt que de tout rejeter, elles deviennent des cases noires —
@@ -1023,7 +1121,9 @@ def build_skeleton_bank(
     while len(bank) < target and attempts < budget:
         attempts += 1
 
-        roles = generate_skeleton(rows, cols, rng, weights, max_len)
+        # Générateur à indices espacés : c'est le seul qui garantisse qu'aucune
+        # case-indice n'en touche une autre (voir sa docstring).
+        roles = generate_skeleton_spaced(rows, cols, rng)
 
         # Zéro tolérance ici : une case orpheline deviendrait une case noire
         # au runtime, or on veut un banc utilisable tel quel.

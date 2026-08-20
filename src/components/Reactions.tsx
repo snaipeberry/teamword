@@ -6,10 +6,11 @@ import { hapticTick } from '../lib/sounds';
 const REACTIONS: { emoji: string; label: string }[] = [
   { emoji: '😂', label: 'Rigole' },
   { emoji: '😮', label: 'Waw' },
-  { emoji: '👏', label: 'Bien joué' },
-  { emoji: '🔥', label: 'En feu' },
-  { emoji: '🤔', label: 'Hmm' },
-];
+  { emoji: '👏', label: 'Bravo' },
+  // « Révéler » n'est pas une émotion mais un appel à l'aide : signaler aux
+  // autres qu'on sèche et qu'on aimerait griller un indice.
+  { emoji: '💡', label: 'Révéler' },
+]
 
 /** Boutons d'envoi, posés dans la barre d'actions. */
 export function ReactionBar() {
