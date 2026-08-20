@@ -18,17 +18,6 @@ function GameHeader({ title, round }: { title: string; round: number }) {
   const game = useGameState();
   return (
     <header className="flex w-full max-w-[480px] shrink-0 animate-pop-in flex-col items-center gap-0.5 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-      <div className="flex w-full items-center justify-between">
-        <span className="w-9" aria-hidden="true" />
-        <h1 className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-200 bg-clip-text text-center font-display text-2xl font-semibold tracking-wide text-transparent drop-shadow-sm">
-          {title}
-        </h1>
-        <SoundToggle />
-      </div>
-      <p className="flex items-center gap-2 text-xs font-semibold text-white/70">
-        <span className="rounded-full bg-white/15 px-2 py-0.5">Grille {round + 1}</span>
-        <span>{game.multiplayer ? '🟢 En direct' : 'Mode local'}</span>
-      </p>
     </header>
   );
 }
