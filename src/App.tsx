@@ -17,7 +17,7 @@ import { seedFor } from './lib/puzzleApi';
 function GameHeader({ title, round }: { title: string; round: number }) {
   const game = useGameState();
   return (
-    <header className="flex w-full max-w-[480px] animate-pop-in flex-col items-center gap-1 px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
+    <header className="flex w-full max-w-[480px] shrink-0 animate-pop-in flex-col items-center gap-0.5 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
       <div className="flex w-full items-center justify-between">
         <span className="w-9" aria-hidden="true" />
         <h1 className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-200 bg-clip-text text-center font-display text-2xl font-semibold tracking-wide text-transparent drop-shadow-sm">
@@ -46,7 +46,7 @@ function SessionInviteBar({ sessionId }: { sessionId: string }) {
 
   return (
     <div
-      className="my-3 flex animate-pop-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white/90 shadow-lg backdrop-blur-md"
+      className="my-1.5 flex shrink-0 animate-pop-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] text-white/90 shadow-lg backdrop-blur-md"
       style={{ animationDelay: '0.06s' }}
     >
       <span>
@@ -111,7 +111,10 @@ export default function App() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col items-center pb-10">
+    // Hauteur d'écran FIXE (100dvh suit la barre d'URL mobile, contrairement
+    // à 100vh) et `overflow-hidden` : la page ne défile plus, donc la grille
+    // et le clavier tiennent ensemble à l'écran en permanence.
+    <div className="flex h-[100dvh] flex-col items-center overflow-hidden">
       <AuroraBackground />
       <SessionProvider sessionId={sessionId}>
         <Round sessionId={sessionId} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Puzzle } from '../types/puzzle';
 import { cellId, wordCellIds } from '../lib/gridGeometry';
@@ -6,6 +6,7 @@ import { useGameState, useRound, type PlayerCursor } from '../state/GameState';
 import { ClueCell } from './ClueCell';
 import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
+import { Keyboard } from './Keyboard';
 import {
   hapticTick,
   hapticWin,
@@ -21,7 +22,6 @@ import {
 export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   const game = useGameState();
   const { advanceRound } = useRound();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
   const [wrongCells, setWrongCells] = useState<Set<string>>(new Set());
@@ -32,6 +32,44 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   // (invisible) state, so a normal effect flipping this once is more robust.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  /**
+   * Taille de la grille, mesurée plutôt que calculée en CSS.
+   *
+   * Il faut respecter DEUX bornes à la fois — largeur et hauteur disponibles —
+   * en gardant le ratio. Or `aspect-ratio` ne propage la contrainte que dans
+   * un sens : partir de la largeur laisse `max-height` rogner la hauteur sans
+   * réduire la largeur (mesuré : 353x301 sur un écran 375x667), et partir de
+   * la hauteur produit l'inverse. On mesure donc le conteneur et on prend le
+   * minimum des deux.
+   */
+  const fitRef = useRef<HTMLDivElement>(null);
+  const [gridWidth, setGridWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = fitRef.current;
+    if (!el) return;
+    const ratio = puzzle.cols / puzzle.rows;
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width > 0 && height > 0) {
+        setGridWidth(Math.floor(Math.min(width, 480, height * ratio)));
+      }
+    };
+    // Mesure SYNCHRONE dans le callback : ResizeObserver se déclenche déjà
+    // après le calcul de la mise en page, les dimensions y sont donc justes.
+    // Surtout, ne pas passer par requestAnimationFrame — il ne s'exécute pas
+    // quand l'onglet ne compose pas de frames (arrière-plan), et la grille
+    // resterait alors bloquée sur sa taille de repli.
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [puzzle.cols, puzzle.rows]);
 
   const cellsByWordId = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -183,9 +221,31 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
       setActiveCellId(id);
       setActiveWordId(nextWordId);
       game.setMyActiveCell(id);
-      inputRef.current?.focus();
     },
     [activeCellId, activeWordId, game, puzzle.grid],
+  );
+
+  /**
+   * Sélectionne un mot depuis sa DÉFINITION.
+   *
+   * Le double-tap sur une case pour changer de direction fonctionne, mais il
+   * est inutilisable en pratique : dès qu'on a saisi une lettre le curseur a
+   * avancé, donc retaper la case d'origine ne bascule plus rien. Passer par
+   * la définition — qui porte déjà sa flèche — rend le choix du sens explicite.
+   */
+  const selectWord = useCallback(
+    (wordId: string) => {
+      unlockAudio();
+      const ids = cellsByWordId.get(wordId);
+      if (!ids || ids.length === 0) return;
+      // On démarre sur la première case encore à remplir, pas systématiquement
+      // sur la première du mot : sinon on repasse sur des lettres déjà justes.
+      const target = ids.find((id) => game.getLetter(id) !== answerByCellId.get(id)) ?? ids[0];
+      setActiveWordId(wordId);
+      setActiveCellId(target);
+      game.setMyActiveCell(target);
+    },
+    [cellsByWordId, answerByCellId, game],
   );
 
   const moveWithinWord = useCallback(
@@ -237,7 +297,7 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   }, [activeCellId, game, isCellLocked, moveWithinWord]);
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
+    (e: globalThis.KeyboardEvent) => {
       const key = e.key;
       if (key === 'Backspace') {
         e.preventDefault();
@@ -270,6 +330,16 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
     [handleBackspace, handleLetter, moveWithinWord],
   );
 
+  // Écoute globale plutôt qu'un <input> caché qu'il fallait garder focalisé.
+  // Sur téléphone ce focus ouvrait le clavier natif — dont la hauteur est
+  // imposée par l'OS — qui recouvrait la moitié de la grille. La saisie
+  // tactile passe désormais par le clavier intégré (voir Keyboard.tsx), et
+  // cette écoute ne sert plus qu'au clavier physique sur ordinateur.
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
   const checkGrid = useCallback(() => {
     const wrong = new Set<string>();
     allLetterCells.forEach(({ id, answer }) => {
@@ -293,16 +363,33 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
   }, [game.others]);
 
   return (
-    // Marge réduite sur téléphone : 32 px de padding coûtaient ~4 px de
-    // largeur à chaque case, ce qui compte beaucoup pour lire les définitions.
-    <div className="flex w-full flex-col items-center gap-5 px-2 pb-[env(safe-area-inset-bottom)] sm:px-4">
-      <motion.div
-        animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
-        className="w-full max-w-[480px] rounded-2xl bg-gradient-to-br from-aurora-amber via-aurora-coral to-aurora-magenta p-[3px] shadow-2xl"
-      >
+    // `min-h-0` est indispensable : sans lui un enfant flex refuse de se
+    // comprimer sous sa taille de contenu, et la grille pousserait le clavier
+    // hors de l'écran au lieu de se réduire.
+    <div className="flex w-full min-h-0 flex-1 flex-col items-center gap-2 px-2 sm:px-4">
+      {/*
+        Conteneur centreur : c'est LUI qui absorbe la hauteur restante. La
+        carte, elle, ne doit surtout pas être en `flex-1` — cela l'étirerait
+        verticalement et écraserait son ratio (cases mesurées 46x59 au lieu
+        de carrées). Elle se dimensionne donc uniquement par son aspect-ratio,
+        borné par la hauteur ET la largeur disponibles.
+      */}
+      <div ref={fitRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
+        <motion.div
+          animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
+          className="rounded-2xl bg-gradient-to-br from-aurora-amber via-aurora-coral to-aurora-magenta p-[3px] shadow-2xl"
+          style={{
+            aspectRatio: `${puzzle.cols} / ${puzzle.rows}`,
+            // Avant la première mesure on retombe sur la largeur pleine, pour
+            // éviter un saut de mise en page au montage.
+            width: gridWidth ? `${gridWidth}px` : '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
+          }}
+        >
         <div
-          className="grid overflow-hidden rounded-[14px] border border-white/40"
+          className="grid h-full w-full overflow-hidden rounded-[14px] border border-white/40"
           style={{
             gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
             // Lignes explicitement uniformes : sans cette ligne, les rangées
@@ -310,7 +397,6 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
             // 40 à 55 px sur une même grille), ce qui donne des cases de
             // tailles inégales.
             gridTemplateRows: `repeat(${puzzle.rows}, 1fr)`,
-            aspectRatio: `${puzzle.cols} / ${puzzle.rows}`,
           }}
         >
           {puzzle.grid.map((rowCells, row) =>
@@ -320,7 +406,15 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
                 return <div key={id} className="bg-neutral-100" />;
               }
               if (cell.type === 'clue') {
-                return <ClueCell key={id} data={cell} solvedWordIds={solvedWordIds} />;
+                return (
+                  <ClueCell
+                    key={id}
+                    data={cell}
+                    solvedWordIds={solvedWordIds}
+                    activeWordId={activeWordId}
+                    onSelectWord={selectWord}
+                  />
+                );
               }
               const value = game.getLetter(id);
               return (
@@ -339,27 +433,16 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
               );
             }),
           )}
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
+      </div>
 
-      <input
-        ref={inputRef}
-        className="pointer-events-none absolute h-px w-px opacity-0"
-        autoCapitalize="characters"
-        autoCorrect="off"
-        autoComplete="off"
-        inputMode="text"
-        aria-hidden="true"
-        tabIndex={-1}
-        onKeyDown={handleKeyDown}
-      />
-
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-3">
         <motion.button
           type="button"
           onClick={revealActiveCell}
           whileTap={{ scale: 0.94 }}
-          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-lg backdrop-blur-md transition"
+          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-bold text-white shadow-lg backdrop-blur-md transition"
         >
           <span aria-hidden="true">💡</span> Révéler
         </motion.button>
@@ -368,11 +451,13 @@ export function CrosswordGrid({ puzzle }: { puzzle: Puzzle }) {
           type="button"
           onClick={checkGrid}
           whileTap={{ scale: 0.94 }}
-          className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-aurora-violet shadow-xl transition"
+          className="flex items-center gap-1.5 rounded-full bg-white px-5 py-1.5 text-xs font-bold text-aurora-violet shadow-xl transition"
         >
           <span aria-hidden="true">✓</span> Vérifier
         </motion.button>
       </div>
+
+      <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />
 
       <AnimatePresence>
         {celebrating && <CompletionCelebration onDone={goToNextRound} />}

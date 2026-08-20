@@ -13,7 +13,7 @@ export function Scoreboard() {
   const leaderScore = game.scoreboard[0]?.score ?? 0;
 
   return (
-    <div className="mb-3 flex w-full max-w-[480px] animate-pop-in flex-col gap-2 px-4" style={{ animationDelay: '0.12s' }}>
+    <div className="mb-1.5 flex w-full max-w-[480px] shrink-0 animate-pop-in flex-col gap-1 px-4" style={{ animationDelay: '0.12s' }}>
       {game.scoreboard.map((p, i) => {
         const isLeader = i === 0 && leaderScore > 0;
         const displayName = p.isMe ? 'Vous' : p.name;

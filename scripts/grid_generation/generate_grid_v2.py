@@ -1246,6 +1246,12 @@ def main():
         help="Nombre max de mots ne croisant aucun autre mot (défaut 0).",
     )
     parser.add_argument(
+        "--max-attempts-per-hit", type=int, default=4000,
+        help="Budget de tentatives par squelette recherché (défaut 4000). "
+             "À augmenter quand les filtres sont stricts sur une grande grille : "
+             "les bons squelettes y sont bien plus rares.",
+    )
+    parser.add_argument(
         "--max-dead-clues", type=int, default=None,
         help="Nombre max de cases-indices sans définition, c.-à-d. de trous "
              "visibles dans la grille (défaut : illimité).",
@@ -1275,6 +1281,7 @@ def main():
         bank, attempts = build_skeleton_bank(
             words, args.rows, args.cols, args.build_bank, seed=args.seed,
             max_isolated=args.max_isolated, max_dead_clues=args.max_dead_clues,
+            max_attempts_per_hit=args.max_attempts_per_hit,
         )
         if not bank:
             raise SystemExit(

@@ -26,6 +26,8 @@ const BENT: Record<Arrow, boolean> = {
 interface ClueCellProps {
   data: ClueCellData;
   solvedWordIds: Set<string>;
+  activeWordId: string | null;
+  onSelectWord: (wordId: string) => void;
 }
 
 /**
@@ -46,7 +48,12 @@ function fontSizeFor(totalChars: number, clueCount: number): string {
   return 'text-[clamp(7px,2.5vw,10.5px)]';
 }
 
-export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
+export function ClueCell({
+  data,
+  solvedWordIds,
+  activeWordId,
+  onSelectWord,
+}: ClueCellProps) {
   const isDouble = data.clues.length > 1;
   const totalChars = data.clues.reduce((n, c) => n + c.text.length, 0);
 
@@ -66,14 +73,20 @@ export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
       {data.clues.map((clue, i) => {
         const solved = solvedWordIds.has(clue.wordId);
         const arrow = clue.arrow ?? clue.direction;
+        const active = clue.wordId === activeWordId;
         return (
-          <span
+          // Chaque définition est un bouton : c'est le moyen le plus direct de
+          // choisir un mot ET son sens de lecture, notamment pour les mots
+          // verticaux qu'on ne pouvait sélectionner qu'en tapant deux fois de
+          // suite la même case.
+          <button
             key={i}
+            type="button"
+            onClick={() => onSelectWord(clue.wordId)}
             className={[
-              'w-full transition-opacity duration-300',
-              // Trait de séparation : sans lui, deux définitions empilées se
-              // lisent comme une seule phrase.
+              'w-full cursor-pointer rounded-[2px] transition-all duration-200',
               i > 0 ? 'mt-[2px] border-t border-neutral-500/30 pt-[2px]' : '',
+              active ? 'bg-cell-active/60 ring-1 ring-cyan-500/60' : '',
               solved ? 'text-emerald-700 opacity-50 line-through decoration-emerald-600' : '',
             ].join(' ')}
           >
@@ -99,7 +112,7 @@ export function ClueCell({ data, solvedWordIds }: ClueCellProps) {
             >
               {ARROW_GLYPH[arrow]}
             </span>
-          </span>
+          </button>
         );
       })}
     </div>
