@@ -44,13 +44,11 @@ declare global {
       players: LiveMap<string, { name: string; color: string }>;
     };
     /**
-     * Réactions envoyées en direct. Volontairement éphémères : elles passent
-     * par le canal de diffusion et ne sont jamais écrites dans Storage — une
-     * réaction n'a de sens qu'au moment où elle est envoyée, et la persister
-     * ferait réapparaître de vieux emojis à chaque reconnexion.
+     * Messages éphémères : ils passent par le canal de diffusion et ne sont
+     * jamais écrits dans Storage — ils n'ont de sens qu'à l'instant où ils
+     * sont émis, et les persister les ferait rejouer à chaque reconnexion.
      */
     RoomEvent:
-      | { type: 'reaction'; emoji: string; playerId: string; name: string }
       /**
        * Talkie-walkie. La voix est enregistrée pendant l'appui puis envoyée
        * découpée au relâchement : les événements de diffusion doivent rester

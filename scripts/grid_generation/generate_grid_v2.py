@@ -53,6 +53,7 @@ import json
 import random
 import re
 import time
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from collections import defaultdict
@@ -137,6 +138,7 @@ def load_dictionary(path):
 
     result = []
     seen = set()
+    seen_display = set()
 
     for item in data:
         if not isinstance(item, dict):
@@ -162,6 +164,17 @@ def load_dictionary(path):
         if word in seen:
             continue
 
+        # L'app compare les saisies sans accents ni casse : « té » et « te »
+        # y deviennent le MÊME mot. Les garder tous les deux faisait
+        # apparaître deux fois « TE » dans une grille — visiblement un
+        # doublon pour le joueur, et impossible de savoir quelle définition
+        # va avec quelle case. On n'en garde donc qu'un.
+        display = "".join(
+            ch for ch in unicodedata.normalize("NFD", word) if not unicodedata.combining(ch)
+        ).upper()
+        if display in seen_display:
+            continue
+
         try:
             complexity = int(item.get("complexity", 3))
         except Exception:
@@ -175,6 +188,7 @@ def load_dictionary(path):
             )
         )
         seen.add(word)
+        seen_display.add(display)
 
     return result
 
@@ -511,6 +525,23 @@ def generate_skeleton_spaced(rows, cols, rng):
     # Le coin est toujours un indice : une lettre y serait forcément orpheline.
     place_clue(0, 0)
 
+    # Indices en quinconce sur la première ligne et la première colonne.
+    #
+    # Ces deux bords sont les seuls où une case-indice peut dépasser deux
+    # définitions : n'ayant pas de voisine avant elle, elle y cumule sa flèche
+    # droite ET une flèche coudée. C'était de très loin le premier motif de
+    # rejet (99,99 % des essais en 10x10).
+    #
+    # En posant un indice une case sur deux, la suite horizontale qui les
+    # sépare ne fait qu'une case : elle ne forme donc pas de mot, ce qui
+    # retire une définition au compte de chaque indice de bord et le ramène
+    # sous la limite. Mesuré : 6 -> 1845 grilles complètes pour 20 000 essais
+    # en 8x8, et 1 -> 497 en 10x10.
+    for c in range(2, cols, 2):
+        place_clue(0, c)
+    for r in range(2, rows, 2):
+        place_clue(r, 0)
+
     positions = [(r, c) for r in range(rows) for c in range(cols) if (r, c) != (0, 0)]
     rng.shuffle(positions)
     for r, c in positions:
@@ -667,7 +698,8 @@ def build_word_index(words):
     return WordIndex(words)
 
 
-def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index=None):
+def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index=None,
+               avoid_words=None):
     """Renvoie (assignment, complete). `assignment` couvre tous les slots
     quand complete=True ; sinon c'est le MEILLEUR remplissage partiel
     rencontré pendant la recherche (le plus de slots comblés), pour que
@@ -677,6 +709,11 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
 
     `index` (WordIndex) peut être fourni pour éviter de le reconstruire à
     chaque appel — indispensable pour un usage serveur.
+
+    `avoid_words` rétrograde des mots (typiquement ceux des grilles
+    précédentes) sans jamais les interdire : sur les suites de 2 ou 3 cases
+    le stock est si mince qu'une exclusion ferme rendrait beaucoup de grilles
+    irremplissables. Ils ne sont donc essayés qu'en dernier recours.
     """
 
     if index is None:
@@ -718,6 +755,14 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
 
     empty = frozenset()
 
+    # Indices (dans les pools par longueur) des mots à rétrograder.
+    avoid_idx = {}
+    if avoid_words:
+        for length, pool in index.by_length.items():
+            marked = {i for i, w in enumerate(pool) if w.word in avoid_words}
+            if marked:
+                avoid_idx[length] = marked
+
     def candidate_set(si):
         """Ensemble des indices de mots compatibles avec les lettres déjà
         fixées par les slots perpendiculaires (mots déjà pris exclus)."""
@@ -748,9 +793,16 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
         return (cand - taken) if taken else cand
 
     def materialize(si, cand):
-        pool = index.by_length[slots[si].length]
+        length = slots[si].length
+        pool = index.by_length[length]
         picks = list(cand)
         rng.shuffle(picks)  # variété entre générations successives
+        marked = avoid_idx.get(length)
+        if marked:
+            # Tri STABLE sur un booléen : les mots déjà vus passent derrière,
+            # l'ordre aléatoire est conservé à l'intérieur de chaque groupe.
+            # Le plafonnage qui suit les élimine donc en premier.
+            picks.sort(key=lambda i: i in marked)
         del picks[candidate_cap:]
         return [(i, pool[i]) for i in picks]
 
@@ -1207,7 +1259,8 @@ def load_skeleton_bank(path):
     return payload
 
 
-def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks=2500):
+def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks=2500,
+                       avoid_words=None):
     """Chemin TEMPS RÉEL : prend un squelette du banc et le remplit.
 
     `index` (WordIndex) doit être construit une fois au démarrage du serveur
@@ -1234,7 +1287,8 @@ def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks
         roles = decode_roles(rng.choice(skeletons))
         slots = extract_slots(roles, rows, cols)
         assignment, complete = fill_slots(
-            slots, words, rng, max_backtracks=max_backtracks, index=index
+            slots, words, rng, max_backtracks=max_backtracks, index=index,
+            avoid_words=avoid_words,
         )
         if not complete:
             continue

@@ -25,31 +25,37 @@ const BENT: Record<Arrow, boolean> = {
 
 interface ClueCellProps {
   data: ClueCellData;
+  /** Côté de la case en pixels — la police s'y rapporte. */
+  cellSize: number;
   solvedWordIds: Set<string>;
   activeWordId: string | null;
   onSelectWord: (wordId: string) => void;
 }
 
 /**
- * Taille de police adaptée au contenu : une définition courte s'affiche
- * confortablement, une longue doit se resserrer pour tenir dans une case de
- * ~46 px de côté sur téléphone.
+ * Taille de police, en fraction de la TAILLE DE CASE.
+ *
+ * Elle était auparavant exprimée en `vw`, donc indexée sur la largeur de
+ * l'écran : cela coïncidait avec la case en 8x8, mais plus du tout en 10x10
+ * où les cases rétrécissent alors que l'écran ne bouge pas — 40 % des
+ * définitions y débordaient. La rapporter à la case rend le réglage valable
+ * quelle que soit la taille de grille.
  *
  * Le nombre de définitions compte autant que leur longueur : une case double
  * doit loger deux blocs ET un séparateur, donc à nombre de caractères égal
- * il lui faut une police plus petite (sans ce supplément, les cases doubles
- * débordaient).
+ * il lui faut une police plus petite.
  */
-function fontSizeFor(totalChars: number, clueCount: number): string {
+function fontRatioFor(totalChars: number, clueCount: number): number {
   const budget = totalChars + (clueCount > 1 ? 12 : 0);
-  if (budget > 32) return 'text-[clamp(5px,1.7vw,7.5px)]';
-  if (budget > 24) return 'text-[clamp(5.5px,1.85vw,8.5px)]';
-  if (budget > 14) return 'text-[clamp(6px,2.05vw,9px)]';
-  return 'text-[clamp(7px,2.5vw,10.5px)]';
+  if (budget > 32) return 0.155;
+  if (budget > 24) return 0.175;
+  if (budget > 14) return 0.19;
+  return 0.225;
 }
 
 export function ClueCell({
   data,
+  cellSize,
   solvedWordIds,
   activeWordId,
   onSelectWord,
@@ -66,9 +72,9 @@ export function ClueCell({
         'flex h-full w-full flex-col items-center justify-center overflow-hidden',
         'border border-cell-border/50 px-[2px] py-[1px] text-center font-clue font-bold',
         'leading-[1.1] text-neutral-800 hyphens-auto [overflow-wrap:anywhere]',
-        fontSizeFor(totalChars, data.clues.length),
         isDouble ? 'bg-gradient-to-br from-clue-accent to-amber-200' : 'bg-clue',
       ].join(' ')}
+      style={{ fontSize: `${(cellSize * fontRatioFor(totalChars, data.clues.length)).toFixed(2)}px` }}
     >
       {data.clues.map((clue, i) => {
         const solved = solvedWordIds.has(clue.wordId);

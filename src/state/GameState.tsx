@@ -35,14 +35,6 @@ export interface PlayerScore {
   isMe: boolean;
 }
 
-/** Réaction reçue d'un autre joueur, à afficher puis oublier. */
-export interface LiveReaction {
-  id: number;
-  emoji: string;
-  name: string;
-  isMe: boolean;
-}
-
 export interface GameStateApi {
   /** false when no Liveblocks key is configured — grid still fully playable, just single-player/local. */
   multiplayer: boolean;
@@ -65,9 +57,6 @@ export interface GameStateApi {
   /** Ce joueur s'est-il déclaré prêt pour CETTE grille ? */
   isReadyFor: (playerId: string, round: number) => boolean;
 
-  /** Diffuse une réaction aux autres joueurs (éphémère, jamais persistée). */
-  sendReaction: (emoji: string) => void;
-
   /** Talkie-walkie : maintenir pour parler, relâcher pour envoyer. */
   startTalking: () => Promise<void>;
   stopTalking: () => void;
@@ -75,8 +64,6 @@ export interface GameStateApi {
   talkingNames: string[];
   /** Le micro a été refusé (ou est indisponible) : on le signale plutôt que d'échouer en silence. */
   micDenied: boolean;
-  /** Réactions actuellement à l'écran. */
-  reactions: LiveReaction[];
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -109,8 +96,6 @@ export function useRound(): RoundApi {
 
 const PLAYER_COLORS = ['#F5A623', '#4ECDC4', '#FF6B6B', '#8E7CFF', '#2ECC71'];
 
-/** Durée d'affichage d'une réaction avant disparition. */
-const REACTION_LIFETIME_MS = 2600;
 
 function randomColor(): string {
   return PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
@@ -162,15 +147,6 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
   const { letters, setLetters, revealed, setRevealed } = store;
   const myColor = useMemo(randomColor, []);
 
-  // En solo il n'y a personne à attendre : « prêt » est immédiatement vrai,
-  // et une réaction n'est qu'une petite animation pour soi-même.
-  const [reactions, setReactions] = useState<LiveReaction[]>([]);
-  const pushReaction = useCallback((emoji: string) => {
-    const id = Date.now() + Math.random();
-    setReactions((prev) => [...prev, { id, emoji, name: 'Vous', isMe: true }]);
-    setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), REACTION_LIFETIME_MS);
-  }, []);
-
   const api = useMemo<GameStateApi>(
     () => ({
       multiplayer: false,
@@ -189,15 +165,13 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       setReady: () => {},
       allReadyFor: () => true,
       isReadyFor: () => true,
-      sendReaction: pushReaction,
-      reactions,
       // En solo il n'y a personne à qui parler : le bouton est masqué côté UI.
       startTalking: async () => {},
       stopTalking: () => {},
       talkingNames: [],
       micDenied: false,
     }),
-    [letters, revealed, setLetters, setRevealed, myColor, pushReaction, reactions],
+    [letters, revealed, setLetters, setRevealed, myColor],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
@@ -322,29 +296,6 @@ function LiveblocksGameBridge({
   }, []);
 
   const broadcast = useBroadcastEvent();
-  const [reactions, setReactions] = useState<LiveReaction[]>([]);
-
-  const pushReaction = useCallback((emoji: string, name: string, isMe: boolean) => {
-    const id = Date.now() + Math.random();
-    setReactions((prev) => [...prev, { id, emoji, name, isMe }]);
-    setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), REACTION_LIFETIME_MS);
-  }, []);
-
-  const sendReaction = useCallback(
-    (emoji: string) => {
-      // Affichage local immédiat : la diffusion ne se renvoie pas à
-      // l'expéditeur, et attendre l'aller-retour rendrait le bouton mou.
-      pushReaction(emoji, 'Vous', true);
-      broadcast({
-        type: 'reaction',
-        emoji,
-        playerId: myPresence.playerId,
-        name: myPresence.name,
-      });
-    },
-    [broadcast, pushReaction, myPresence.playerId, myPresence.name],
-  );
-
   // ---------- Talkie-walkie ----------
   const recordingRef = useRef<Recording | null>(null);
   // Indexé par playerId : `voice-end` ne transporte que l'identifiant.
@@ -395,10 +346,6 @@ function LiveblocksGameBridge({
   const inboxRef = useRef(new Map<string, { parts: Map<number, string>; total: number }>());
 
   useEventListener(({ event }) => {
-    if (event.type === 'reaction') {
-      pushReaction(event.emoji, event.name, false);
-      return;
-    }
     if (event.type === 'voice-start') {
       setTalking((prev) => ({ ...prev, [event.playerId]: event.name }));
       return;
@@ -514,8 +461,6 @@ function LiveblocksGameBridge({
       setReady,
       allReadyFor,
       isReadyFor,
-      sendReaction,
-      reactions,
       startTalking,
       stopTalking,
       talkingNames,
@@ -523,7 +468,7 @@ function LiveblocksGameBridge({
     }),
     [
       letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence,
-      scoreboard, setReady, allReadyFor, isReadyFor, sendReaction, reactions,
+      scoreboard, setReady, allReadyFor, isReadyFor,
       startTalking, stopTalking, talkingNames, micDenied,
     ],
   );

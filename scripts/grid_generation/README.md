@@ -30,8 +30,8 @@ plus que du remplissage.
 ### 1. Construire le banc (hors-ligne)
 
 ```bash
-python generate_grid_v2.py ../datasets/mots_fleches_enriched_v6_hard_hints.json \
-    --build-bank 80 --bank-file banks/skeletons_8x8.json \
+python generate_grid_v2.py ../datasets/mots_fleches_enriched_v8_conjugation_fixed.json \
+    --build-bank 80 --bank-file banks/skeletons_10x10.json \
     --max-isolated 3 --max-dead-clues 7
 ```
 
@@ -41,17 +41,17 @@ le temps réel n'a donc jamais besoin de réparation par cases noires.
 ### 2. Générer une grille (temps réel)
 
 ```bash
-python generate_grid_v2.py ../datasets/mots_fleches_enriched_v6_hard_hints.json \
-    --from-bank --bank-file banks/skeletons_8x8.json
+python generate_grid_v2.py ../datasets/mots_fleches_enriched_v8_conjugation_fixed.json \
+    --from-bank --bank-file banks/skeletons_10x10.json
 ```
 
 ### 3. Intégration serveur
 
 ```python
 # --- au demarrage, UNE fois (~5 ms) ---
-words   = load_dictionary("../datasets/mots_fleches_enriched_v6_hard_hints.json")
+words   = load_dictionary("../datasets/mots_fleches_enriched_v8_conjugation_fixed.json")
 index   = build_word_index(words)          # index inverse, immuable
-bank    = load_skeleton_bank("banks/skeletons_8x8.json")
+bank    = load_skeleton_bank("banks/skeletons_10x10.json")
 
 # --- par requete (~1 ms) ---
 cells, words_out, metrics = generate_from_bank(bank, words, rng, index=index)

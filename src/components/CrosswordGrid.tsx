@@ -8,7 +8,6 @@ import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
-import { ReactionBar, ReactionOverlay } from './Reactions';
 import { PushToTalk, TalkingIndicator } from './PushToTalk';
 import {
   hapticTick,
@@ -74,6 +73,11 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
       window.removeEventListener('resize', measure);
     };
   }, [puzzle.cols, puzzle.rows]);
+
+  // Côté d'une case, dérivé de la mesure du conteneur : c'est lui qui
+  // dimensionne le texte des définitions (voir ClueCell). Repli sur une
+  // valeur plausible tant que la première mesure n'a pas eu lieu.
+  const cellSize = (gridWidth ?? 360) / puzzle.cols;
 
   const cellsByWordId = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -421,6 +425,7 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
                   <ClueCell
                     key={id}
                     data={cell}
+                    cellSize={cellSize}
                     solvedWordIds={solvedWordIds}
                     activeWordId={activeWordId}
                     onSelectWord={selectWord}
@@ -468,13 +473,10 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
         >
           <span aria-hidden="true">✓</span> Vérifier
         </motion.button>
-
-        <ReactionBar />
       </div>
 
       <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />
 
-      <ReactionOverlay />
       <TalkingIndicator />
 
       <AnimatePresence>

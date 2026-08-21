@@ -45,7 +45,7 @@ def _find_project_root():
 # (fichier manquant, banc non embarqué, etc.) depuis la réponse HTTP.
 
 _BOOT_ERROR = None
-_WORDS = _INDEX = _BANK = _to_app_puzzle = None
+_WORDS = _INDEX = _BANK = _to_app_puzzle = _rotation_avoid = None
 _BOOT_MS = 0.0
 
 try:
@@ -61,10 +61,13 @@ try:
         load_dictionary,
         load_skeleton_bank,
     )
-    from serve_puzzles import to_app_puzzle as _to_app_puzzle  # noqa: E402
+    from serve_puzzles import (  # noqa: E402
+        rotation_avoid as _rotation_avoid,
+        to_app_puzzle as _to_app_puzzle,
+    )
 
-    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v6_hard_hints.json"
-    BANK_PATH = GEN_DIR / "banks" / "skeletons_8x8.json"
+    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v8_conjugation_fixed.json"
+    BANK_PATH = GEN_DIR / "banks" / "skeletons_10x10.json"
 
     _WORDS = load_dictionary(DATASET_PATH)
     _INDEX = build_word_index(_WORDS)
@@ -79,7 +82,10 @@ def build_payload(seed=None):
     rng = random.Random(seed) if seed is not None else random.Random()
 
     cells, words_out, metrics = generate_from_bank(
-        _BANK, _WORDS, rng, index=_INDEX
+        _BANK, _WORDS, rng, index=_INDEX,
+        # Alterne le stock de mots courts pour ne pas revoir les mêmes
+        # d'une grille à l'autre.
+        avoid_words=_rotation_avoid(_INDEX, seed),
     )
 
     payload = _to_app_puzzle(

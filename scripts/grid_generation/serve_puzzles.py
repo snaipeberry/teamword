@@ -34,6 +34,7 @@ Lancement :
 import argparse
 import json
 import random
+import re
 import sys
 import time
 import unicodedata
@@ -128,6 +129,49 @@ def to_app_puzzle(cells, words_out, rows, cols, puzzle_id, title):
     }
 
 
+# L'app envoie une graine de la forme « <session>-r<numéro de grille> ».
+SEED_RE = re.compile(r"^(?P<session>.+)-r(?P<round>\d+)$")
+
+# Longueurs dont le stock est trop mince pour éviter les redites naturellement.
+# Mesuré sur ce dictionnaire : 91 mots répétés d'une grille à la suivante,
+# dont 75 de 2 lettres et 15 de 3 lettres — au-delà de 4 lettres, 1 sur 231.
+# Le stock (62 mots de 2 lettres pour une douzaine utilisés par grille) rend
+# la collision quasi certaine par simple tirage.
+THIN_STOCK_MAX = 200
+
+# Nombre de groupes alternés. Deux est optimal ici : plus fin, chaque groupe
+# devient trop petit pour couvrir les ~12 mots de 2 lettres d'une grille, le
+# remplissage doit puiser dans les autres groupes et l'effet se dilue
+# (mesuré : 7,6 % de recouvrement à K=2, contre 10,1 % à K=3 et 10,8 % à K=4).
+ROTATION_GROUPS = 2
+
+
+def rotation_avoid(index, seed):
+    """Mots à rétrograder pour que deux grilles consécutives ne se ressemblent pas.
+
+    Le stock court est découpé en groupes alternés, et chaque grille
+    privilégie celui qui correspond à son numéro : deux grilles qui se
+    suivent puisent donc dans des moitiés différentes.
+
+    Entièrement déterministe — cela ne dépend que du numéro de grille, que
+    les deux joueurs partagent — et sans coût : aucune grille précédente
+    n'est recalculée.
+    """
+    m = SEED_RE.match(seed or "")
+    if not m:
+        return None
+
+    current = int(m.group("round"))
+    avoid = set()
+    for length, pool in index.by_length.items():
+        if len(pool) > THIN_STOCK_MAX:
+            continue  # stock large : les redites y sont déjà négligeables
+        for i, word in enumerate(pool):
+            if i % ROTATION_GROUPS != current % ROTATION_GROUPS:
+                avoid.add(word.word)
+    return avoid or None
+
+
 class PuzzleService:
     """Détient les ressources immuables (dictionnaire, index, banc)."""
 
@@ -162,7 +206,8 @@ class PuzzleService:
         rng = random.Random(seed) if seed is not None else random.Random()
 
         cells, words_out, metrics = generate_from_bank(
-            self.bank, self.words, rng, index=self.index
+            self.bank, self.words, rng, index=self.index,
+            avoid_words=rotation_avoid(self.index, seed),
         )
 
         payload = to_app_puzzle(
@@ -253,10 +298,10 @@ def main():
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=here.parent / "datasets" / "mots_fleches_enriched_v6_hard_hints.json",
+        default=here.parent / "datasets" / "mots_fleches_enriched_v8_conjugation_fixed.json",
     )
     parser.add_argument(
-        "--bank-file", type=Path, default=here / "banks" / "skeletons_8x8.json"
+        "--bank-file", type=Path, default=here / "banks" / "skeletons_10x10.json"
     )
     args = parser.parse_args()
 
