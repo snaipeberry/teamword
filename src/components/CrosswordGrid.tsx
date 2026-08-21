@@ -9,6 +9,7 @@ import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
 import { PushToTalk, TalkingIndicator } from './PushToTalk';
+import { ActiveClueBar } from './ActiveClueBar';
 import {
   hapticTick,
   hapticWin,
@@ -217,6 +218,28 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
   }, [activeCellId, activeWordId, cellsByWordId, allLetterCells, answerByCellId, game]);
 
   const activeWordCellIds = activeWordId ? (cellsByWordId.get(activeWordId) ?? []) : [];
+
+  // Définition en cours, reprise en grand au-dessus du clavier.
+  const activeWord = useMemo(
+    () => puzzle.words.find((w) => w.id === activeWordId) ?? null,
+    [puzzle.words, activeWordId],
+  );
+
+  // La flèche vit sur la case-indice, pas sur le mot : on la retrouve en
+  // cherchant l'entrée qui désigne ce mot.
+  const activeArrow = useMemo(() => {
+    if (!activeWordId) return null;
+    for (const row of puzzle.grid) {
+      for (const cell of row) {
+        if (cell.type !== 'clue') continue;
+        const entry = cell.clues.find((c) => c.wordId === activeWordId);
+        if (entry) return entry.arrow ?? entry.direction;
+      }
+    }
+    return null;
+  }, [puzzle.grid, activeWordId]);
+
+  const activeFilled = activeWordCellIds.filter((id) => game.getLetter(id)).length;
 
   const selectCell = useCallback(
     (row: number, col: number) => {
@@ -460,9 +483,11 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
           type="button"
           onClick={revealActiveCell}
           whileTap={{ scale: 0.94 }}
-          className="flex shrink-0 items-center gap-1 rounded-full border border-white/30 bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur-md transition"
+          aria-label="Révéler une lettre"
+          title="Révéler une lettre"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm shadow-lg backdrop-blur-md transition"
         >
-          <span aria-hidden="true">💡</span> Révéler
+          <span aria-hidden="true">💡</span>
         </motion.button>
 
         <motion.button
@@ -473,6 +498,8 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
         >
           <span aria-hidden="true">✓</span> Vérifier
         </motion.button>
+
+        <ActiveClueBar word={activeWord} arrow={activeArrow} filled={activeFilled} />
       </div>
 
       <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />

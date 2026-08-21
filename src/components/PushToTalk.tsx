@@ -58,7 +58,7 @@ export function PushToTalk() {
       onPointerDown={begin}
       onPointerUp={end}
       onPointerCancel={end}
-      className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-bold shadow-lg backdrop-blur-md transition ${
+      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm shadow-lg backdrop-blur-md transition ${
         game.micDenied
           ? 'border border-white/20 bg-white/10 text-white/40'
           : talking
@@ -67,8 +67,9 @@ export function PushToTalk() {
       }`}
       style={{ touchAction: 'none' }}
     >
+      {/* Icône seule : la place gagnée revient au rappel de la définition,
+          qui doit rester lisible (voir ActiveClueBar). */}
       <span aria-hidden="true">{game.micDenied ? '🚫' : '🎙️'}</span>
-      {talking ? 'Parlez…' : 'Parler'}
     </motion.button>
   );
 }

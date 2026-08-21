@@ -46,12 +46,12 @@ de démonstration embarquée si le service est éteint.
 
 Il n'y a **qu'un seul dictionnaire et un seul banc** : la notion de difficulté
 a été retirée au profit d'un dataset unique et bien plus large
-(`scripts/datasets/mots_fleches_enriched_v8_conjugation_fixed.json`, 4573 mots utilisables).
+(`scripts/datasets/mots_fleches_enriched_v9_infinitives_2letters.json`, 4573 mots utilisables).
 Le banc vit dans `scripts/grid_generation/banks/skeletons_10x10.json` et est déjà
 construit. Pour le régénérer (opération lente, hors-ligne) :
 
 ```bash
-python3 generate_grid_v2.py ../datasets/mots_fleches_enriched_v8_conjugation_fixed.json \
+python3 generate_grid_v2.py ../datasets/mots_fleches_enriched_v9_infinitives_2letters.json \
     --build-bank 80 --bank-file banks/skeletons_10x10.json \
     --max-isolated 3 --max-dead-clues 7
 ```

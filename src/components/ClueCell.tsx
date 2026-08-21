@@ -16,6 +16,22 @@ const ARROW_GLYPH: Record<Arrow, string> = {
   right_down: '↴',
 };
 
+/**
+ * Ordre d'affichage des définitions d'une même case.
+ *
+ * Elles sont triées selon la case où DÉMARRE leur mot, dans l'ordre de
+ * lecture : le mot qui part vers la droite (r, c+1) avant celui qui part vers
+ * le bas (r+1, c). Sans ce tri, l'ordre était celui du générateur — arbitraire
+ * — et une définition du bas pouvait renvoyer au mot de droite, ce qui rendait
+ * l'appariement illisible.
+ */
+const START_ORDER: Record<Arrow, number> = {
+  right: 0,       // le mot commence à droite
+  right_down: 0,  // idem, mais se lit vers le bas
+  down: 1,        // le mot commence en dessous
+  down_right: 1,  // idem, mais se lit vers la droite
+};
+
 const BENT: Record<Arrow, boolean> = {
   right: false,
   down: false,
@@ -63,6 +79,10 @@ export function ClueCell({
   const isDouble = data.clues.length > 1;
   const totalChars = data.clues.reduce((n, c) => n + c.text.length, 0);
 
+  const clues = [...data.clues].sort(
+    (a, b) => START_ORDER[a.arrow ?? a.direction] - START_ORDER[b.arrow ?? b.direction],
+  );
+
   return (
     <div
       // `lang` est requis pour que le navigateur applique la césure FRANÇAISE
@@ -76,7 +96,7 @@ export function ClueCell({
       ].join(' ')}
       style={{ fontSize: `${(cellSize * fontRatioFor(totalChars, data.clues.length)).toFixed(2)}px` }}
     >
-      {data.clues.map((clue, i) => {
+      {clues.map((clue, i) => {
         const solved = solvedWordIds.has(clue.wordId);
         const arrow = clue.arrow ?? clue.direction;
         const active = clue.wordId === activeWordId;
@@ -90,7 +110,13 @@ export function ClueCell({
             type="button"
             onClick={() => onSelectWord(clue.wordId)}
             className={[
-              'w-full cursor-pointer rounded-[2px] transition-all duration-200',
+              // `text-[1em]` est indispensable : un <button> n'hérite pas de
+              // `font-size` (feuille de style du navigateur pour les contrôles
+              // de formulaire). Sans lui, le texte restait figé à ~7,2 px
+              // pendant que la case dimensionnait sa police — le calcul
+              // n'atteignait donc jamais les définitions, et les cases doubles
+              // débordaient en 10x10.
+              'w-full cursor-pointer rounded-[2px] text-[1em] transition-all duration-200',
               i > 0 ? 'mt-[2px] border-t border-neutral-500/30 pt-[2px]' : '',
               active ? 'bg-cell-active/60 ring-1 ring-cyan-500/60' : '',
               solved ? 'text-emerald-700 opacity-50 line-through decoration-emerald-600' : '',
