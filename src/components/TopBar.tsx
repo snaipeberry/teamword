@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameState } from '../state/GameState';
 import { SoundToggle } from './SoundToggle';
+import { SessionMenu } from './SessionMenu';
 import { AnimatedNumber } from './AnimatedNumber';
 import { buildInviteUrl } from '../lib/sessionCode';
 
@@ -31,7 +32,10 @@ export function TopBar({ sessionId, round }: { sessionId: string; round: number 
   };
 
   return (
-    <div className="flex w-full max-w-[560px] shrink-0 items-center gap-1.5 px-2 pt-[max(env(safe-area-inset-top),6px)]">
+    // `relative z-50` : la carte de grille est un motion.div transformé, donc
+    // un contexte d'empilement qui passerait devant le menu déroulant —
+    // le z-index du menu seul ne suffit pas, il faut élever son ancêtre.
+    <div className="relative z-50 flex w-full max-w-[560px] shrink-0 items-center gap-1.5 px-2 pt-[max(env(safe-area-inset-top),6px)]">
       <span className="shrink-0 rounded-full bg-white/15 px-2 py-1 font-display text-[11px] font-bold text-white/90">
         #{round + 1}
       </span>
@@ -77,6 +81,7 @@ export function TopBar({ sessionId, round }: { sessionId: string; round: number 
         </button>
       )}
       <SoundToggle />
+      <SessionMenu multiplayer={game.multiplayer} />
     </div>
   );
 }

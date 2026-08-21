@@ -82,8 +82,16 @@ export function useGameState(): GameStateApi {
  */
 export interface RoundApi {
   round: number;
+  /** Numéro de partie — entre dans la graine, voir seedFor. */
+  game: number;
   /** `fromRound` évite de sauter plusieurs grilles quand tous les clients avancent en même temps. */
   advanceRound: (fromRound?: number) => void;
+  /**
+   * Repart de zéro SANS quitter la session : NOUVELLE grille 1, scores et
+   * indices remis à zéro. Le code de session ne change pas, donc les autres
+   * joueurs restent connectés et voient la remise à zéro aussitôt.
+   */
+  resetSession: () => void;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -114,19 +122,29 @@ const LocalLettersContext = createContext<{
 
 function LocalSessionProvider({ children }: { children: React.ReactNode }) {
   const [round, setRound] = useState(0);
+  const [game, setGame] = useState(0);
   const [letters, setLetters] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const roundApi = useMemo<RoundApi>(
     () => ({
       round,
+      game,
       advanceRound: () => {
         setRound((r) => r + 1);
         setLetters({});
         setRevealed({});
       },
+      resetSession: () => {
+        // Incrémenter la partie change la graine : on repart sur une grille
+        // NEUVE, et non sur celle déjà jouée.
+        setGame((g) => g + 1);
+        setRound(0);
+        setLetters({});
+        setRevealed({});
+      },
     }),
-    [round],
+    [round, game],
   );
 
   const lettersApi = useMemo(
@@ -203,6 +221,7 @@ function usePuzzleIndex(puzzle: Puzzle) {
 
 function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
   const round = useStorage((root) => root.round) ?? 0;
+  const game = useStorage((root) => root.game) ?? 0;
 
   // On repart d'une grille vierge : les lettres de la manche précédente
   // n'ont plus de sens sur la nouvelle. Les scores, eux, se cumulent.
@@ -223,7 +242,26 @@ function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
     Array.from(revealedMap.keys()).forEach((key) => revealedMap.delete(key));
   }, []);
 
-  const api = useMemo<RoundApi>(() => ({ round, advanceRound }), [round, advanceRound]);
+  // Vide TOUT l'état de partie d'un coup. Contrairement à `advanceRound`,
+  // les scores et les indices sont eux aussi remis à zéro : c'est une
+  // nouvelle partie, pas une grille de plus.
+  const resetSession = useMutation(({ storage }) => {
+    // Incrémenter la partie change la graine : on repart sur une grille
+    // NEUVE, et non sur celle déjà jouée.
+    storage.set('game', (storage.get('game') ?? 0) + 1);
+    storage.set('round', 0);
+    // LiveMap n'a pas de .clear() : on supprime clé par clé, en figeant
+    // d'abord la liste pour ne pas muter la map pendant qu'on l'itère.
+    for (const name of ['letters', 'revealed', 'scores', 'hints', 'ready'] as const) {
+      const map = storage.get(name);
+      Array.from(map.keys()).forEach((key) => map.delete(key));
+    }
+  }, []);
+
+  const api = useMemo<RoundApi>(
+    () => ({ round, game, advanceRound, resetSession }),
+    [round, game, advanceRound, resetSession],
+  );
   return <RoundContext.Provider value={api}>{children}</RoundContext.Provider>;
 }
 
@@ -514,6 +552,7 @@ export function SessionProvider({
         initialPresence={{ name: playerName, color: randomColor(), activeCell: null, playerId }}
         initialStorage={{
           round: 0,
+          game: 0,
           letters: new LiveMap(),
           scores: new LiveMap(),
           hints: new LiveMap(),

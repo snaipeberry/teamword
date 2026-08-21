@@ -58,3 +58,16 @@ export function buildInviteUrl(sessionId: string): string {
     : CANONICAL_APP_URL;
   return `${base}/?session=${encodeURIComponent(sessionId)}`;
 }
+
+/**
+ * Quitte la partie en cours pour une session neuve.
+ *
+ * Un rechargement complet est volontaire : le code de session détermine la
+ * room Liveblocks, or celle-ci est fixée au montage du provider. Se contenter
+ * de réécrire l'URL laisserait l'app connectée à l'ancienne room.
+ */
+export function startNewSession(): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set('session', generateSessionCode());
+  window.location.href = url.toString();
+}

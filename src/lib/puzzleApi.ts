@@ -2,11 +2,16 @@ import type { ClueCellPlacement, WordEntry } from '../types/puzzle';
 
 /**
  * Graine de génération. Le serveur étant déterministe, deux joueurs d'une
- * même partie (même code de session, même manche) obtiennent exactement la
- * même grille — sans que le serveur ait à stocker quoi que ce soit.
+ * même partie (même code de session, même partie, même grille) obtiennent
+ * exactement la même grille — sans que le serveur ait à stocker quoi que ce soit.
+ *
+ * `game` s'incrémente à chaque « Recommencer ». Sans lui, repartir à la
+ * grille 1 redonnerait la grille DÉJÀ jouée, puisque la graine ne dépendrait
+ * que du numéro de grille. Il est placé avant `-r` pour que le serveur
+ * continue d'y lire le numéro de grille (il ne s'intéresse qu'au suffixe).
  */
-export function seedFor(sessionId: string, round: number): string {
-  return `${sessionId}-r${round}`;
+export function seedFor(sessionId: string, game: number, round: number): string {
+  return `${sessionId}-g${game}-r${round}`;
 }
 
 // Par défaut : même origine. En production c'est la fonction serverless

@@ -24,6 +24,11 @@ declare global {
        * se cumulent sur l'ensemble de la session.
        */
       round: number;
+      /**
+       * Numéro de partie, incrémenté par « Recommencer ». Il entre dans la
+       * graine : sans lui, recommencer redonnerait la grille déjà jouée.
+       */
+      game: number;
       letters: LiveMap<string, string>;
       /** playerId -> words found. Lives in Storage (not Presence) so it survives disconnects. */
       scores: LiveMap<string, number>;

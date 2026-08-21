@@ -26,8 +26,8 @@ function LoadingScreen() {
  * ce composant doit vivre à l'intérieur du provider de session.
  */
 function Round({ sessionId }: { sessionId: string }) {
-  const { round } = useRound();
-  const seed = seedFor(sessionId, round);
+  const { round, game } = useRound();
+  const seed = seedFor(sessionId, game, round);
   const { puzzle, loading, error } = usePuzzle(seed);
 
   if (loading || !puzzle) return <LoadingScreen />;
