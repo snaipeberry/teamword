@@ -63,7 +63,7 @@ try:
     )
     from serve_puzzles import to_app_puzzle as _to_app_puzzle  # noqa: E402
 
-    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v4_hints.json"
+    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v6_hard_hints.json"
     BANK_PATH = GEN_DIR / "banks" / "skeletons_8x8.json"
 
     _WORDS = load_dictionary(DATASET_PATH)

@@ -253,7 +253,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=here.parent / "datasets" / "mots_fleches_enriched_v4_hints.json",
+        default=here.parent / "datasets" / "mots_fleches_enriched_v6_hard_hints.json",
     )
     parser.add_argument(
         "--bank-file", type=Path, default=here / "banks" / "skeletons_8x8.json"
