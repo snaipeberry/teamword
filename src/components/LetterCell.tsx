@@ -6,7 +6,6 @@ interface LetterCellProps {
   value: string;
   isActive: boolean;
   isInActiveWord: boolean;
-  isCorrect: boolean;
   isWrong: boolean;
   isLocked: boolean;
   lockDelay: number;
@@ -18,7 +17,6 @@ export function LetterCell({
   value,
   isActive,
   isInActiveWord,
-  isCorrect,
   isWrong,
   isLocked,
   lockDelay,
@@ -96,8 +94,11 @@ export function LetterCell({
         initial={{ scale: 0.4, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+        // Vert UNIQUEMENT quand le mot entier est trouvé. Colorer une lettre
+        // dès qu'elle est juste individuellement révélait la réponse au fur et
+        // à mesure de la saisie.
         className={`relative z-10 ${
-          isLocked || isCorrect ? 'text-emerald-700' : isWrong ? 'text-red-600' : 'text-neutral-900'
+          isLocked ? 'text-emerald-700' : isWrong ? 'text-red-600' : 'text-neutral-900'
         }`}
       >
         {value}

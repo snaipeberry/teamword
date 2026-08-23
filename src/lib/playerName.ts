@@ -27,3 +27,11 @@ export function getOrCreatePlayerId(): string {
   localStorage.setItem(ID_STORAGE_KEY, id);
   return id;
 }
+
+/** Enregistre le nom choisi par le joueur, en remplacement du nom tiré au sort. */
+export function setPlayerName(name: string): string {
+  const clean = name.trim().slice(0, 16);
+  if (!clean) return getOrCreatePlayerName();
+  localStorage.setItem(NAME_STORAGE_KEY, clean);
+  return clean;
+}

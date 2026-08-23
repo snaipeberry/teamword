@@ -10,19 +10,13 @@ export function generateSessionCode(length = 6): string {
 }
 
 /**
- * Reads `?session=` from the URL, or mints a fresh code and writes it back
- * (via replaceState, no reload/navigation) so the address bar becomes the
- * shareable invite link and a page refresh resumes the same game.
+ * Code de partie présent dans l'URL, ou `null`.
+ *
+ * On n'en crée plus automatiquement : sans code, l'app doit montrer l'accueil
+ * pour que le joueur choisisse entre créer et rejoindre.
  */
-export function getOrCreateSessionCode(): string {
-  const url = new URL(window.location.href);
-  const existing = url.searchParams.get('session');
-  if (existing) return existing;
-
-  const fresh = generateSessionCode();
-  url.searchParams.set('session', fresh);
-  window.history.replaceState({}, '', url.toString());
-  return fresh;
+export function readSessionCode(): string | null {
+  return new URL(window.location.href).searchParams.get('session');
 }
 
 /**

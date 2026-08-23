@@ -462,7 +462,6 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
                   value={value}
                   isActive={activeCellId === id}
                   isInActiveWord={activeWordCellIds.includes(id)}
-                  isCorrect={value !== '' && value === cell.answer}
                   isWrong={wrongCells.has(id)}
                   isLocked={isCellLocked(id)}
                   lockDelay={lockDelayByCell.get(id) ?? 0}

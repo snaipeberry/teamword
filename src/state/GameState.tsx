@@ -11,7 +11,7 @@ import {
   useBroadcastEvent,
   useEventListener,
 } from '@liveblocks/react/suspense';
-import { getOrCreatePlayerId, getOrCreatePlayerName } from '../lib/playerName';
+import { getOrCreatePlayerId, getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
 import { wordCellIds } from '../lib/gridGeometry';
 import { playRadioClip, splitIntoChunks, startRecording, type Recording } from '../lib/voiceRadio';
 import type { Puzzle, WordEntry } from '../types/puzzle';
@@ -64,6 +64,10 @@ export interface GameStateApi {
   talkingNames: string[];
   /** Le micro a été refusé (ou est indisponible) : on le signale plutôt que d'échouer en silence. */
   micDenied: boolean;
+
+  /** Nom affiché du joueur, et son remplacement par un nom choisi. */
+  myName: string;
+  renameMe: (name: string) => void;
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -92,6 +96,18 @@ export interface RoundApi {
    * joueurs restent connectés et voient la remise à zéro aussitôt.
    */
   resetSession: () => void;
+
+  // ---- Salon ----
+  /** Identifiant du créateur de la partie ; lui seul peut exclure. */
+  hostId: string | null;
+  /** La partie a-t-elle été lancée depuis le salon ? */
+  started: boolean;
+  /** Lance la partie (hôte). */
+  startGame: () => void;
+  /** Exclut un joueur (hôte). */
+  kickPlayer: (playerId: string) => void;
+  /** Ce joueur a-t-il été exclu ? */
+  isKicked: (playerId: string) => boolean;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -143,6 +159,12 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
         setLetters({});
         setRevealed({});
       },
+      // En solo il n'y a ni salon ni hôte : la partie démarre directement.
+      hostId: 'local',
+      started: true,
+      startGame: () => {},
+      kickPlayer: () => {},
+      isKicked: () => false,
     }),
     [round, game],
   );
@@ -164,6 +186,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
   if (!store) throw new Error('LocalGameProvider must be used within a SessionProvider');
   const { letters, setLetters, revealed, setRevealed } = store;
   const myColor = useMemo(randomColor, []);
+  const [localName, setLocalName] = useState(getOrCreatePlayerName);
 
   const api = useMemo<GameStateApi>(
     () => ({
@@ -188,8 +211,10 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       stopTalking: () => {},
       talkingNames: [],
       micDenied: false,
+      myName: localName,
+      renameMe: (name) => setLocalName(setPlayerName(name)),
     }),
-    [letters, revealed, setLetters, setRevealed, myColor],
+    [letters, revealed, setLetters, setRevealed, myColor, localName],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
@@ -222,6 +247,33 @@ function usePuzzleIndex(puzzle: Puzzle) {
 function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
   const round = useStorage((root) => root.round) ?? 0;
   const game = useStorage((root) => root.game) ?? 0;
+  const hostId = useStorage((root) => root.hostId) ?? null;
+  const started = useStorage((root) => root.started) ?? false;
+  const kicked = useStorage((root) => root.kicked);
+
+  // Le PREMIER arrivant devient hôte, et le reste. Ne jamais réattribuer :
+  // sinon un invité hériterait du rôle dès que le créateur se déconnecte, et
+  // pourrait exclure tout le monde.
+  const claimHost = useMutation(({ storage, self }) => {
+    if (storage.get('hostId') == null) storage.set('hostId', self.presence.playerId);
+  }, []);
+
+  useEffect(() => {
+    claimHost();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const startGame = useMutation(({ storage }) => {
+    storage.set('started', true);
+  }, []);
+
+  const kickPlayer = useMutation(({ storage, self }, playerId: string) => {
+    // Contrôle côté mutation, pas seulement dans l'UI : masquer le bouton ne
+    // protège de rien, la mutation restant appelable.
+    if (storage.get('hostId') !== self.presence.playerId) return;
+    if (playerId === self.presence.playerId) return; // l'hôte ne s'exclut pas
+    storage.get('kicked').set(playerId, true);
+  }, []);
 
   // On repart d'une grille vierge : les lettres de la manche précédente
   // n'ont plus de sens sur la nouvelle. Les scores, eux, se cumulent.
@@ -259,8 +311,12 @@ function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const api = useMemo<RoundApi>(
-    () => ({ round, game, advanceRound, resetSession }),
-    [round, game, advanceRound, resetSession],
+    () => ({
+      round, game, advanceRound, resetSession,
+      hostId, started, startGame, kickPlayer,
+      isKicked: (id: string) => kicked.get(id) === true,
+    }),
+    [round, game, advanceRound, resetSession, hostId, started, startGame, kickPlayer, kicked],
   );
   return <RoundContext.Provider value={api}>{children}</RoundContext.Provider>;
 }
@@ -418,6 +474,25 @@ function LiveblocksGameBridge({
 
 
 
+  // Le nom vit à deux endroits : la présence (temps réel, pour les curseurs)
+  // et le storage (persistant, pour rester affiché hors ligne au tableau des
+  // scores). Renommer doit donc écrire dans les deux.
+  const publishName = useMutation(({ storage, self }, name: string) => {
+    storage.get('players').set(self.presence.playerId, {
+      name,
+      color: self.presence.color,
+    });
+  }, []);
+
+  const renameMe = useCallback(
+    (name: string) => {
+      const clean = setPlayerName(name);
+      updateMyPresence({ name: clean });
+      publishName(clean);
+    },
+    [updateMyPresence, publishName],
+  );
+
   const registerPlayer = useMutation(({ storage, self }) => {
     storage.get('players').set(self.presence.playerId, {
       name: self.presence.name,
@@ -503,11 +578,13 @@ function LiveblocksGameBridge({
       stopTalking,
       talkingNames,
       micDenied,
+      myName: myPresence.name,
+      renameMe,
     }),
     [
       letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence,
       scoreboard, setReady, allReadyFor, isReadyFor,
-      startTalking, stopTalking, talkingNames, micDenied,
+      startTalking, stopTalking, talkingNames, micDenied, renameMe,
     ],
   );
 
@@ -553,6 +630,9 @@ export function SessionProvider({
         initialStorage={{
           round: 0,
           game: 0,
+          hostId: null,
+          started: false,
+          kicked: new LiveMap(),
           letters: new LiveMap(),
           scores: new LiveMap(),
           hints: new LiveMap(),

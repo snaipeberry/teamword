@@ -3,14 +3,18 @@ import {
   GameStateProvider,
   SessionProvider,
   hasLiveblocksKey,
+  useGameState,
   useRound,
 } from './state/GameState';
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { TopBar } from './components/TopBar';
+import { Home } from './components/Home';
+import { Lobby, KickedScreen } from './components/Lobby';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
-import { getOrCreateSessionCode } from './lib/sessionCode';
+import { readSessionCode } from './lib/sessionCode';
 import { seedFor } from './lib/puzzleApi';
+import { demoPuzzle } from './data/demoPuzzle';
 
 function LoadingScreen() {
   return (
@@ -48,14 +52,44 @@ function Round({ sessionId }: { sessionId: string }) {
   );
 }
 
+/**
+ * Aiguillage à l'intérieur de la session : salon tant que l'hôte n'a pas
+ * lancé, jeu ensuite — et écran d'adieu pour un joueur exclu.
+ *
+ * Il faut être CONNECTÉ pour savoir lequel afficher (l'état est partagé),
+ * d'où ce composant sous SessionProvider plutôt qu'au-dessus.
+ */
+function SessionRouter({ sessionId }: { sessionId: string }) {
+  const { started, isKicked } = useRound();
+  const game = useGameState();
+
+  if (isKicked(game.myPlayerId)) return <KickedScreen />;
+  if (!started) return <Lobby sessionId={sessionId} />;
+  return <Round sessionId={sessionId} />;
+}
+
+/**
+ * Le salon a besoin de la liste des joueurs, qui vient de GameStateApi — or
+ * ce provider réclame une grille. On lui en donne une factice : elle n'est
+ * jamais affichée avant le lancement, et cela évite de dupliquer toute la
+ * logique de présence pour le seul salon.
+ */
+function SessionShell({ sessionId }: { sessionId: string }) {
+  return (
+    <GameStateProvider puzzle={demoPuzzle}>
+      <SessionRouter sessionId={sessionId} />
+    </GameStateProvider>
+  );
+}
+
 export default function App() {
   // Stable pour la durée de vie du composant : lit `?session=` dans l'URL ou
   // en génère un et l'y réécrit, de sorte que la barre d'adresse devienne le
   // lien d'invitation.
-  const sessionId = useMemo(
-    () => (hasLiveblocksKey ? getOrCreateSessionCode() : 'solo'),
-    [],
-  );
+  // Plus de création automatique : sans `?session=`, on affiche l'accueil.
+  // En solo (aucune clé Liveblocks) il n'y a ni salon ni invitation, donc on
+  // court-circuite directement vers le jeu.
+  const sessionId = useMemo(() => (hasLiveblocksKey ? readSessionCode() : 'solo'), []);
 
   return (
     // Hauteur d'écran FIXE (100dvh suit la barre d'URL mobile, contrairement
@@ -63,9 +97,17 @@ export default function App() {
     // et le clavier tiennent ensemble à l'écran en permanence.
     <div className="flex h-[100dvh] flex-col items-center overflow-hidden">
       <AuroraBackground />
-      <SessionProvider sessionId={sessionId}>
-        <Round sessionId={sessionId} />
-      </SessionProvider>
+      {sessionId === null ? (
+        <Home />
+      ) : (
+        <SessionProvider sessionId={sessionId}>
+          {hasLiveblocksKey ? (
+            <SessionShell sessionId={sessionId} />
+          ) : (
+            <Round sessionId={sessionId} />
+          )}
+        </SessionProvider>
+      )}
     </div>
   );
 }

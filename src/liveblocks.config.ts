@@ -29,6 +29,16 @@ declare global {
        * graine : sans lui, recommencer redonnerait la grille déjà jouée.
        */
       game: number;
+      /**
+       * Joueur ayant créé la partie. Lui seul peut exclure quelqu'un.
+       * Fixé par le premier arrivant, puis jamais réattribué : sinon un
+       * invité deviendrait hôte à la moindre déconnexion du créateur.
+       */
+      hostId: string | null;
+      /** true une fois la partie lancée depuis le salon. */
+      started: boolean;
+      /** playerId -> true pour les joueurs exclus, qui sont renvoyés à l'accueil. */
+      kicked: LiveMap<string, boolean>;
       letters: LiveMap<string, string>;
       /** playerId -> words found. Lives in Storage (not Presence) so it survives disconnects. */
       scores: LiveMap<string, number>;
