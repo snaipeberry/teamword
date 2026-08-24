@@ -68,7 +68,7 @@ try:
         to_app_puzzle as _to_app_puzzle,
     )
 
-    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v9_infinitives_2letters.json"
+    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v11_expert_hints.json"
     BANK_PATH = GEN_DIR / "banks" / "skeletons_10x10.json"
 
     _WORDS = load_dictionary(DATASET_PATH)

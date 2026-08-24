@@ -323,7 +323,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=here.parent / "datasets" / "mots_fleches_enriched_v9_infinitives_2letters.json",
+        default=here.parent / "datasets" / "mots_fleches_enriched_v11_expert_hints.json",
     )
     parser.add_argument(
         "--bank-file", type=Path, default=here / "banks" / "skeletons_10x10.json"
