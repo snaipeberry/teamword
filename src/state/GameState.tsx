@@ -361,6 +361,10 @@ function RemoteSessionProvider({
   );
 }
 
+/** Une frappe non confirmée au-delà de ce délai est abandonnée : l'autorité
+ *  reste le serveur, et mieux vaut retirer une lettre fantôme que la figer. */
+const PEREMPTION_MS = 8000;
+
 function RemoteGameProvider({
   puzzle,
   children,
@@ -372,7 +376,50 @@ function RemoteGameProvider({
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
   const [myName, setMyName] = useState(me.name);
 
-  const getLetter = useCallback((cellId: string) => state.letters[cellId] ?? '', [state.letters]);
+  /**
+   * Saisie optimiste.
+   *
+   * Sans elle, une lettre n'apparaissait qu'au retour du serveur : mesuré à
+   * 404 ms sur l'hébergement de production (0 ms en local, d'où un bug
+   * invisible en développement). On affiche donc la frappe immédiatement, et
+   * l'état serveur — qui reste la seule autorité — vient la confirmer.
+   *
+   * Ce n'est pas qu'un confort d'affichage : `setLetter` calcule le score à
+   * partir des lettres déjà posées. En lisant le seul état serveur, une frappe
+   * rapide ne « voyait » pas les lettres précédentes encore en vol, et la
+   * complétion d'un mot pouvait n'être jamais détectée.
+   */
+  const enAttente = useRef<Map<string, { letter: string; at: number }>>(new Map());
+  const [versionAttente, setVersionAttente] = useState(0);
+
+  const purger = useCallback(() => {
+    const maintenant = Date.now();
+    let change = false;
+    for (const [cellId, p] of enAttente.current) {
+      const confirme = (state.letters[cellId] ?? '') === p.letter;
+      if (confirme || maintenant - p.at > PEREMPTION_MS) {
+        enAttente.current.delete(cellId);
+        change = true;
+      }
+    }
+    if (change) setVersionAttente((v) => v + 1);
+  }, [state.letters]);
+
+  // Chaque diffusion du serveur est une occasion de confirmer les frappes en vol.
+  useEffect(purger, [purger]);
+
+  /** Lettre affichée : la frappe locale non confirmée prime sur l'état serveur. */
+  const lettreEffective = useCallback(
+    (cellId: string) => enAttente.current.get(cellId)?.letter ?? state.letters[cellId] ?? '',
+    [state.letters],
+  );
+
+  const getLetter = useCallback(
+    (cellId: string) => lettreEffective(cellId),
+    // versionAttente force le recalcul des mémos qui en dépendent (grille,
+    // mots résolus) dès qu'une frappe locale est posée ou confirmée.
+    [lettreEffective, versionAttente],
+  );
 
   /**
    * Le score est calculé ICI, pas sur le serveur : lui seul ignore les mots
@@ -391,19 +438,33 @@ function RemoteGameProvider({
         const cells = cellsByWordId.get(wordId);
         if (!word || !cells) return false;
         return cells.every((id, i) => {
-          const value = id === cellId ? override : (state.letters[id] ?? '');
+          // lettreEffective et non state.letters : les frappes précédentes
+          // peuvent être encore en vol, et les ignorer ferait manquer la
+          // complétion du mot.
+          const value = id === cellId ? override : lettreEffective(id);
           return value === word.answer[i];
         });
       };
-      const avant = new Map(affected.map((id) => [id, complete(id, state.letters[cellId] ?? '')]));
+      const avant = new Map(affected.map((id) => [id, complete(id, lettreEffective(cellId))]));
       const scored = affected.filter((id) => !avant.get(id) && complete(id, letter)).length;
+
+      // Affichage immédiat, puis envoi. L'ordre importe peu techniquement,
+      // mais dit l'intention : l'écran ne dépend pas du réseau.
+      enAttente.current.set(cellId, { letter, at: Date.now() });
+      setVersionAttente((v) => v + 1);
       send({ t: 'letter', cellId, letter, scored });
     },
-    [send, state.letters, wordsById, cellsByWordId, wordIdsByCellId],
+    [send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId],
   );
 
   const revealLetter = useCallback(
-    (cellId: string, letter: string) => send({ t: 'reveal', cellId, letter }),
+    (cellId: string, letter: string) => {
+      // Même raison que pour la frappe : la lettre révélée doit apparaître
+      // sans attendre le serveur.
+      enAttente.current.set(cellId, { letter, at: Date.now() });
+      setVersionAttente((v) => v + 1);
+      send({ t: 'reveal', cellId, letter });
+    },
     [send],
   );
 
