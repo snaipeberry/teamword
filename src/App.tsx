@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import {
   GameStateProvider,
   SessionProvider,
-  hasLiveblocksKey,
+  hasMultiplayer,
   useGameState,
   useRound,
 } from './state/GameState';
@@ -10,10 +10,11 @@ import { CrosswordGrid } from './components/CrosswordGrid';
 import { TopBar } from './components/TopBar';
 import { Home } from './components/Home';
 import { Lobby, KickedScreen } from './components/Lobby';
+import { BotPlayer } from './components/BotGame';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
 import { readSessionCode } from './lib/sessionCode';
-import { seedFor } from './lib/puzzleApi';
+import { dailyLabel, dailySeed, seedFor } from './lib/puzzleApi';
 import { demoPuzzle } from './data/demoPuzzle';
 
 function LoadingScreen() {
@@ -29,9 +30,19 @@ function LoadingScreen() {
  * Sous la session : la manche partagée détermine quelle grille charger, donc
  * ce composant doit vivre à l'intérieur du provider de session.
  */
-function Round({ sessionId }: { sessionId: string }) {
+function Round({
+  sessionId,
+  daily,
+  bot,
+}: {
+  sessionId: string;
+  daily: boolean;
+  bot: boolean;
+}) {
   const { round, game } = useRound();
-  const seed = seedFor(sessionId, game, round);
+  // En mode « grille du jour », la graine ne dépend NI de la session NI du
+  // numéro de grille : elle est commune à tous les joueurs du monde.
+  const seed = daily ? dailySeed() : seedFor(sessionId, game, round);
   const { puzzle, loading, error } = usePuzzle(seed);
 
   if (loading || !puzzle) return <LoadingScreen />;
@@ -41,13 +52,14 @@ function Round({ sessionId }: { sessionId: string }) {
     // sélection de case et les animations de la grille précédente
     // survivraient à l'arrivée de la nouvelle.
     <GameStateProvider key={puzzle.id} puzzle={puzzle}>
-      <TopBar sessionId={sessionId} round={round} />
+      <TopBar sessionId={sessionId} round={round} dailyLabel={daily ? dailyLabel() : null} />
       {error && (
         <p className="mt-1 shrink-0 rounded-full bg-amber-400/20 px-3 py-0.5 text-[10px] text-amber-100">
           Serveur injoignable — grille de démonstration
         </p>
       )}
-      <CrosswordGrid puzzle={puzzle} round={round} />
+      {bot && <BotPlayer puzzle={puzzle} onScore={() => {}} />}
+      <CrosswordGrid puzzle={puzzle} round={round} daily={daily} />
     </GameStateProvider>
   );
 }
@@ -59,13 +71,23 @@ function Round({ sessionId }: { sessionId: string }) {
  * Il faut être CONNECTÉ pour savoir lequel afficher (l'état est partagé),
  * d'où ce composant sous SessionProvider plutôt qu'au-dessus.
  */
-function SessionRouter({ sessionId }: { sessionId: string }) {
+function SessionRouter({
+  sessionId,
+  daily,
+  bot,
+}: {
+  sessionId: string;
+  daily: boolean;
+  bot: boolean;
+}) {
   const { started, isKicked } = useRound();
   const game = useGameState();
 
   if (isKicked(game.myPlayerId)) return <KickedScreen />;
-  if (!started) return <Lobby sessionId={sessionId} />;
-  return <Round sessionId={sessionId} />;
+  // Grille du jour et partie contre un bot se jouent directement : il n'y a
+  // personne à attendre dans un salon.
+  if (!started && !daily && !bot) return <Lobby sessionId={sessionId} />;
+  return <Round sessionId={sessionId} daily={daily} bot={bot} />;
 }
 
 /**
@@ -74,10 +96,18 @@ function SessionRouter({ sessionId }: { sessionId: string }) {
  * jamais affichée avant le lancement, et cela évite de dupliquer toute la
  * logique de présence pour le seul salon.
  */
-function SessionShell({ sessionId }: { sessionId: string }) {
+function SessionShell({
+  sessionId,
+  daily,
+  bot,
+}: {
+  sessionId: string;
+  daily: boolean;
+  bot: boolean;
+}) {
   return (
     <GameStateProvider puzzle={demoPuzzle}>
-      <SessionRouter sessionId={sessionId} />
+      <SessionRouter sessionId={sessionId} daily={daily} bot={bot} />
     </GameStateProvider>
   );
 }
@@ -89,7 +119,10 @@ export default function App() {
   // Plus de création automatique : sans `?session=`, on affiche l'accueil.
   // En solo (aucune clé Liveblocks) il n'y a ni salon ni invitation, donc on
   // court-circuite directement vers le jeu.
-  const sessionId = useMemo(() => (hasLiveblocksKey ? readSessionCode() : 'solo'), []);
+  const sessionId = useMemo(() => (hasMultiplayer ? readSessionCode() : 'solo'), []);
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const daily = useMemo(() => params.get('daily') === '1', [params]);
+  const bot = useMemo(() => params.get('bot') === '1', [params]);
 
   return (
     // Hauteur d'écran FIXE (100dvh suit la barre d'URL mobile, contrairement
@@ -101,10 +134,10 @@ export default function App() {
         <Home />
       ) : (
         <SessionProvider sessionId={sessionId}>
-          {hasLiveblocksKey ? (
-            <SessionShell sessionId={sessionId} />
+          {hasMultiplayer ? (
+            <SessionShell sessionId={sessionId} daily={daily} bot={bot} />
           ) : (
-            <Round sessionId={sessionId} />
+            <Round sessionId={sessionId} daily={daily} bot={bot} />
           )}
         </SessionProvider>
       )}

@@ -77,18 +77,6 @@ export function LetterCell({
         )}
       </AnimatePresence>
 
-      {isLocked && (
-        <motion.span
-          aria-hidden="true"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: lockDelay + 0.2, type: 'spring', stiffness: 500, damping: 18 }}
-          className="absolute -right-1 -top-1 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-600 text-[8px] text-white shadow"
-        >
-          ✓
-        </motion.span>
-      )}
-
       <motion.span
         key={value}
         initial={{ scale: 0.4, opacity: 0 }}

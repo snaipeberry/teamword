@@ -3,6 +3,10 @@ import { motion } from 'framer-motion';
 import { NameField } from './NameField';
 import { getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
 import { generateSessionCode } from '../lib/sessionCode';
+import { dailyLabel } from '../lib/puzzleApi';
+import { Matchmaking } from './Matchmaking';
+import { ProfileScreen } from './Profile';
+import { LeaderboardScreen } from './Leaderboard';
 
 /**
  * Accueil : choisir son nom, puis créer une partie ou en rejoindre une.
@@ -12,14 +16,21 @@ import { generateSessionCode } from '../lib/sessionCode';
  * provider. Réécrire l'URL sans recharger laisserait l'app connectée à
  * l'ancienne room.
  */
+type Ecran = 'accueil' | 'matchmaking' | 'profil' | 'classement';
+
 export function Home() {
   const [name, setName] = useState(getOrCreatePlayerName);
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
+  const [ecran, setEcran] = useState<Ecran>('accueil');
 
-  const go = (session: string) => {
+  const go = (session: string, daily = false, bot = false) => {
     const url = new URL(window.location.href);
     url.searchParams.set('session', session);
+    if (daily) url.searchParams.set('daily', '1');
+    else url.searchParams.delete('daily');
+    if (bot) url.searchParams.set('bot', '1');
+    else url.searchParams.delete('bot');
     window.location.href = url.toString();
   };
 
@@ -32,8 +43,12 @@ export function Home() {
     go(clean);
   };
 
+  if (ecran === 'matchmaking') return <Matchmaking onClose={() => setEcran('accueil')} />;
+  if (ecran === 'profil') return <ProfileScreen onClose={() => setEcran('accueil')} />;
+  if (ecran === 'classement') return <LeaderboardScreen onClose={() => setEcran('accueil')} />;
+
   return (
-    <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-5 px-5">
+    <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,11 +67,45 @@ export function Home() {
       <motion.button
         type="button"
         whileTap={{ scale: 0.96 }}
-        onClick={() => go(generateSessionCode())}
+        onClick={() => go(generateSessionCode(), true)}
+        className="w-full rounded-2xl border border-amber-200/40 bg-gradient-to-r from-amber-400/25 to-orange-400/25 py-3 font-display text-[15px] font-bold text-white shadow-xl backdrop-blur-md"
+      >
+        ☀️ Grille du jour
+        <span className="mt-0.5 block text-[11px] font-medium text-white/60">
+          {dailyLabel()} — plus difficile, la même pour tous
+        </span>
+      </motion.button>
+
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.96 }}
+        onClick={() => setEcran('matchmaking')}
         className="w-full rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber py-3 font-display text-[15px] font-bold text-white shadow-xl"
       >
-        Créer une partie
+        ⚔️ Duel aléatoire
+        <span className="mt-0.5 block text-[11px] font-medium text-white/70">
+          Contre un joueur au hasard — partie classée
+        </span>
       </motion.button>
+
+      <div className="flex w-full gap-2">
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.96 }}
+          onClick={() => go(generateSessionCode())}
+          className="flex-1 rounded-full bg-white/20 py-2.5 font-display text-[13px] font-bold text-white"
+        >
+          Partie privée
+        </motion.button>
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.96 }}
+          onClick={() => go(generateSessionCode(), false, true)}
+          className="flex-1 rounded-full bg-white/20 py-2.5 font-display text-[13px] font-bold text-white"
+        >
+          🤖 Contre un bot
+        </motion.button>
+      </div>
 
       <div className="flex w-full items-center gap-3 text-[11px] font-bold uppercase text-white/30">
         <span className="h-px flex-1 bg-white/20" /> ou <span className="h-px flex-1 bg-white/20" />
@@ -89,6 +138,23 @@ export function Home() {
           </motion.button>
         </div>
         {erreur && <p className="mt-1.5 text-center text-[11px] font-bold text-rose-300">{erreur}</p>}
+      </div>
+
+      <div className="flex w-full gap-2">
+        <button
+          type="button"
+          onClick={() => setEcran('profil')}
+          className="flex-1 rounded-full border border-white/20 py-2 text-[12px] font-bold text-white/80 active:scale-95"
+        >
+          👤 Profil
+        </button>
+        <button
+          type="button"
+          onClick={() => setEcran('classement')}
+          className="flex-1 rounded-full border border-white/20 py-2 text-[12px] font-bold text-white/80 active:scale-95"
+        >
+          🏆 Classement
+        </button>
       </div>
     </div>
   );

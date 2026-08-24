@@ -11,8 +11,6 @@
     "generate-clues": "node scripts/generate-clues.mjs"
   },
   "dependencies": {
-    "@liveblocks/client": "^2.13.0",
-    "@liveblocks/react": "^2.13.0",
     "@supabase/supabase-js": "^2.45.4",
     "framer-motion": "^11.11.17",
     "howler": "^2.2.4",

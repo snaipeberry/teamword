@@ -14,6 +14,25 @@ export function seedFor(sessionId: string, game: number, round: number): string 
   return `${sessionId}-g${game}-r${round}`;
 }
 
+/**
+ * Graine de la grille du jour — la MÊME pour tout le monde.
+ *
+ * Datée en UTC et non en heure locale : sans cela, deux joueurs de fuseaux
+ * différents joueraient des grilles différentes le même jour, et le principe
+ * même d'une grille commune tomberait.
+ *
+ * Le préfixe est reconnu par le serveur, qui privilégie alors les mots
+ * difficiles.
+ */
+export function dailySeed(date = new Date()): string {
+  return `daily-${date.toISOString().slice(0, 10)}`;
+}
+
+/** Libellé lisible de la grille du jour, pour l'affichage. */
+export function dailyLabel(date = new Date()): string {
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+}
+
 // Par défaut : même origine. En production c'est la fonction serverless
 // `api/puzzle.py` ; en développement, le proxy déclaré dans vite.config.ts
 // renvoie /api vers le serveur Python local. Une même URL des deux côtés.

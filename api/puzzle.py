@@ -62,6 +62,8 @@ try:
         load_skeleton_bank,
     )
     from serve_puzzles import (  # noqa: E402
+        DAILY_MIN_COMPLEXITY as _DAILY_MIN_COMPLEXITY,
+        DAILY_PREFIX as _DAILY_PREFIX,
         rotation_avoid as _rotation_avoid,
         to_app_puzzle as _to_app_puzzle,
     )
@@ -72,6 +74,7 @@ try:
     _WORDS = load_dictionary(DATASET_PATH)
     _INDEX = build_word_index(_WORDS)
     _BANK = load_skeleton_bank(BANK_PATH)
+    _EASY_WORDS = {w.word for w in _WORDS if w.complexity < _DAILY_MIN_COMPLEXITY}
 
     _BOOT_MS = (time.perf_counter() - _t0) * 1000
 except Exception:  # noqa: BLE001 — on veut le détail dans la réponse
@@ -81,11 +84,13 @@ except Exception:  # noqa: BLE001 — on veut le détail dans la réponse
 def build_payload(seed=None):
     rng = random.Random(seed) if seed is not None else random.Random()
 
+    # La grille du jour vise plus difficile ; les autres alternent le stock
+    # court pour éviter les redites d'une grille à la suivante.
+    daily = bool(seed) and seed.startswith(_DAILY_PREFIX)
+    avoid = _EASY_WORDS if daily else _rotation_avoid(_INDEX, seed)
+
     cells, words_out, metrics = generate_from_bank(
-        _BANK, _WORDS, rng, index=_INDEX,
-        # Alterne le stock de mots courts pour ne pas revoir les mêmes
-        # d'une grille à l'autre.
-        avoid_words=_rotation_avoid(_INDEX, seed),
+        _BANK, _WORDS, rng, index=_INDEX, avoid_words=avoid,
     )
 
     payload = _to_app_puzzle(
@@ -96,6 +101,7 @@ def build_payload(seed=None):
         puzzle_id=str(seed) if seed is not None else f"{rng.getrandbits(48):012x}",
         title="Mots fléchés",
     )
+    payload["daily"] = daily
     payload["stats"] = {
         "words": metrics["words"],
         "letters": metrics["letters"],

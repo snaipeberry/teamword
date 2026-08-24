@@ -22,7 +22,16 @@ import {
   unlockAudio,
 } from '../lib/sounds';
 
-export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number }) {
+export function CrosswordGrid({
+  puzzle,
+  round,
+  daily = false,
+}: {
+  puzzle: Puzzle;
+  round: number;
+  /** La grille du jour est unique : pas d'enchaînement vers une suivante. */
+  daily?: boolean;
+}) {
   const game = useGameState();
   const { advanceRound } = useRound();
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
@@ -173,7 +182,10 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
   const showRoundResults = useCallback(() => {
     setCelebrating(false);
     setShowResults(true);
-  }, []);
+    // La grille du jour n'a pas de suivante : c'est ici qu'on la comptabilise
+    // pour la médaille d'assiduité et sa prime de points.
+    if (daily) game.reportDailyDone();
+  }, [daily, game]);
 
   const goToNextRound = useCallback(() => {
     setShowResults(false);
@@ -507,7 +519,7 @@ export function CrosswordGrid({ puzzle, round }: { puzzle: Puzzle; round: number
 
       <AnimatePresence>
         {celebrating && <CompletionCelebration onDone={showRoundResults} />}
-        {showResults && <RoundResults round={round} onAdvance={goToNextRound} />}
+        {showResults && <RoundResults round={round} daily={daily} onAdvance={goToNextRound} />}
       </AnimatePresence>
     </div>
   );

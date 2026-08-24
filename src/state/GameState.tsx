@@ -1,22 +1,24 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { LiveMap } from '@liveblocks/client';
 import {
-  LiveblocksProvider,
-  RoomProvider,
-  ClientSideSuspense,
-  useStorage,
-  useMutation,
-  useMyPresence,
-  useOthers,
-  useBroadcastEvent,
-  useEventListener,
-} from '@liveblocks/react/suspense';
-import { getOrCreatePlayerId, getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
+  connectRoom,
+  EMPTY_STATE,
+  type RoomConnection,
+  type RoomPeer,
+  type RoomState,
+} from '../lib/roomClient';
+import { getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
+import { activePlayerId } from '../lib/auth';
 import { wordCellIds } from '../lib/gridGeometry';
 import { playRadioClip, splitIntoChunks, startRecording, type Recording } from '../lib/voiceRadio';
 import type { Puzzle, WordEntry } from '../types/puzzle';
 
-export const hasLiveblocksKey = Boolean(import.meta.env.VITE_LIVEBLOCKS_PUBLIC_KEY);
+/**
+ * Le multijoueur passe par notre propre serveur WebSocket (server/index.js),
+ * plus par Liveblocks : facturé au joueur actif, son coût croissait avec le
+ * succès. Il n'y a donc plus de clé à configurer — le mode multijoueur est
+ * toujours disponible.
+ */
+export const hasMultiplayer = true;
 
 export interface PlayerCursor {
   connectionId: number;
@@ -68,6 +70,10 @@ export interface GameStateApi {
   /** Nom affiché du joueur, et son remplacement par un nom choisi. */
   myName: string;
   renameMe: (name: string) => void;
+  /** Met à jour le profil persistant (pseudo et/ou vignette). */
+  updateProfile: (patch: { name?: string; avatar?: string | null }) => void;
+  /** Signale une grille du jour terminée (compteur d'assiduité). */
+  reportDailyDone: () => void;
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -108,6 +114,13 @@ export interface RoundApi {
   kickPlayer: (playerId: string) => void;
   /** Ce joueur a-t-il été exclu ? */
   isKicked: (playerId: string) => boolean;
+
+  // ---- Équipes (matchmaking privé 2v2 / 3v3) ----
+  /** playerId -> 'A' | 'B'. Vide = partie coopérative classique. */
+  teams: Record<string, string>;
+  setTeam: (team: string | null) => void;
+  /** Partie classée : issue du 1v1 aléatoire. */
+  ranked: boolean;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -165,6 +178,9 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
       startGame: () => {},
       kickPlayer: () => {},
       isKicked: () => false,
+      teams: {},
+      setTeam: () => {},
+      ranked: false,
     }),
     [round, game],
   );
@@ -213,6 +229,8 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       micDenied: false,
       myName: localName,
       renameMe: (name) => setLocalName(setPlayerName(name)),
+      updateProfile: ({ name }) => { if (name) setLocalName(setPlayerName(name)); },
+      reportDailyDone: () => {},
     }),
     [letters, revealed, setLetters, setRevealed, myColor, localName],
   );
@@ -221,7 +239,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ============================================================
-// Mode multijoueur
+// Mode multijoueur (serveur WebSocket maison)
 // ============================================================
 
 /** cellId -> ids of the word(s) that cell belongs to, and wordId -> its ordered cellIds / definition. */
@@ -244,359 +262,330 @@ function usePuzzleIndex(puzzle: Puzzle) {
   }, [puzzle.words]);
 }
 
-function LiveblocksRoundProvider({ children }: { children: React.ReactNode }) {
-  const round = useStorage((root) => root.round) ?? 0;
-  const game = useStorage((root) => root.game) ?? 0;
-  const hostId = useStorage((root) => root.hostId) ?? null;
-  const started = useStorage((root) => root.started) ?? false;
-  const kicked = useStorage((root) => root.kicked);
-
-  // Le PREMIER arrivant devient hôte, et le reste. Ne jamais réattribuer :
-  // sinon un invité hériterait du rôle dès que le créateur se déconnecte, et
-  // pourrait exclure tout le monde.
-  const claimHost = useMutation(({ storage, self }) => {
-    if (storage.get('hostId') == null) storage.set('hostId', self.presence.playerId);
-  }, []);
-
-  useEffect(() => {
-    claimHost();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const startGame = useMutation(({ storage }) => {
-    storage.set('started', true);
-  }, []);
-
-  const kickPlayer = useMutation(({ storage, self }, playerId: string) => {
-    // Contrôle côté mutation, pas seulement dans l'UI : masquer le bouton ne
-    // protège de rien, la mutation restant appelable.
-    if (storage.get('hostId') !== self.presence.playerId) return;
-    if (playerId === self.presence.playerId) return; // l'hôte ne s'exclut pas
-    storage.get('kicked').set(playerId, true);
-  }, []);
-
-  // On repart d'une grille vierge : les lettres de la manche précédente
-  // n'ont plus de sens sur la nouvelle. Les scores, eux, se cumulent.
-  //
-  // `fromRound` rend l'appel IDEMPOTENT : tous les clients détectent
-  // « tout le monde est prêt » au même instant et appellent donc cette
-  // mutation en même temps. Sans cette garde, on sauterait deux ou trois
-  // grilles d'un coup.
-  const advanceRound = useMutation(({ storage }, fromRound?: number) => {
-    const current = storage.get('round') ?? 0;
-    if (fromRound !== undefined && current !== fromRound) return;
-    storage.set('round', current + 1);
-    // LiveMap n'a pas de .clear() : on supprime clé par clé, en figeant
-    // d'abord la liste pour ne pas muter la map pendant qu'on l'itère.
-    const lettersMap = storage.get('letters');
-    Array.from(lettersMap.keys()).forEach((key) => lettersMap.delete(key));
-    const revealedMap = storage.get('revealed');
-    Array.from(revealedMap.keys()).forEach((key) => revealedMap.delete(key));
-  }, []);
-
-  // Vide TOUT l'état de partie d'un coup. Contrairement à `advanceRound`,
-  // les scores et les indices sont eux aussi remis à zéro : c'est une
-  // nouvelle partie, pas une grille de plus.
-  const resetSession = useMutation(({ storage }) => {
-    // Incrémenter la partie change la graine : on repart sur une grille
-    // NEUVE, et non sur celle déjà jouée.
-    storage.set('game', (storage.get('game') ?? 0) + 1);
-    storage.set('round', 0);
-    // LiveMap n'a pas de .clear() : on supprime clé par clé, en figeant
-    // d'abord la liste pour ne pas muter la map pendant qu'on l'itère.
-    for (const name of ['letters', 'revealed', 'scores', 'hints', 'ready'] as const) {
-      const map = storage.get(name);
-      Array.from(map.keys()).forEach((key) => map.delete(key));
-    }
-  }, []);
-
-  const api = useMemo<RoundApi>(
-    () => ({
-      round, game, advanceRound, resetSession,
-      hostId, started, startGame, kickPlayer,
-      isKicked: (id: string) => kicked.get(id) === true,
-    }),
-    [round, game, advanceRound, resetSession, hostId, started, startGame, kickPlayer, kicked],
-  );
-  return <RoundContext.Provider value={api}>{children}</RoundContext.Provider>;
+/**
+ * Connexion partagée : l'état de partie et la présence sont nécessaires à la
+ * fois au niveau session (manche, salon) et au niveau grille (scores, lettres).
+ * Les faire vivre ici évite d'ouvrir deux sockets.
+ */
+interface RoomBridge {
+  state: RoomState;
+  peers: RoomPeer[];
+  send: (message: Record<string, unknown>) => void;
+  me: { id: string; name: string; color: string };
+  onBroadcast: (handler: (payload: unknown) => void) => () => void;
 }
 
-function LiveblocksGameBridge({
+const RoomContext = createContext<RoomBridge | null>(null);
+
+function useRoom(): RoomBridge {
+  const ctx = useContext(RoomContext);
+  if (!ctx) throw new Error('useRoom must be used within a SessionProvider');
+  return ctx;
+}
+
+function RemoteSessionProvider({
+  sessionId,
+  children,
+}: {
+  sessionId: string;
+  children: React.ReactNode;
+}) {
+  const me = useMemo(
+    () => ({
+      id: activePlayerId(),
+      name: getOrCreatePlayerName(),
+      color: randomColor(),
+    }),
+    [],
+  );
+
+  const [state, setState] = useState<RoomState>(EMPTY_STATE);
+  const [peers, setPeers] = useState<RoomPeer[]>([]);
+  const connection = useRef<RoomConnection | null>(null);
+
+  // Les auditeurs de diffusion (talkie-walkie) s'abonnent ici : le socket est
+  // ouvert une seule fois, mais plusieurs composants peuvent vouloir écouter.
+  const listeners = useRef(new Set<(payload: unknown) => void>());
+
+  useEffect(() => {
+    const conn = connectRoom(sessionId, me, {
+      onState: setState,
+      onPresence: setPeers,
+      onBroadcast: (payload) => listeners.current.forEach((fn) => fn(payload)),
+    });
+    connection.current = conn;
+    return () => {
+      conn.close();
+      connection.current = null;
+    };
+  }, [sessionId, me]);
+
+  const send = useCallback((message: Record<string, unknown>) => {
+    connection.current?.send(message);
+  }, []);
+
+  const onBroadcast = useCallback((handler: (payload: unknown) => void) => {
+    listeners.current.add(handler);
+    return () => listeners.current.delete(handler);
+  }, []);
+
+  const bridge = useMemo<RoomBridge>(
+    () => ({ state, peers, send, me, onBroadcast }),
+    [state, peers, send, me, onBroadcast],
+  );
+
+  const roundApi = useMemo<RoundApi>(
+    () => ({
+      round: state.round,
+      game: state.game,
+      // `fromRound` rend l'appel idempotent côté serveur : tous les clients
+      // l'émettent en même temps dès que le dernier joueur est prêt.
+      advanceRound: (fromRound) => send({ t: 'advance', fromRound }),
+      resetSession: () => send({ t: 'reset' }),
+      hostId: state.hostId,
+      started: state.started,
+      startGame: () => send({ t: 'start' }),
+      kickPlayer: (playerId) => send({ t: 'kick', playerId }),
+      isKicked: (playerId) => state.kicked[playerId] === true,
+      teams: state.teams ?? {},
+      setTeam: (team) => send({ t: 'team', team }),
+      ranked: state.ranked === true,
+    }),
+    [state, send],
+  );
+
+  return (
+    <RoomContext.Provider value={bridge}>
+      <RoundContext.Provider value={roundApi}>{children}</RoundContext.Provider>
+    </RoomContext.Provider>
+  );
+}
+
+function RemoteGameProvider({
   puzzle,
   children,
 }: {
   puzzle: Puzzle;
   children: React.ReactNode;
 }) {
+  const { state, peers, send, me, onBroadcast } = useRoom();
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
+  const [myName, setMyName] = useState(me.name);
 
-  const letters = useStorage((root) => root.letters);
-  const scores = useStorage((root) => root.scores);
-  const players = useStorage((root) => root.players);
-  const hints = useStorage((root) => root.hints);
-  const revealed = useStorage((root) => root.revealed);
-  const ready = useStorage((root) => root.ready);
-  const others = useOthers();
-  const [myPresence, updateMyPresence] = useMyPresence();
+  const getLetter = useCallback((cellId: string) => state.letters[cellId] ?? '', [state.letters]);
 
-  const setLetter = useMutation(
-    ({ storage, self }, targetCellId: string, letter: string) => {
-      const lettersMap = storage.get('letters');
-      const previousLetter = lettersMap.get(targetCellId) ?? '';
-      const affectedWordIds = wordIdsByCellId.get(targetCellId) ?? [];
-
-      const isWordComplete = (wordId: string, overrideCellId: string, overrideLetter: string) => {
+  /**
+   * Le score est calculé ICI, pas sur le serveur : lui seul ignore les mots
+   * de la grille, et l'y envoyer ferait de ce serveur générique un serveur
+   * de mots fléchés. Même niveau de confiance qu'avant, les mutations
+   * Liveblocks s'exécutant elles aussi côté client.
+   *
+   * Seul l'auteur de la frappe détecte la transition non-résolu → résolu,
+   * donc un mot ne peut pas être compté deux fois.
+   */
+  const setLetter = useCallback(
+    (cellId: string, letter: string) => {
+      const affected = wordIdsByCellId.get(cellId) ?? [];
+      const complete = (wordId: string, override: string) => {
         const word = wordsById.get(wordId);
         const cells = cellsByWordId.get(wordId);
         if (!word || !cells) return false;
         return cells.every((id, i) => {
-          const value = id === overrideCellId ? overrideLetter : (lettersMap.get(id) ?? '');
+          const value = id === cellId ? override : (state.letters[id] ?? '');
           return value === word.answer[i];
         });
       };
-
-      const wasCompleteBefore = new Map(
-        affectedWordIds.map((wordId) => [wordId, isWordComplete(wordId, targetCellId, previousLetter)]),
-      );
-
-      lettersMap.set(targetCellId, letter);
-
-      const newlyCompleted = affectedWordIds.filter(
-        (wordId) => !wasCompleteBefore.get(wordId) && isWordComplete(wordId, targetCellId, letter),
-      );
-
-      if (newlyCompleted.length > 0) {
-        const playerId = self.presence.playerId;
-        const scoresMap = storage.get('scores');
-        scoresMap.set(playerId, (scoresMap.get(playerId) ?? 0) + newlyCompleted.length);
-      }
+      const avant = new Map(affected.map((id) => [id, complete(id, state.letters[cellId] ?? '')]));
+      const scored = affected.filter((id) => !avant.get(id) && complete(id, letter)).length;
+      send({ t: 'letter', cellId, letter, scored });
     },
-    [wordsById, cellsByWordId, wordIdsByCellId],
+    [send, state.letters, wordsById, cellsByWordId, wordIdsByCellId],
   );
 
-  // Volontairement SANS attribution de points : une lettre donnée par l'aide
-  // ne doit pas pouvoir faire gagner le mot. Seul le compteur d'indices bouge,
-  // pour que l'usage de l'aide reste visible des deux joueurs.
-  const revealLetter = useMutation(({ storage, self }, targetCellId: string, letter: string) => {
-    storage.get('letters').set(targetCellId, letter);
-    storage.get('revealed').set(targetCellId, true);
-    const playerId = self.presence.playerId;
-    const hintsMap = storage.get('hints');
-    hintsMap.set(playerId, (hintsMap.get(playerId) ?? 0) + 1);
-  }, []);
+  const revealLetter = useCallback(
+    (cellId: string, letter: string) => send({ t: 'reveal', cellId, letter }),
+    [send],
+  );
 
-  const setReady = useMutation(({ storage, self }, round: number) => {
-    storage.get('ready').set(self.presence.playerId, round);
-  }, []);
+  const scoreboard = useMemo<PlayerScore[]>(() => {
+    const ids = new Set<string>([
+      ...Object.keys(state.players),
+      ...Object.keys(state.scores),
+      me.id,
+      ...peers.map((p) => p.id),
+    ]);
+    const online = new Set(peers.map((p) => p.id));
 
-  const broadcast = useBroadcastEvent();
+    return [...ids]
+      .map((id) => {
+        const isMe = id === me.id;
+        const live = peers.find((p) => p.id === id);
+        const stored = state.players[id];
+        return {
+          playerId: id,
+          name: isMe ? myName : (live?.name ?? stored?.name ?? 'Joueur'),
+          color: live?.color ?? stored?.color ?? '#9CA3AF',
+          score: state.scores[id] ?? 0,
+          hints: state.hints[id] ?? 0,
+          online: online.has(id),
+          isMe,
+        };
+      })
+      .sort((a, b) => b.score - a.score || Number(b.isMe) - Number(a.isMe));
+  }, [state, peers, me.id, myName]);
+
+  /** On n'attend que les joueurs EN LIGNE : un partant bloquerait les autres. */
+  const allReadyFor = useCallback(
+    (round: number) => peers.every((p) => state.ready[p.id] === round),
+    [peers, state.ready],
+  );
+
+  const renameMe = useCallback(
+    (name: string) => {
+      const clean = setPlayerName(name);
+      setMyName(clean);
+      // `profile` met à jour le profil PERSISTANT en plus de l'état de partie :
+      // le pseudo doit survivre à la session.
+      send({ t: 'profile', name: clean });
+    },
+    [send],
+  );
+
+  const updateProfile = useCallback(
+    (patch: { name?: string; avatar?: string | null }) => {
+      if (patch.name) {
+        const clean = setPlayerName(patch.name);
+        setMyName(clean);
+        send({ t: 'profile', name: clean, avatar: patch.avatar });
+      } else {
+        send({ t: 'profile', avatar: patch.avatar });
+      }
+    },
+    [send],
+  );
+
+  const reportDailyDone = useCallback(() => send({ t: 'dailyDone' }), [send]);
+
   // ---------- Talkie-walkie ----------
   const recordingRef = useRef<Recording | null>(null);
-  // Indexé par playerId : `voice-end` ne transporte que l'identifiant.
   const [talking, setTalking] = useState<Record<string, string>>({});
   const [micDenied, setMicDenied] = useState(false);
   const talkingNames = useMemo(() => Object.values(talking), [talking]);
+  const inbox = useRef(new Map<string, { parts: Map<number, string>; total: number }>());
+
+  useEffect(
+    () =>
+      onBroadcast((raw) => {
+        const event = raw as Record<string, unknown>;
+        if (event.type === 'voice-start') {
+          setTalking((prev) => ({ ...prev, [event.playerId as string]: event.name as string }));
+        } else if (event.type === 'voice-end') {
+          setTalking((prev) => {
+            const next = { ...prev };
+            delete next[event.playerId as string];
+            return next;
+          });
+        } else if (event.type === 'voice-chunk') {
+          // Les morceaux d'un même message peuvent arriver dans le désordre :
+          // on les range par numéro et on ne joue qu'une fois complet.
+          const clipId = event.clipId as string;
+          const entry =
+            inbox.current.get(clipId) ?? { parts: new Map<number, string>(), total: event.total as number };
+          entry.parts.set(event.seq as number, event.data as string);
+          inbox.current.set(clipId, entry);
+          if (entry.parts.size === entry.total) {
+            inbox.current.delete(clipId);
+            setTalking((prev) => {
+              const next = { ...prev };
+              delete next[event.playerId as string];
+              return next;
+            });
+            const ordered = Array.from({ length: entry.total }, (_, i) => entry.parts.get(i) ?? '').join('');
+            void playRadioClip(ordered);
+          }
+        }
+      }),
+    [onBroadcast],
+  );
 
   const startTalking = useCallback(async () => {
     if (recordingRef.current) return;
     try {
       recordingRef.current = await startRecording();
       setMicDenied(false);
-      broadcast({ type: 'voice-start', playerId: myPresence.playerId, name: myPresence.name });
+      send({ t: 'broadcast', payload: { type: 'voice-start', playerId: me.id, name: myName } });
     } catch {
-      // Micro refusé ou indisponible : on le signale à l'UI, on ne casse rien.
       recordingRef.current = null;
       setMicDenied(true);
     }
-  }, [broadcast, myPresence.playerId, myPresence.name]);
+  }, [send, me.id, myName]);
 
   const stopTalking = useCallback(() => {
     const rec = recordingRef.current;
     if (!rec) return;
     recordingRef.current = null;
-    broadcast({ type: 'voice-end', playerId: myPresence.playerId });
+    send({ t: 'broadcast', payload: { type: 'voice-end', playerId: me.id } });
 
     void rec.stop().then((clip) => {
       if (!clip) return;
       const chunks = splitIntoChunks(clip.base64);
-      const clipId = `${myPresence.playerId}-${Date.now()}`;
+      const clipId = `${me.id}-${Date.now()}`;
       chunks.forEach((data, seq) =>
-        broadcast({
-          type: 'voice-chunk',
-          playerId: myPresence.playerId,
-          name: myPresence.name,
-          clipId,
-          seq,
-          total: chunks.length,
-          data,
+        send({
+          t: 'broadcast',
+          payload: {
+            type: 'voice-chunk',
+            playerId: me.id,
+            name: myName,
+            clipId,
+            seq,
+            total: chunks.length,
+            data,
+          },
         }),
       );
     });
-  }, [broadcast, myPresence.playerId, myPresence.name]);
-
-  // Réassemblage des messages reçus. Les morceaux d'un même clip peuvent
-  // arriver dans le désordre : on les range par numéro et on ne joue qu'une
-  // fois le compte complet atteint.
-  const inboxRef = useRef(new Map<string, { parts: Map<number, string>; total: number }>());
-
-  useEventListener(({ event }) => {
-    if (event.type === 'voice-start') {
-      setTalking((prev) => ({ ...prev, [event.playerId]: event.name }));
-      return;
-    }
-    if (event.type === 'voice-end') {
-      setTalking((prev) => {
-        if (!(event.playerId in prev)) return prev;
-        const next = { ...prev };
-        delete next[event.playerId];
-        return next;
-      });
-      return;
-    }
-    if (event.type === 'voice-chunk') {
-      const inbox = inboxRef.current;
-      const entry = inbox.get(event.clipId) ?? { parts: new Map<number, string>(), total: event.total };
-      entry.parts.set(event.seq, event.data);
-      inbox.set(event.clipId, entry);
-      if (entry.parts.size === entry.total) {
-        inbox.delete(event.clipId);
-        setTalking((prev) => {
-          if (!(event.playerId in prev)) return prev;
-          const next = { ...prev };
-          delete next[event.playerId];
-          return next;
-        });
-        const ordered = Array.from({ length: entry.total }, (_, i) => entry.parts.get(i) ?? '').join('');
-        void playRadioClip(ordered);
-      }
-    }
-  });
-
-
-
-  // Le nom vit à deux endroits : la présence (temps réel, pour les curseurs)
-  // et le storage (persistant, pour rester affiché hors ligne au tableau des
-  // scores). Renommer doit donc écrire dans les deux.
-  const publishName = useMutation(({ storage, self }, name: string) => {
-    storage.get('players').set(self.presence.playerId, {
-      name,
-      color: self.presence.color,
-    });
-  }, []);
-
-  const renameMe = useCallback(
-    (name: string) => {
-      const clean = setPlayerName(name);
-      updateMyPresence({ name: clean });
-      publishName(clean);
-    },
-    [updateMyPresence, publishName],
-  );
-
-  const registerPlayer = useMutation(({ storage, self }) => {
-    storage.get('players').set(self.presence.playerId, {
-      name: self.presence.name,
-      color: self.presence.color,
-    });
-  }, []);
-
-  useEffect(() => {
-    registerPlayer();
-    // Runs once per room join to publish this player's name/color into persistent storage.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const scoreboard = useMemo<PlayerScore[]>(() => {
-    const ids = new Set<string>();
-    players.forEach((_, id) => ids.add(id));
-    scores.forEach((_, id) => ids.add(id));
-    ids.add(myPresence.playerId);
-    others.forEach((o) => ids.add(o.presence.playerId));
-
-    const onlineIds = new Set([myPresence.playerId, ...others.map((o) => o.presence.playerId)]);
-
-    return [...ids]
-      .map((id) => {
-        const isMe = id === myPresence.playerId;
-        const onlineOther = others.find((o) => o.presence.playerId === id);
-        const stored = players.get(id);
-        return {
-          playerId: id,
-          name: isMe ? myPresence.name : (onlineOther?.presence.name ?? stored?.name ?? 'Joueur'),
-          color: isMe ? myPresence.color : (onlineOther?.presence.color ?? stored?.color ?? '#9CA3AF'),
-          score: scores.get(id) ?? 0,
-          hints: hints.get(id) ?? 0,
-          online: onlineIds.has(id),
-          isMe,
-        };
-      })
-      .sort((a, b) => b.score - a.score || Number(b.isMe) - Number(a.isMe));
-  }, [players, scores, hints, others, myPresence]);
-
-  /**
-   * On n'attend que les joueurs EN LIGNE : sinon un joueur parti en cours de
-   * partie bloquerait définitivement la progression des autres.
-   */
-  const allReadyFor = useCallback(
-    (round: number) => {
-      const onlineIds = [myPresence.playerId, ...others.map((o) => o.presence.playerId)];
-      return onlineIds.every((id) => ready.get(id) === round);
-    },
-    [ready, others, myPresence.playerId],
-  );
-
-  /**
-   * Le drapeau « prêt » ne peut pas vivre dans PlayerScore : il n'a de sens
-   * que rapporté à une grille précise, que le tableau des scores ignore.
-   */
-  const isReadyFor = useCallback(
-    (playerId: string, round: number) => ready.get(playerId) === round,
-    [ready],
-  );
+  }, [send, me.id, myName]);
 
   const api = useMemo<GameStateApi>(
     () => ({
       multiplayer: true,
-      getLetter: (cellId) => letters.get(cellId) ?? '',
+      getLetter,
       setLetter,
       revealLetter,
-      isRevealed: (cellId) => revealed.get(cellId) === true,
-      others: others.map((o) => ({
-        connectionId: o.connectionId,
-        name: o.presence.name,
-        color: o.presence.color,
-        activeCell: o.presence.activeCell,
-      })),
-      myColor: myPresence.color,
-      myPlayerId: myPresence.playerId,
-      setMyActiveCell: (cellId) => updateMyPresence({ activeCell: cellId }),
+      isRevealed: (cellId) => state.revealed[cellId] === true,
+      others: peers
+        .filter((p) => p.id !== me.id)
+        .map((p) => ({
+          connectionId: p.connectionId,
+          name: p.name,
+          color: p.color,
+          activeCell: p.activeCell,
+        })),
+      myColor: me.color,
+      myPlayerId: me.id,
+      setMyActiveCell: (cellId) => send({ t: 'presence', activeCell: cellId }),
       scoreboard,
-      setReady,
+      setReady: (round) => send({ t: 'ready', round }),
       allReadyFor,
-      isReadyFor,
+      isReadyFor: (playerId, round) => state.ready[playerId] === round,
       startTalking,
       stopTalking,
       talkingNames,
       micDenied,
-      myName: myPresence.name,
+      myName,
       renameMe,
+      updateProfile,
+      reportDailyDone,
     }),
     [
-      letters, revealed, others, myPresence, setLetter, revealLetter, updateMyPresence,
-      scoreboard, setReady, allReadyFor, isReadyFor,
-      startTalking, stopTalking, talkingNames, micDenied, renameMe,
+      getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard,
+      allReadyFor, startTalking, stopTalking, talkingNames, micDenied, myName,
+      renameMe, updateProfile, reportDailyDone,
     ],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
-}
-
-function ConnectingFallback() {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center text-sm text-white/70">
-      Connexion à la partie…
-    </div>
-  );
 }
 
 // ============================================================
@@ -604,9 +593,9 @@ function ConnectingFallback() {
 // ============================================================
 
 /**
- * Ouvre la session (room Liveblocks ou état local). L'identifiant de room ne
- * dépend QUE de la session, pas de la manche : il faut déjà être connecté
- * pour savoir quelle manche est en cours.
+ * Ouvre la session. L'identifiant de room ne dépend QUE de la session, pas de
+ * la manche : il faut déjà être connecté pour savoir quelle manche est en
+ * cours. Effet de bord souhaitable : les scores se cumulent sur la session.
  */
 export function SessionProvider({
   sessionId,
@@ -615,38 +604,10 @@ export function SessionProvider({
   sessionId: string;
   children: React.ReactNode;
 }) {
-  if (!hasLiveblocksKey) {
+  if (!hasMultiplayer) {
     return <LocalSessionProvider>{children}</LocalSessionProvider>;
   }
-
-  const playerName = getOrCreatePlayerName();
-  const playerId = getOrCreatePlayerId();
-
-  return (
-    <LiveblocksProvider publicApiKey={import.meta.env.VITE_LIVEBLOCKS_PUBLIC_KEY as string}>
-      <RoomProvider
-        id={`mots-fleches-${sessionId}`}
-        initialPresence={{ name: playerName, color: randomColor(), activeCell: null, playerId }}
-        initialStorage={{
-          round: 0,
-          game: 0,
-          hostId: null,
-          started: false,
-          kicked: new LiveMap(),
-          letters: new LiveMap(),
-          scores: new LiveMap(),
-          hints: new LiveMap(),
-          revealed: new LiveMap(),
-          ready: new LiveMap(),
-          players: new LiveMap(),
-        }}
-      >
-        <ClientSideSuspense fallback={<ConnectingFallback />}>
-          <LiveblocksRoundProvider>{children}</LiveblocksRoundProvider>
-        </ClientSideSuspense>
-      </RoomProvider>
-    </LiveblocksProvider>
-  );
+  return <RemoteSessionProvider sessionId={sessionId}>{children}</RemoteSessionProvider>;
 }
 
 /** À placer sous SessionProvider, une fois la grille de la manche chargée. */
@@ -657,14 +618,8 @@ export function GameStateProvider({
   puzzle: Puzzle;
   children: React.ReactNode;
 }) {
-  if (!hasLiveblocksKey) {
+  if (!hasMultiplayer) {
     return <LocalGameProvider>{children}</LocalGameProvider>;
   }
-  return <LiveblocksGameBridge puzzle={puzzle}>{children}</LiveblocksGameBridge>;
-}
-
-/** Petit hook utilitaire pour vider la grille locale/partagée en fin de manche. */
-export function useAdvanceRound(): () => void {
-  const { advanceRound } = useRound();
-  return useCallback(() => advanceRound(), [advanceRound]);
+  return <RemoteGameProvider puzzle={puzzle}>{children}</RemoteGameProvider>;
 }

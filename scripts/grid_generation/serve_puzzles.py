@@ -145,6 +145,21 @@ THIN_STOCK_MAX = 200
 # (mesuré : 7,6 % de recouvrement à K=2, contre 10,1 % à K=3 et 10,8 % à K=4).
 ROTATION_GROUPS = 2
 
+# Préfixe des graines de la grille du jour : « daily-AAAA-MM-JJ ».
+DAILY_PREFIX = "daily-"
+
+# Seuil de complexité privilégié pour la grille du jour.
+#
+# On PRÉFÈRE les mots difficiles sans jamais exclure les faciles. Un filtrage
+# dur est impossible : au-delà de 4, il ne reste que 30 mots de 2 lettres pour
+# la douzaine qu'exige chaque grille, et plus aucune ne se remplit (mesuré :
+# 0 sur 30). En rétrogradant, la complexité moyenne passe de 2,51 à 3,24 avec
+# 100 % de réussite.
+#
+# Un seuil de 5 est contre-productif : on rétrograde tant de mots que le
+# remplissage retombe sur les faciles (2,78, moins bon qu'à 4).
+DAILY_MIN_COMPLEXITY = 4
+
 
 def rotation_avoid(index, seed):
     """Mots à rétrograder pour que deux grilles consécutives ne se ressemblent pas.
@@ -194,6 +209,11 @@ class PuzzleService:
         self.index = build_word_index(self.words)
         self.bank = load_skeleton_bank(bank_path)
 
+        # Calculé une fois : les mots à rétrograder pour la grille du jour.
+        self.easy_words = {
+            w.word for w in self.words if w.complexity < DAILY_MIN_COMPLEXITY
+        }
+
         print(
             f"[OK] {len(self.words)} mots, {self.bank['count']} squelettes "
             f"{self.bank['rows']}x{self.bank['cols']}"
@@ -205,9 +225,13 @@ class PuzzleService:
         # identique sans que le serveur ait à stocker quoi que ce soit.
         rng = random.Random(seed) if seed is not None else random.Random()
 
+        # La grille du jour vise plus difficile ; les autres alternent le stock
+        # court pour éviter les redites d'une grille à la suivante.
+        daily = bool(seed) and seed.startswith(DAILY_PREFIX)
+        avoid = self.easy_words if daily else rotation_avoid(self.index, seed)
+
         cells, words_out, metrics = generate_from_bank(
-            self.bank, self.words, rng, index=self.index,
-            avoid_words=rotation_avoid(self.index, seed),
+            self.bank, self.words, rng, index=self.index, avoid_words=avoid,
         )
 
         payload = to_app_puzzle(
@@ -218,6 +242,7 @@ class PuzzleService:
             puzzle_id=str(seed) if seed is not None else f"{rng.getrandbits(48):012x}",
             title="Mots fléchés",
         )
+        payload["daily"] = daily
         payload["stats"] = {
             "words": metrics["words"],
             "letters": metrics["letters"],

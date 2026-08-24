@@ -36,6 +36,18 @@ export default defineConfig({
         target: 'http://127.0.0.1:8787',
         changeOrigin: true,
       },
+      // Routes HTTP du service temps réel (classement, profils).
+      '/rt': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/rt/, ''),
+      },
+      // Serveur temps réel des parties (server/index.js).
+      '/ws': {
+        target: 'ws://127.0.0.1:8080',
+        ws: true,
+        rewrite: (p) => p.replace(/^\/ws/, ''),
+      },
     },
   },
 });

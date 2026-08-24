@@ -3,10 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { NameField } from './NameField';
 import { buildInviteUrl } from '../lib/sessionCode';
-
-function initials(name: string): string {
-  return name.slice(0, 2).toUpperCase();
-}
+import { Avatar } from './Avatar';
 
 /**
  * Salon d'attente : code à partager, liste des joueurs, départ.
@@ -16,7 +13,7 @@ function initials(name: string): string {
  */
 export function Lobby({ sessionId }: { sessionId: string }) {
   const game = useGameState();
-  const { hostId, startGame, kickPlayer, isKicked } = useRound();
+  const { hostId, startGame, kickPlayer, isKicked, teams, setTeam } = useRound();
   const [copied, setCopied] = useState<'code' | 'lien' | null>(null);
 
   const jeSuisHote = hostId === game.myPlayerId;
@@ -80,12 +77,7 @@ export function Lobby({ sessionId }: { sessionId: string }) {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-2"
               >
-                <span
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-display text-[10px] font-semibold text-white"
-                  style={{ backgroundColor: p.color }}
-                >
-                  {initials(p.isMe ? game.myName : p.name)}
-                </span>
+                <Avatar name={p.isMe ? game.myName : p.name} color={p.color} size={28} />
                 <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-white">
                   {p.isMe ? game.myName : p.name}
                   {p.isMe && <span className="ml-1 text-[10px] font-medium text-white/50">(vous)</span>}
@@ -93,6 +85,29 @@ export function Lobby({ sessionId }: { sessionId: string }) {
                 {hostId === p.playerId && (
                   <span className="shrink-0 text-[10px]" title="Hôte">👑</span>
                 )}
+                {/* Équipe : chacun choisit la sienne, ce qui couvre 1v1, 2v2
+                    et 3v3 sans mode dédié — le nombre de joueurs par camp
+                    suffit à définir le format. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!p.isMe) return;
+                    const actuelle = teams[p.playerId];
+                    setTeam(actuelle === 'A' ? 'B' : actuelle === 'B' ? null : 'A');
+                  }}
+                  disabled={!p.isMe}
+                  aria-label={p.isMe ? 'Changer d’équipe' : undefined}
+                  className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${
+                    teams[p.playerId] === 'A'
+                      ? 'bg-cyan-400/30 text-cyan-100'
+                      : teams[p.playerId] === 'B'
+                        ? 'bg-rose-400/30 text-rose-100'
+                        : 'bg-white/10 text-white/40'
+                  } ${p.isMe ? 'active:scale-95' : 'cursor-default'}`}
+                >
+                  {teams[p.playerId] ? `Équipe ${teams[p.playerId]}` : 'Coop'}
+                </button>
+
                 {jeSuisHote && !p.isMe && (
                   <button
                     type="button"
@@ -109,6 +124,18 @@ export function Lobby({ sessionId }: { sessionId: string }) {
           </AnimatePresence>
         </div>
       </div>
+
+      {(() => {
+        const a = presents.filter((p) => teams[p.playerId] === 'A').length;
+        const b = presents.filter((p) => teams[p.playerId] === 'B').length;
+        if (a === 0 && b === 0) return null;
+        return (
+          <p className="text-center text-[12px] font-bold text-white/70">
+            Format {a}v{b}
+            {a !== b && <span className="ml-1 text-amber-300">— équipes déséquilibrées</span>}
+          </p>
+        );
+      })()}
 
       {jeSuisHote ? (
         <motion.button

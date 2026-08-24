@@ -1,0 +1,4 @@
+# Données d'exécution : profils, comptes (hachages + sels), jetons de session
+# et parties en cours. Rien de tout cela n'a sa place dans le dépôt — et les
+# comptes encore moins que le reste.
+data/
