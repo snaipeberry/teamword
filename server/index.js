@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { WebSocketServer } from 'ws';
@@ -205,17 +205,25 @@ function loadSnapshot() {
   }
 }
 
+// Écriture atomique : on écrit dans un fichier temporaire puis on le
+// `rename` sur la cible. Un `writeFileSync` direct tronque le fichier en
+// cas de crash pendant l'écriture — sur accounts.json, ça veut dire tous
+// les comptes perdus. `rename` sur un même volume est atomique.
+function writeJsonAtomic(path, data) {
+  mkdirSync(dirname(path), { recursive: true });
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(data));
+  renameSync(tmp, path);
+}
+
 function saveSnapshot() {
   try {
-    mkdirSync(dirname(SNAPSHOT_PATH), { recursive: true });
-    writeFileSync(SNAPSHOT_PATH, JSON.stringify(Object.fromEntries(rooms)));
-    mkdirSync(dirname(PROFILES_PATH), { recursive: true });
-    writeFileSync(PROFILES_PATH, JSON.stringify(Object.fromEntries(profiles)));
-    mkdirSync(dirname(ACCOUNTS_PATH), { recursive: true });
-    writeFileSync(
-      ACCOUNTS_PATH,
-      JSON.stringify({ accounts: Object.fromEntries(accounts), tokens: Object.fromEntries(tokens) }),
-    );
+    writeJsonAtomic(SNAPSHOT_PATH, Object.fromEntries(rooms));
+    writeJsonAtomic(PROFILES_PATH, Object.fromEntries(profiles));
+    writeJsonAtomic(ACCOUNTS_PATH, {
+      accounts: Object.fromEntries(accounts),
+      tokens: Object.fromEntries(tokens),
+    });
   } catch (err) {
     console.error('[snapshot] échec', err.message);
   }
@@ -810,3 +818,15 @@ setInterval(() => {
 }, 30_000);
 
 http.listen(PORT, () => console.log(`[ws] écoute sur :${PORT}`));
+
+// Un hébergeur (Railway, Fly, ...) envoie SIGTERM avant de tuer le process à
+// chaque redéploiement. Sans ce handler, Node quitte immédiatement et perd
+// jusqu'à SNAPSHOT_EVERY_MS de parties, points et comptes non encore
+// écrits sur disque.
+function arreterProprement() {
+  console.log('[arrêt] instantané final avant extinction');
+  saveSnapshot();
+  process.exit(0);
+}
+process.on('SIGTERM', arreterProprement);
+process.on('SIGINT', arreterProprement);
