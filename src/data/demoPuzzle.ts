@@ -10,6 +10,7 @@ const words: WordEntry[] = [
     startCol: 1,
     length: 4,
     answer: 'LION',
+    complexity: 1,
   },
   {
     id: 'oeuf',
@@ -19,6 +20,7 @@ const words: WordEntry[] = [
     startCol: 3,
     length: 4,
     answer: 'OEUF',
+    complexity: 1,
   },
   {
     id: 'nez',
@@ -28,6 +30,7 @@ const words: WordEntry[] = [
     startCol: 4,
     length: 3,
     answer: 'NEZ',
+    complexity: 1,
   },
   {
     id: 'os',
@@ -37,6 +40,7 @@ const words: WordEntry[] = [
     startCol: 1,
     length: 2,
     answer: 'OS',
+    complexity: 1,
   },
   {
     id: 'ami',
@@ -46,6 +50,7 @@ const words: WordEntry[] = [
     startCol: 0,
     length: 3,
     answer: 'AMI',
+    complexity: 1,
   },
 ];
 

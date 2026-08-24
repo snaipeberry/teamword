@@ -1,19 +1,53 @@
 /**
- * Comptes joueur.
+ * Comptes joueur — et identité invité.
  *
- * Avant les comptes, l'identité tenait à un identifiant tiré au sort et gardé
- * dans le navigateur : la progression ne suivait donc pas d'un appareil à
- * l'autre et disparaissait avec les données du site. Un compte rattache cette
- * progression à un pseudo et un mot de passe.
- *
- * Le jeu reste JOUABLE SANS COMPTE — se connecter n'est jamais obligatoire,
- * et l'inscription reprend la progression déjà accumulée.
+ * Un compte rattache la progression à un pseudo et un mot de passe, portable
+ * d'un appareil à l'autre. L'invité est l'inverse délibéré : un identifiant
+ * ET un nom générés une seule fois PAR CHARGEMENT DE PAGE (variables de
+ * module, jamais écrites dans le navigateur) — recharger la page en génère
+ * de nouveaux. C'est un choix explicite de l'utilisateur (« aucune
+ * persistance »), pas un oubli : ne pas être tenté de les stocker « pour
+ * plus tard », ça romprait la promesse faite à l'écran d'accueil.
  */
-import { getOrCreatePlayerId } from './playerName';
+import { generateRandomName, getOrCreatePlayerName, setPlayerName } from './playerName';
 
 const TOKEN_KEY = 'mf_auth_token';
 const ACCOUNT_KEY = 'mf_account_id';
 const USERNAME_KEY = 'mf_account_name';
+
+let guestId: string | null = null;
+let guestName: string | null = null;
+
+/** Préfixe reconnu par le serveur pour exclure les invités du classement. */
+function ensureGuestId(): string {
+  if (!guestId) guestId = `guest-${crypto.randomUUID()}`;
+  return guestId;
+}
+
+function ensureGuestName(): string {
+  if (!guestName) guestName = generateRandomName();
+  return guestName;
+}
+
+/**
+ * Le portail (LoginGate) doit s'afficher au premier chargement, mais PAS se
+ * remettre en travers de chaque partie rejointe : rejoindre une salle
+ * recharge la page en entier (voir Home.tsx `go()`), ce qui réexécuterait ce
+ * module et redemanderait « connecté / invité » avant CHAQUE partie. On se
+ * souvient donc du choix dans `sessionStorage` — portée l'onglet, effacée à
+ * sa fermeture — ce qui est un choix de NAVIGATION, pas de persistance de
+ * données : l'identité invité elle-même (ci-dessus) continue de se
+ * régénérer à chaque rechargement, sans exception.
+ */
+const GATE_SKIP_KEY = 'mf_gate_skip';
+
+export function shouldSkipGate(): boolean {
+  return sessionStorage.getItem(GATE_SKIP_KEY) === '1';
+}
+
+export function skipGateForThisTab(): void {
+  sessionStorage.setItem(GATE_SKIP_KEY, '1');
+}
 
 export interface Session {
   id: string;
@@ -53,20 +87,45 @@ export function currentSession(): Session | null {
 
 /**
  * Identifiant utilisé par le jeu : celui du compte s'il y en a un, sinon
- * l'identifiant local. Tout le reste (profil, scores, classement) s'y réfère,
- * donc se connecter fait bien suivre la progression.
+ * l'identifiant invité éphémère. Tout le reste (profil, scores, classement)
+ * s'y réfère, donc se connecter fait bien suivre la progression — et rester
+ * invité ne la fait jamais suivre nulle part.
  */
 export function activePlayerId(): string {
-  return localStorage.getItem(ACCOUNT_KEY) ?? getOrCreatePlayerId();
+  return localStorage.getItem(ACCOUNT_KEY) ?? ensureGuestId();
+}
+
+/**
+ * Nom affiché : celui choisi par le compte (persistant) s'il y en a un,
+ * sinon le nom généré de l'invité (éphémère, modifiable pour la session en
+ * cours via `setActivePlayerName`, jamais écrit dans le navigateur).
+ */
+export function activePlayerName(): string {
+  return currentSession() ? getOrCreatePlayerName() : ensureGuestName();
+}
+
+/**
+ * Change le nom affiché. Persistant pour un compte ; pour un invité, ne vit
+ * que le temps du chargement de page en cours — cohérent avec le reste de
+ * son identité.
+ */
+export function setActivePlayerName(name: string): string {
+  if (currentSession()) return setPlayerName(name);
+  const clean = name.trim().slice(0, 16);
+  guestName = clean || ensureGuestName();
+  return guestName;
 }
 
 export async function register(username: string, password: string): Promise<Session | string> {
-  // `migrateFrom` transmet l'identifiant local pour reprendre la progression
-  // déjà jouée. Le serveur ne l'accepte qu'une fois.
+  // `migrateFrom` transmet l'identité active pour reprendre la progression
+  // déjà jouée dans CETTE visite — celle d'un invité qui décide de créer un
+  // compte en cours de partie, typiquement. Le serveur ne l'accepte qu'une
+  // fois. `activePlayerId()` renvoie ici forcément l'identifiant invité :
+  // on n'appelle jamais `register` en étant déjà connecté.
   const data = await post('/register', {
     username,
     password,
-    migrateFrom: getOrCreatePlayerId(),
+    migrateFrom: activePlayerId(),
   });
   if (typeof data.error === 'string') return data.error;
   return store(data as unknown as Session);

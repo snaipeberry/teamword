@@ -8,8 +8,10 @@ import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
+import { SoloRoundResults } from './SoloRoundResults';
 import { PushToTalk, TalkingIndicator } from './PushToTalk';
 import { ActiveClueBar } from './ActiveClueBar';
+import { useSoloProfile } from '../hooks/useSoloProfile';
 import {
   hapticTick,
   hapticWin,
@@ -26,14 +28,22 @@ export function CrosswordGrid({
   puzzle,
   round,
   daily = false,
+  solo = false,
 }: {
   puzzle: Puzzle;
   round: number;
   /** La grille du jour est unique : pas d'enchaînement vers une suivante. */
   daily?: boolean;
+  /** Mode solo : progression infinie, points pondérés, ampoules limitées. */
+  solo?: boolean;
 }) {
   const game = useGameState();
   const { advanceRound } = useRound();
+  // Solo/quotidien partagent la même économie de points/ampoules côté profil
+  // — voir useSoloProfile pour pourquoi CrosswordGrid et SoloRoundResults
+  // s'appuient sur le même hook plutôt que deux fetchs séparés.
+  const soloScored = solo || daily;
+  const soloProfile = useSoloProfile(game.myPlayerId, soloScored);
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
   const [wrongCells, setWrongCells] = useState<Set<string>>(new Set());
@@ -167,6 +177,14 @@ export function CrosswordGrid({
     [allLetterCells, game],
   );
 
+  // Formule confirmée : somme brute des complexités, sans pondération par le
+  // nombre de mots — une grille avec plus de mots rapporte donc simplement
+  // plus, sans bonus ni malus caché.
+  const soloPointsEarned = useMemo(
+    () => puzzle.words.reduce((n, w) => n + w.complexity, 0),
+    [puzzle.words],
+  );
+
   useEffect(() => {
     if (isSolved) {
       setCelebrating(true);
@@ -182,10 +200,14 @@ export function CrosswordGrid({
   const showRoundResults = useCallback(() => {
     setCelebrating(false);
     setShowResults(true);
-    // La grille du jour n'a pas de suivante : c'est ici qu'on la comptabilise
-    // pour la médaille d'assiduité et sa prime de points.
-    if (daily) game.reportDailyDone();
-  }, [daily, game]);
+    if (soloScored) {
+      game.reportGridDone(soloPointsEarned, daily);
+      // `soloGridDone` ne rediffuse rien (les points solo ne sont pas un
+      // état de salle partagé) : on relit le profil un instant après plutôt
+      // que d'attendre un signal que le serveur n'envoie pas.
+      setTimeout(() => soloProfile.refresh(), 400);
+    }
+  }, [daily, soloScored, soloPointsEarned, game, soloProfile]);
 
   const goToNextRound = useCallback(() => {
     setShowResults(false);
@@ -403,6 +425,14 @@ export function CrosswordGrid({
     }
   }, [allLetterCells, game]);
 
+  // Deux régimes de plafond, demandés séparément : en solo/quotidien une
+  // monnaie persistante sur le profil (rechargée en jouant) ; en multijoueur
+  // classique un plafond fixe par salle, déjà suivi côté serveur — pas
+  // besoin d'un fetch supplémentaire pour celui-là.
+  const monHintCount = game.scoreboard.find((p) => p.isMe)?.hints ?? 0;
+  const hintBudget = soloScored ? (soloProfile.profile?.hintBalance ?? 0) : Math.max(0, 3 - monHintCount);
+  const hintsExhausted = soloScored ? (soloProfile.profile?.hintBalance ?? 0) <= 0 : monHintCount >= 3;
+
   const othersByCellId = useMemo(() => {
     const map = new Map<string, PlayerCursor[]>();
     game.others.forEach((o) => {
@@ -493,12 +523,18 @@ export function CrosswordGrid({
         <motion.button
           type="button"
           onClick={revealActiveCell}
-          whileTap={{ scale: 0.94 }}
+          disabled={hintsExhausted}
+          whileTap={hintsExhausted ? undefined : { scale: 0.94 }}
           aria-label="Révéler une lettre"
-          title="Révéler une lettre"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm shadow-lg backdrop-blur-md transition"
+          title={hintsExhausted ? 'Plus d’indice disponible' : 'Révéler une lettre'}
+          className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm shadow-lg backdrop-blur-md transition ${
+            hintsExhausted ? 'opacity-40' : ''
+          }`}
         >
           <span aria-hidden="true">💡</span>
+          <span className="absolute -bottom-1 -right-1 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-aurora-violet px-[3px] text-[8px] font-bold text-white">
+            {hintBudget}
+          </span>
         </motion.button>
 
         <motion.button
@@ -519,7 +555,22 @@ export function CrosswordGrid({
 
       <AnimatePresence>
         {celebrating && <CompletionCelebration onDone={showRoundResults} />}
-        {showResults && <RoundResults round={round} daily={daily} onAdvance={goToNextRound} />}
+        {showResults && solo && (
+          <SoloRoundResults
+            round={round}
+            pointsEarned={soloPointsEarned}
+            profile={soloProfile.profile}
+            onAdvance={goToNextRound}
+          />
+        )}
+        {showResults && !solo && (
+          <RoundResults
+            round={round}
+            daily={daily}
+            soloPointsEarned={daily ? soloPointsEarned : undefined}
+            onAdvance={goToNextRound}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

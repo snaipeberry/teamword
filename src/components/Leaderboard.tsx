@@ -2,23 +2,45 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Avatar } from './Avatar';
 import { fetchLeaderboard, type LeaderboardRow } from '../lib/roomClient';
-import { getOrCreatePlayerId } from '../lib/playerName';
+import { activePlayerId } from '../lib/auth';
 
 const MEDAL_BY_RANK: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
-/** Classement général, trié par points puis par mots trouvés. */
+/**
+ * Classement général (multijoueur) OU solo, au choix — deux économies de
+ * points séparées (voir server/index.js), donc deux classements séparés.
+ */
 export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<'multi' | 'solo'>('multi');
   const [rows, setRows] = useState<LeaderboardRow[] | null>(null);
   const [erreur, setErreur] = useState(false);
-  const moi = getOrCreatePlayerId();
+  const moi = activePlayerId();
 
   useEffect(() => {
-    fetchLeaderboard(50).then(setRows).catch(() => setErreur(true));
-  }, []);
+    setRows(null);
+    fetchLeaderboard(50, mode === 'solo' ? 'solo' : undefined)
+      .then(setRows)
+      .catch(() => setErreur(true));
+  }, [mode]);
 
   return (
     <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col gap-3 px-5 py-6">
       <h1 className="shrink-0 text-center font-display text-xl font-bold text-white/90">Classement</h1>
+
+      <div className="flex shrink-0 gap-1.5 rounded-full bg-white/10 p-1">
+        {(['multi', 'solo'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`flex-1 rounded-full py-1.5 text-[12px] font-bold transition ${
+              mode === m ? 'bg-white text-aurora-violet shadow' : 'text-white/60'
+            }`}
+          >
+            {m === 'multi' ? '⚔️ Multijoueur' : '🧩 Solo'}
+          </button>
+        ))}
+      </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {erreur && <p className="text-center text-[12px] text-rose-300">Classement indisponible</p>}
@@ -51,7 +73,9 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
                 <span className="block font-display text-[14px] font-bold tabular-nums text-white">
                   {r.points}
                 </span>
-                <span className="block text-[9px] text-white/45">{r.wins} v.</span>
+                <span className="block text-[9px] text-white/45">
+                  {mode === 'solo' ? `${r.soloGrids} grilles` : `${r.wins} v.`}
+                </span>
               </span>
             </motion.div>
           ))}

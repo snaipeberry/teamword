@@ -4,8 +4,7 @@ import { Avatar } from './Avatar';
 import { NameField } from './NameField';
 import { fileToAvatar } from '../lib/avatar';
 import { fetchProfile, type Profile as ProfileData } from '../lib/roomClient';
-import { getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
-import { activePlayerId, currentSession, logout } from '../lib/auth';
+import { activePlayerId, activePlayerName, currentSession, logout, setActivePlayerName } from '../lib/auth';
 import { AuthScreen } from './Auth';
 
 /**
@@ -17,7 +16,7 @@ import { AuthScreen } from './Auth';
  */
 export function ProfileScreen({ onClose }: { onClose: () => void }) {
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [name, setName] = useState(getOrCreatePlayerName);
+  const [name, setName] = useState(activePlayerName);
   const [erreur, setErreur] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [session, setSession] = useState(currentSession);
@@ -86,7 +85,7 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
         <NameField
           value={name}
           onChange={(n) => {
-            const clean = setPlayerName(n);
+            const clean = setActivePlayerName(n);
             setName(clean);
             void envoyer({ name: clean });
           }}

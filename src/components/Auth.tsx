@@ -12,11 +12,15 @@ import { login, register, type Session } from '../lib/auth';
 export function AuthScreen({
   onDone,
   onClose,
+  initialMode = 'login',
+  closeLabel = 'Continuer sans compte',
 }: {
   onDone: (session: Session) => void;
   onClose: () => void;
+  initialMode?: 'login' | 'register';
+  closeLabel?: string;
 }) {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
@@ -100,7 +104,7 @@ export function AuthScreen({
         onClick={onClose}
         className="rounded-full bg-white/15 px-5 py-2 text-[13px] font-bold text-white/80 active:scale-95"
       >
-        Continuer sans compte
+        {closeLabel}
       </button>
     </div>
   );

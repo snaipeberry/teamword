@@ -57,6 +57,45 @@ function titleFor(profile) {
   return gagnees.length ? gagnees[gagnees.length - 1].label : 'Débutant';
 }
 
+/**
+ * Paliers du mode solo, sur `profile.soloPoints`.
+ *
+ * Seuils volontairement élevés (~30 grilles pour Argent, ×2 à ×3 par palier
+ * ensuite) : le solo est annoncé comme théoriquement infini, il doit rester
+ * un vrai horizon de progression et non se vider en une soirée.
+ */
+const SOLO_TIERS = [
+  { id: 'bronze', label: 'Bronze', icon: '🥉', min: 0 },
+  { id: 'argent', label: 'Argent', icon: '🥈', min: 4_200 },
+  { id: 'or', label: 'Or', icon: '🥇', min: 12_600 },
+  { id: 'platine', label: 'Platine', icon: '💎', min: 30_000 },
+  { id: 'diamant', label: 'Diamant', icon: '💠', min: 70_000 },
+  { id: 'maitre', label: 'Maître', icon: '🔮', min: 150_000 },
+  { id: 'grand_maitre', label: 'Grand Maître', icon: '⚡', min: 300_000 },
+  { id: 'sorcier', label: 'Sorcier', icon: '🧙', min: 600_000 },
+  { id: 'archimage', label: 'Archimage', icon: '🌌', min: 1_200_000 },
+];
+
+/** Index du palier courant dans SOLO_TIERS, à partir d'un total de points. */
+function soloTierIndex(soloPoints) {
+  let i = 0;
+  for (let n = 0; n < SOLO_TIERS.length; n++) {
+    if (soloPoints >= SOLO_TIERS[n].min) i = n;
+  }
+  return i;
+}
+
+/** Palier courant + progression vers le suivant, pour l'affichage. */
+function soloTierFor(profile) {
+  const i = soloTierIndex(profile.soloPoints);
+  const suivant = SOLO_TIERS[i + 1] ?? null;
+  return {
+    tier: SOLO_TIERS[i],
+    next: suivant,
+    pointsToNext: suivant ? suivant.min - profile.soloPoints : null,
+  };
+}
+
 function emptyRoom() {
   return {
     round: 0,
@@ -71,6 +110,9 @@ function emptyRoom() {
     ready: {},
     players: {},
     teams: {},
+    // 'solo' | 'daily' | undefined (undefined = multijoueur classique,
+    // comportement inchangé). Fixé au premier join, jamais réattribué.
+    mode: undefined,
     touchedAt: Date.now(),
   };
 }
@@ -100,6 +142,12 @@ function emptyProfile(id) {
     games: 0,
     dailies: 0,
     cleanGrids: 0,
+    // Économie solo : séparée du classement général (`points`) — voir
+    // l'intent `soloGridDone` et l'intent `letter` (qui n'incrémente PAS
+    // `points` en salle solo/quotidienne).
+    soloPoints: 0,
+    soloGrids: 0,
+    hintBalance: 3,
     updatedAt: Date.now(),
   };
 }
@@ -115,6 +163,7 @@ function publicProfile(id) {
     ...p,
     medals: MEDALS.filter((m) => m.test(p)).map(({ id, label, icon }) => ({ id, label, icon })),
     title: titleFor(p),
+    ...soloTierFor(p),
   };
 }
 
@@ -197,7 +246,12 @@ function loadSnapshot() {
     const raw = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8'));
     const now = Date.now();
     for (const [code, state] of Object.entries(raw)) {
-      if (now - (state.touchedAt ?? 0) < ROOM_TTL_MS) rooms.set(code, state);
+      // Une salle solo n'expire jamais : la progression (numéro de grille en
+      // cours) doit survivre indéfiniment, pas seulement les points/ampoules
+      // déjà pérennes sur le profil.
+      if (state.mode === 'solo' || now - (state.touchedAt ?? 0) < ROOM_TTL_MS) {
+        rooms.set(code, state);
+      }
     }
     console.log(`[boot] ${rooms.size} partie(s) restaurée(s)`);
   } catch {
@@ -256,6 +310,7 @@ function loadProfiles() {
 function pruneRooms() {
   const now = Date.now();
   for (const [code, state] of rooms) {
+    if (state.mode === 'solo') continue; // jamais oubliée, voir loadSnapshot
     const vivants = sockets.get(code);
     if ((!vivants || vivants.size === 0) && now - state.touchedAt > ROOM_TTL_MS) {
       rooms.delete(code);
@@ -305,7 +360,13 @@ const INTENTS = {
       // Les points de profil suivent les mots trouvés, pas les grilles : c'est
       // immédiat et cela récompense aussi les parties abandonnées en cours.
       const profile = getProfile(playerId);
-      profile.points += scored;
+      // Le solo/quotidien a son PROPRE système de points (pondéré par la
+      // complexité, attribué en bloc en fin de grille par `soloGridDone`) :
+      // le classement général ne doit refléter que le multijoueur, sinon
+      // les deux classements se confondraient.
+      if (state.mode !== 'solo' && state.mode !== 'daily') {
+        profile.points += scored;
+      }
       profile.words += scored;
       profile.updatedAt = Date.now();
     }
@@ -314,6 +375,20 @@ const INTENTS = {
 
   reveal(state, { cellId, letter }, playerId) {
     if (typeof cellId !== 'string') return false;
+
+    if (state.mode === 'solo' || state.mode === 'daily') {
+      // Monnaie persistante (« ampoules ») : gagnée en jouant, dépensée ici.
+      const profile = getProfile(playerId);
+      if (profile.hintBalance <= 0) return false;
+      profile.hintBalance -= 1;
+      profile.updatedAt = Date.now();
+    } else {
+      // Multijoueur classique : pas de monnaie, un plafond fixe par salle
+      // (state.hints n'est jamais remis à zéro entre les manches d'une même
+      // salle — donc 3 indices pour toute la partie, pas 3 par grille).
+      if ((state.hints[playerId] ?? 0) >= 3) return false;
+    }
+
     state.letters[cellId] = String(letter).slice(0, 1);
     state.revealed[cellId] = true;
     // Volontairement SANS point : une lettre donnée par l'aide ne doit pas
@@ -398,13 +473,27 @@ const INTENTS = {
     return true;
   },
 
-  /** Signale une grille du jour terminée, pour la médaille d'assiduité. */
-  dailyDone(state, _payload, playerId) {
+  /**
+   * Signale une grille solo ou quotidienne terminée : `points` (pondérés par
+   * la complexité des mots) est calculé côté client, qui seul connaît les
+   * mots — même niveau de confiance que `scored` sur l'intent `letter`.
+   */
+  soloGridDone(state, { points, daily = false }, playerId) {
     const profile = getProfile(playerId);
-    profile.dailies += 1;
-    profile.points += 10; // prime : elle est plus difficile
+    const gagne = Math.max(0, Math.floor(Number(points) || 0));
+
+    const avant = soloTierIndex(profile.soloPoints);
+    profile.soloPoints += gagne;
+    profile.soloGrids += 1;
+    const apres = soloTierIndex(profile.soloPoints);
+
+    // +1 ampoule à chaque grille, +5 de plus si on vient de franchir un
+    // palier — la progression solo doit se sentir, pas juste s'afficher.
+    profile.hintBalance += 1 + (apres > avant ? 5 : 0);
+
+    if (daily) profile.dailies += 1;
     profile.updatedAt = Date.now();
-    return false; // rien de partagé ne change
+    return false; // rien de partagé au niveau salle ne change
   },
 
   kick(state, { playerId: cible }, playerId) {
@@ -586,8 +675,24 @@ const http = createServer((req, res) => {
             profile.games += ancien.games;
             profile.dailies += ancien.dailies;
             profile.cleanGrids += ancien.cleanGrids;
+            profile.soloPoints += ancien.soloPoints;
+            profile.soloGrids += ancien.soloGrids;
+            // La monnaie d'indices s'ajoute (pas de remplacement) : le solde
+            // de départ du nouveau profil ne doit pas être perdu.
+            profile.hintBalance += ancien.hintBalance;
             if (!profile.avatar) profile.avatar = ancien.avatar;
             ancien.claimed = true;
+
+            // La salle solo elle-même doit suivre : sans ce transfert, la
+            // progression de points migre mais le numéro de grille repart
+            // de zéro (la salle solo du nouveau compte est encore vierge).
+            const salleAnonyme = `solo-${depuis}`;
+            if (rooms.has(salleAnonyme) && !rooms.has(`solo-${account.id}`)) {
+              const salle = rooms.get(salleAnonyme);
+              rooms.delete(salleAnonyme);
+              sockets.delete(salleAnonyme);
+              rooms.set(`solo-${account.id}`, salle);
+            }
           }
         }
 
@@ -670,19 +775,27 @@ const http = createServer((req, res) => {
 
   if (url.pathname === '/leaderboard') {
     const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 200);
+    const solo = url.searchParams.get('mode') === 'solo';
     const top = [...profiles.values()]
-      .filter((p) => p.points > 0)
-      .sort((a, b) => b.points - a.points || b.words - a.words)
+      // Un invité (id préfixé `guest-`, jamais persisté côté client) ne doit
+      // jamais apparaître au classement — c'est explicitement ce qu'« aucune
+      // persistance, pas de classement » veut dire.
+      .filter((p) => !p.id.startsWith('guest-'))
+      .filter((p) => (solo ? p.soloPoints > 0 : p.points > 0))
+      .sort((a, b) =>
+        solo ? b.soloPoints - a.soloPoints || b.soloGrids - a.soloGrids : b.points - a.points || b.words - a.words,
+      )
       .slice(0, limit)
       .map((p, i) => ({
         rank: i + 1,
         id: p.id,
         name: p.name,
         avatar: p.avatar,
-        points: p.points,
+        points: solo ? p.soloPoints : p.points,
         words: p.words,
         wins: p.wins,
-        title: titleFor(p),
+        soloGrids: p.soloGrids,
+        title: solo ? soloTierFor(p).tier.label : titleFor(p),
       }));
     return json(res, { top });
   }
@@ -695,9 +808,14 @@ const http = createServer((req, res) => {
     }
     const me = publicProfile(id);
     // Rang calculé à la volée : le nombre de profils reste modeste et cela
-    // évite de maintenir un index à jour.
-    const mieux = [...profiles.values()].filter((p) => p.points > me.points).length;
-    return json(res, { ...me, rank: me.points > 0 ? mieux + 1 : null });
+    // évite de maintenir un index à jour. Un invité n'a pas de rang — il
+    // n'apparaît jamais au classement (voir /leaderboard) — et ne doit pas
+    // non plus en gonfler le calcul pour les autres.
+    const estInvite = id.startsWith('guest-');
+    const mieux = [...profiles.values()]
+      .filter((p) => !p.id.startsWith('guest-'))
+      .filter((p) => p.points > me.points).length;
+    return json(res, { ...me, rank: !estInvite && me.points > 0 ? mieux + 1 : null });
   }
 
   res.writeHead(404);
@@ -723,19 +841,42 @@ wss.on('connection', (ws) => {
     }
 
     if (msg.t === 'join') {
-      const code = String(msg.room ?? '').slice(0, 32);
+      // 80, pas 32 : une salle solo encode l'identifiant du joueur dans son
+      // code (`solo-<playerId>`), et un id de compte (`acc_` + 24 hex) ou un
+      // UUID anonyme dépasse déjà 32 caractères à lui seul.
+      const code = String(msg.room ?? '').slice(0, 80);
       const player = msg.player ?? {};
       if (!code || !player.id) return;
 
+      const playerId = String(player.id).slice(0, 64);
+
+      // Isolation des salles solo : le propriétaire se déduit du code
+      // lui-même, aucun champ à faire confiance séparément. Un tiers qui
+      // devine ou reçoit ce code ne peut pas rejoindre la partie de
+      // quelqu'un d'autre — seul le même playerId (donc le même compte,
+      // éventuellement depuis un autre appareil) le peut.
+      if (code.startsWith('solo-') && code.slice(5) !== playerId) {
+        send(ws, { t: 'error', reason: 'forbidden' });
+        ws.close();
+        return;
+      }
+
       ws.room = code;
       ws.player = {
-        id: String(player.id).slice(0, 64),
+        id: playerId,
         name: String(player.name ?? 'Joueur').slice(0, 16),
         color: String(player.color ?? '#9CA3AF').slice(0, 9),
         activeCell: null,
       };
 
-      if (!rooms.has(code)) rooms.set(code, emptyRoom());
+      if (!rooms.has(code)) {
+        const room = emptyRoom();
+        // Fixé à la création, jamais réattribué sur les joins suivants —
+        // même logique que `hostId` juste en dessous.
+        const demande = String(msg.mode ?? '');
+        if (demande === 'solo' || demande === 'daily') room.mode = demande;
+        rooms.set(code, room);
+      }
       if (!sockets.has(code)) sockets.set(code, new Set());
       sockets.get(code).add(ws);
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRound } from '../state/GameState';
-import { startNewSession } from '../lib/sessionCode';
+import { goHome, startNewSession } from '../lib/sessionCode';
 
 /**
  * Menu de gestion de la partie.
@@ -80,10 +80,24 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
             transition={{ duration: 0.14 }}
             className="absolute right-0 top-11 z-50 w-56 overflow-hidden rounded-2xl border border-white/20 bg-[#3D1F63]/95 p-1.5 shadow-2xl backdrop-blur-lg"
           >
+            {/* Sans conséquence à confirmer, contrairement aux actions
+                ci-dessous : quitter n'efface aucun score, pour personne — la
+                salle reste jouable au même code/lien. */}
+            <button
+              type="button"
+              onClick={goHome}
+              className="w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold text-white transition active:bg-white/15"
+            >
+              🏠 Retour au menu
+              <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+                Quitte cette partie, rien n’est effacé
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={() => confirm('restart')}
-              className={`w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
+              className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
                 pending === 'restart'
                   ? 'bg-amber-400 text-neutral-900'
                   : 'text-white active:bg-white/15'

@@ -94,6 +94,7 @@ def to_app_puzzle(cells, words_out, rows, cols, puzzle_id, title):
                 "startCol": w["col"],
                 "length": w["length"],
                 "answer": to_app_answer(w["word"]),
+                "complexity": w["complexity"],
             }
         )
 

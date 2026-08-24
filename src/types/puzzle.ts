@@ -50,6 +50,8 @@ export interface WordEntry {
   startCol: number;
   length: number;
   answer: string;
+  /** 1 (facile) à 5 (difficile) — base du calcul des points solo. */
+  complexity: number;
 }
 
 export interface ClueCellPlacement {

@@ -7,7 +7,7 @@ import {
   type RoomState,
 } from '../lib/roomClient';
 import { getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
-import { activePlayerId } from '../lib/auth';
+import { activePlayerId, activePlayerName, setActivePlayerName } from '../lib/auth';
 import { wordCellIds } from '../lib/gridGeometry';
 import { playRadioClip, splitIntoChunks, startRecording, type Recording } from '../lib/voiceRadio';
 import type { Puzzle, WordEntry } from '../types/puzzle';
@@ -72,8 +72,12 @@ export interface GameStateApi {
   renameMe: (name: string) => void;
   /** Met à jour le profil persistant (pseudo et/ou vignette). */
   updateProfile: (patch: { name?: string; avatar?: string | null }) => void;
-  /** Signale une grille du jour terminée (compteur d'assiduité). */
-  reportDailyDone: () => void;
+  /**
+   * Signale une grille solo/quotidienne terminée : `points` (pondérés par la
+   * complexité, calculés côté appelant qui seul connaît les mots) rejoint
+   * `profile.soloPoints` côté serveur.
+   */
+  reportGridDone: (points: number, daily: boolean) => void;
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -230,7 +234,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       myName: localName,
       renameMe: (name) => setLocalName(setPlayerName(name)),
       updateProfile: ({ name }) => { if (name) setLocalName(setPlayerName(name)); },
-      reportDailyDone: () => {},
+      reportGridDone: () => {},
     }),
     [letters, revealed, setLetters, setRevealed, myColor, localName],
   );
@@ -285,15 +289,17 @@ function useRoom(): RoomBridge {
 
 function RemoteSessionProvider({
   sessionId,
+  mode,
   children,
 }: {
   sessionId: string;
+  mode?: string;
   children: React.ReactNode;
 }) {
   const me = useMemo(
     () => ({
       id: activePlayerId(),
-      name: getOrCreatePlayerName(),
+      name: activePlayerName(),
       color: randomColor(),
     }),
     [],
@@ -308,17 +314,22 @@ function RemoteSessionProvider({
   const listeners = useRef(new Set<(payload: unknown) => void>());
 
   useEffect(() => {
-    const conn = connectRoom(sessionId, me, {
-      onState: setState,
-      onPresence: setPeers,
-      onBroadcast: (payload) => listeners.current.forEach((fn) => fn(payload)),
-    });
+    const conn = connectRoom(
+      sessionId,
+      me,
+      {
+        onState: setState,
+        onPresence: setPeers,
+        onBroadcast: (payload) => listeners.current.forEach((fn) => fn(payload)),
+      },
+      mode,
+    );
     connection.current = conn;
     return () => {
       conn.close();
       connection.current = null;
     };
-  }, [sessionId, me]);
+  }, [sessionId, me, mode]);
 
   const send = useCallback((message: Record<string, unknown>) => {
     connection.current?.send(message);
@@ -503,10 +514,11 @@ function RemoteGameProvider({
 
   const renameMe = useCallback(
     (name: string) => {
-      const clean = setPlayerName(name);
+      // Persistant pour un compte, éphémère pour un invité — voir
+      // setActivePlayerName. Le profil serveur suit dans les deux cas ;
+      // seul ce qui reste APRÈS un rechargement diffère.
+      const clean = setActivePlayerName(name);
       setMyName(clean);
-      // `profile` met à jour le profil PERSISTANT en plus de l'état de partie :
-      // le pseudo doit survivre à la session.
       send({ t: 'profile', name: clean });
     },
     [send],
@@ -515,7 +527,7 @@ function RemoteGameProvider({
   const updateProfile = useCallback(
     (patch: { name?: string; avatar?: string | null }) => {
       if (patch.name) {
-        const clean = setPlayerName(patch.name);
+        const clean = setActivePlayerName(patch.name);
         setMyName(clean);
         send({ t: 'profile', name: clean, avatar: patch.avatar });
       } else {
@@ -525,7 +537,10 @@ function RemoteGameProvider({
     [send],
   );
 
-  const reportDailyDone = useCallback(() => send({ t: 'dailyDone' }), [send]);
+  const reportGridDone = useCallback(
+    (points: number, daily: boolean) => send({ t: 'soloGridDone', points, daily }),
+    [send],
+  );
 
   // ---------- Talkie-walkie ----------
   const recordingRef = useRef<Recording | null>(null);
@@ -637,12 +652,12 @@ function RemoteGameProvider({
       myName,
       renameMe,
       updateProfile,
-      reportDailyDone,
+      reportGridDone,
     }),
     [
       getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard,
       allReadyFor, startTalking, stopTalking, talkingNames, micDenied, myName,
-      renameMe, updateProfile, reportDailyDone,
+      renameMe, updateProfile, reportGridDone,
     ],
   );
 
@@ -660,15 +675,22 @@ function RemoteGameProvider({
  */
 export function SessionProvider({
   sessionId,
+  mode,
   children,
 }: {
   sessionId: string;
+  /** 'solo' | 'daily' — voir server/index.js pour ce que ça change. */
+  mode?: string;
   children: React.ReactNode;
 }) {
   if (!hasMultiplayer) {
     return <LocalSessionProvider>{children}</LocalSessionProvider>;
   }
-  return <RemoteSessionProvider sessionId={sessionId}>{children}</RemoteSessionProvider>;
+  return (
+    <RemoteSessionProvider sessionId={sessionId} mode={mode}>
+      {children}
+    </RemoteSessionProvider>
+  );
 }
 
 /** À placer sous SessionProvider, une fois la grille de la manche chargée. */

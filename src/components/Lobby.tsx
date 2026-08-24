@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { NameField } from './NameField';
-import { buildInviteUrl } from '../lib/sessionCode';
+import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { Avatar } from './Avatar';
 
 /**
@@ -151,6 +151,14 @@ export function Lobby({ sessionId }: { sessionId: string }) {
           En attente du lancement par l’hôte…
         </p>
       )}
+
+      <button
+        type="button"
+        onClick={goHome}
+        className="text-[12px] font-bold text-white/50 underline underline-offset-2"
+      >
+        ← Retour au menu
+      </button>
     </div>
   );
 }
@@ -164,11 +172,7 @@ export function KickedScreen() {
       <p className="text-[13px] text-white/60">L’hôte vous a retiré du salon.</p>
       <button
         type="button"
-        onClick={() => {
-          const url = new URL(window.location.href);
-          url.searchParams.delete('session');
-          window.location.href = url.toString();
-        }}
+        onClick={goHome}
         className="rounded-full bg-white/20 px-5 py-2.5 font-display text-[14px] font-bold text-white active:scale-95"
       >
         Retour à l’accueil

@@ -21,11 +21,14 @@ function initials(name: string): string {
 export function RoundResults({
   round,
   daily = false,
+  soloPointsEarned,
   onAdvance,
 }: {
   round: number;
   /** Grille du jour : il n'y a pas de suivante, on renvoie à l'accueil. */
   daily?: boolean;
+  /** Grille du jour uniquement : points solo gagnés, pour la ligne "+ N points solo". */
+  soloPointsEarned?: number;
   onAdvance: () => void;
 }) {
   const game = useGameState();
@@ -63,6 +66,12 @@ export function RoundResults({
         <h2 className="text-center font-display text-xl font-bold text-aurora-violet">
           {daily ? 'Grille du jour terminée !' : `Grille ${round + 1} terminée !`}
         </h2>
+
+        {daily && soloPointsEarned !== undefined && (
+          <p className="mt-1.5 text-center text-[13px] font-bold text-aurora-violet">
+            + {soloPointsEarned} points solo · 💡 +1 indice
+          </p>
+        )}
 
         {totals.length > 0 && (
           <div className="mt-4 flex flex-col gap-2">

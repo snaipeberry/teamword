@@ -65,3 +65,15 @@ export function startNewSession(): void {
   url.searchParams.set('session', generateSessionCode());
   window.location.href = url.toString();
 }
+
+/**
+ * Retour à l'accueil depuis n'importe quel écran de partie (salon, grille,
+ * menu). Efface TOUS les paramètres qui déterminent le mode en cours — pas
+ * seulement `session` — sinon revenir depuis une grille du jour ou un solo
+ * renverrait tout droit dans la même partie plutôt qu'à l'accueil.
+ */
+export function goHome(): void {
+  const url = new URL(window.location.href);
+  for (const param of ['session', 'daily', 'bot', 'solo']) url.searchParams.delete(param);
+  window.location.href = url.toString();
+}

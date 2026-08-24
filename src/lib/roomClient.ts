@@ -33,6 +33,13 @@ export interface Medal {
   icon: string;
 }
 
+export interface SoloTier {
+  id: string;
+  label: string;
+  icon: string;
+  min: number;
+}
+
 export interface Profile {
   id: string;
   name: string;
@@ -45,6 +52,13 @@ export interface Profile {
   medals: Medal[];
   title: string;
   rank: number | null;
+  /** Économie solo — séparée du classement général ci-dessus. */
+  soloPoints: number;
+  soloGrids: number;
+  hintBalance: number;
+  tier: SoloTier;
+  next: SoloTier | null;
+  pointsToNext: number | null;
 }
 
 export interface LeaderboardRow {
@@ -55,6 +69,7 @@ export interface LeaderboardRow {
   points: number;
   words: number;
   wins: number;
+  soloGrids: number;
   title: string;
 }
 
@@ -113,6 +128,8 @@ export function connectRoom(
   room: string | null,
   player: { id: string; name: string; color: string },
   handlers: RoomHandlers,
+  /** 'solo' | 'daily' — fixe le mode de la salle à sa création (voir server/index.js). */
+  mode?: string,
 ): RoomConnection {
   let ws: WebSocket | null = null;
   let closed = false;
@@ -135,7 +152,7 @@ export function connectRoom(
     ws.onopen = () => {
       retry = 0;
       handlers.onStatus?.(true);
-      if (room) ws?.send(JSON.stringify({ t: 'join', room, player }));
+      if (room) ws?.send(JSON.stringify({ t: 'join', room, player, mode }));
       flush();
     };
 
@@ -193,8 +210,9 @@ function httpBase(): string {
   return '/rt';
 }
 
-export async function fetchLeaderboard(limit = 50): Promise<LeaderboardRow[]> {
-  const res = await fetch(`${httpBase()}/leaderboard?limit=${limit}`);
+export async function fetchLeaderboard(limit = 50, mode?: 'solo'): Promise<LeaderboardRow[]> {
+  const params = mode ? `&mode=${mode}` : '';
+  const res = await fetch(`${httpBase()}/leaderboard?limit=${limit}${params}`);
   if (!res.ok) throw new Error(`classement: ${res.status}`);
   return (await res.json()).top as LeaderboardRow[];
 }

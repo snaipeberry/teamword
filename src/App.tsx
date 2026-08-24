@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   GameStateProvider,
   SessionProvider,
@@ -9,11 +9,13 @@ import {
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { TopBar } from './components/TopBar';
 import { Home } from './components/Home';
+import { LoginGate } from './components/LoginGate';
 import { Lobby, KickedScreen } from './components/Lobby';
 import { BotPlayer } from './components/BotGame';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
 import { readSessionCode } from './lib/sessionCode';
+import { currentSession, shouldSkipGate } from './lib/auth';
 import { dailyLabel, dailySeed, seedFor } from './lib/puzzleApi';
 import { demoPuzzle } from './data/demoPuzzle';
 
@@ -34,14 +36,18 @@ function Round({
   sessionId,
   daily,
   bot,
+  solo,
 }: {
   sessionId: string;
   daily: boolean;
   bot: boolean;
+  solo: boolean;
 }) {
   const { round, game } = useRound();
   // En mode « grille du jour », la graine ne dépend NI de la session NI du
-  // numéro de grille : elle est commune à tous les joueurs du monde.
+  // numéro de grille : elle est commune à tous les joueurs du monde. En solo,
+  // `sessionId` est déjà propre au joueur (`solo-<playerId>`) : `seedFor`
+  // suffit à produire une graine stable par joueur ET par numéro de grille.
   const seed = daily ? dailySeed() : seedFor(sessionId, game, round);
   const { puzzle, loading, error } = usePuzzle(seed);
 
@@ -58,8 +64,8 @@ function Round({
           Serveur injoignable — grille de démonstration
         </p>
       )}
-      {bot && <BotPlayer puzzle={puzzle} onScore={() => {}} />}
-      <CrosswordGrid puzzle={puzzle} round={round} daily={daily} />
+      {bot && <BotPlayer puzzle={puzzle} sessionId={sessionId} />}
+      <CrosswordGrid puzzle={puzzle} round={round} daily={daily} solo={solo} />
     </GameStateProvider>
   );
 }
@@ -75,19 +81,21 @@ function SessionRouter({
   sessionId,
   daily,
   bot,
+  solo,
 }: {
   sessionId: string;
   daily: boolean;
   bot: boolean;
+  solo: boolean;
 }) {
   const { started, isKicked } = useRound();
   const game = useGameState();
 
   if (isKicked(game.myPlayerId)) return <KickedScreen />;
-  // Grille du jour et partie contre un bot se jouent directement : il n'y a
-  // personne à attendre dans un salon.
-  if (!started && !daily && !bot) return <Lobby sessionId={sessionId} />;
-  return <Round sessionId={sessionId} daily={daily} bot={bot} />;
+  // Grille du jour, partie contre un bot et solo se jouent directement : il
+  // n'y a personne à attendre dans un salon (le solo n'a même qu'un joueur).
+  if (!started && !daily && !bot && !solo) return <Lobby sessionId={sessionId} />;
+  return <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />;
 }
 
 /**
@@ -100,19 +108,27 @@ function SessionShell({
   sessionId,
   daily,
   bot,
+  solo,
 }: {
   sessionId: string;
   daily: boolean;
   bot: boolean;
+  solo: boolean;
 }) {
   return (
     <GameStateProvider puzzle={demoPuzzle}>
-      <SessionRouter sessionId={sessionId} daily={daily} bot={bot} />
+      <SessionRouter sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
     </GameStateProvider>
   );
 }
 
 export default function App() {
+  // Montré une fois par onglet (voir shouldSkipGate) tant qu'il n'y a pas de
+  // compte connecté. L'identité invité, elle, continue de se régénérer à
+  // chaque rechargement — seule la question « avez-vous déjà choisi ? » est
+  // retenue, pas les données du choix invité lui-même.
+  const [identityChosen, setIdentityChosen] = useState(() => currentSession() !== null || shouldSkipGate());
+
   // Stable pour la durée de vie du composant : lit `?session=` dans l'URL ou
   // en génère un et l'y réécrit, de sorte que la barre d'adresse devienne le
   // lien d'invitation.
@@ -123,6 +139,10 @@ export default function App() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const daily = useMemo(() => params.get('daily') === '1', [params]);
   const bot = useMemo(() => params.get('bot') === '1', [params]);
+  const solo = useMemo(() => params.get('solo') === '1', [params]);
+  // Fixe le mode de la salle à sa création côté serveur (voir join dans
+  // server/index.js) — priorité au solo si jamais les deux étaient présents.
+  const mode = solo ? 'solo' : daily ? 'daily' : undefined;
 
   return (
     // Hauteur d'écran FIXE (100dvh suit la barre d'URL mobile, contrairement
@@ -130,14 +150,16 @@ export default function App() {
     // et le clavier tiennent ensemble à l'écran en permanence.
     <div className="flex h-[100dvh] flex-col items-center overflow-hidden">
       <AuroraBackground />
-      {sessionId === null ? (
+      {!identityChosen ? (
+        <LoginGate onDone={() => setIdentityChosen(true)} />
+      ) : sessionId === null ? (
         <Home />
       ) : (
-        <SessionProvider sessionId={sessionId}>
+        <SessionProvider sessionId={sessionId} mode={mode}>
           {hasMultiplayer ? (
-            <SessionShell sessionId={sessionId} daily={daily} bot={bot} />
+            <SessionShell sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
           ) : (
-            <Round sessionId={sessionId} daily={daily} bot={bot} />
+            <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
           )}
         </SessionProvider>
       )}
