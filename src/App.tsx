@@ -21,7 +21,7 @@ import { activePlayerId, currentSession, shouldSkipGate } from './lib/auth';
 import { dailyLabel, dailySeed, seedFor } from './lib/puzzleApi';
 import { demoPuzzle } from './data/demoPuzzle';
 import { screenClassName, screenTransition, screenVariants } from './lib/motion';
-import { multiplayerDistribution, soloDistribution } from './lib/difficulty';
+import { multiplayerDistribution, soloDistribution, soloGrade } from './lib/difficulty';
 
 function LoadingScreen() {
   return (
@@ -55,7 +55,7 @@ function Round({
   bot: boolean;
   solo: boolean;
 }) {
-  const { round, game, grade } = useRound();
+  const { round, game, grade, ranked } = useRound();
   // En mode « grille du jour », la graine ne dépend NI de la session NI du
   // numéro de grille : elle est commune à tous les joueurs du monde. En solo,
   // `sessionId` est déjà propre au joueur (`solo-<playerId>`) : `seedFor`
@@ -79,10 +79,18 @@ function Round({
     : solo
       ? (soloProfile.profile ? soloDistribution(soloProfile.profile.soloPoints) : undefined)
       : multiplayerDistribution(grade);
+  // Niveau de COMPLEXITÉ des mots retenus — distinct de `hints`, qui ne
+  // choisit que la formulation des définitions. Non transmis en quotidien :
+  // le serveur y impose « difficile » pour tout le monde.
+  const difficulty = daily
+    ? undefined
+    : solo
+      ? (soloProfile.profile ? soloGrade(soloProfile.profile.soloPoints) : undefined)
+      : grade;
   // En solo, la répartition dépend du palier : pas la peine de demander une
   // grille avant de le connaître, elle partirait avec la mauvaise proportion.
   const puzzleReady = !solo || soloProfile.profile !== null;
-  const { puzzle, loading, error } = usePuzzle(seed, { hints, ready: puzzleReady });
+  const { puzzle, loading, error } = usePuzzle(seed, { hints, difficulty, ready: puzzleReady });
 
   if (loading || !puzzle) return <LoadingScreen />;
 
@@ -91,7 +99,15 @@ function Round({
     // sélection de case et les animations de la grille précédente
     // survivraient à l'arrivée de la nouvelle.
     <GameStateProvider key={puzzle.id} puzzle={puzzle}>
-      <TopBar sessionId={sessionId} round={round} dailyLabel={daily ? dailyLabel() : null} />
+      {/* Partie privée = créée depuis « Multijoueur › Partie privée » : ni
+          solo, ni quotidienne, ni contre un bot, ni duel classé. Seule à
+          proposer le menu « ⋯ » (recommencer / nouveau code). */}
+      <TopBar
+        sessionId={sessionId}
+        round={round}
+        dailyLabel={daily ? dailyLabel() : null}
+        partiePrivee={!daily && !bot && !solo && !ranked}
+      />
       {error && (
         <p className="mt-1 shrink-0 rounded-full bg-amber-400/20 px-3 py-0.5 text-[10px] text-amber-100">
           Serveur injoignable — grille de démonstration

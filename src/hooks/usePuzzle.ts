@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { buildGrid } from '../lib/gridBuilder';
 import { demoPuzzle } from '../data/demoPuzzle';
 import { fetchPuzzle } from '../lib/puzzleApi';
-import type { HintDistribution } from '../lib/difficulty';
+import type { HintDistribution, MultiplayerGrade } from '../lib/difficulty';
 import type { Puzzle } from '../types/puzzle';
 
 interface UsePuzzleResult {
@@ -13,6 +13,8 @@ interface UsePuzzleResult {
 
 interface UsePuzzleOptions {
   hints?: HintDistribution;
+  /** Niveau du joueur : pilote la complexité des mots retenus. */
+  difficulty?: MultiplayerGrade;
   /** Tant que `false`, aucun fetch n'est déclenché — utilisé en solo, où la
    *  répartition dépend du palier du joueur, connu seulement une fois son
    *  profil chargé (voir Round dans App.tsx). Vrai par défaut : les autres
@@ -32,7 +34,7 @@ interface UsePuzzleOptions {
  * l'adjacence indice/mot et la cohérence des croisements.
  */
 export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzzleResult {
-  const { hints, ready = true } = options;
+  const { hints, difficulty, ready = true } = options;
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzz
     setLoading(true);
     setError(null);
 
-    fetchPuzzle({ seed, hints, signal: controller.signal })
+    fetchPuzzle({ seed, hints, difficulty, signal: controller.signal })
       .then((payload) => {
         if (cancelled) return;
         setPuzzle({
@@ -79,7 +81,7 @@ export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzz
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seed, ready, hintsKey]);
+  }, [seed, ready, hintsKey, difficulty]);
 
   return { puzzle, loading, error };
 }

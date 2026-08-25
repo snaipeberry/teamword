@@ -189,6 +189,18 @@ def hint_distribution_for(daily, requested):
     return DEFAULT_HINT_DISTRIBUTION
 
 
+def parse_difficulty(params):
+    """Niveau demandé ('facile'/'moyen'/'difficile'), sinon None.
+
+    Distinct de la répartition des indices : celle-ci choisit la FORMULATION
+    d'une définition, alors que le niveau choisit QUELS MOTS entrent dans la
+    grille (voir COMPLEXITY_RANK). Les deux viennent du même réglage côté
+    joueur mais agissent à deux endroits différents.
+    """
+    valeur = (params.get("difficulty") or [None])[0]
+    return valeur if valeur in ("facile", "moyen", "difficile") else None
+
+
 def parse_hint_distribution(params):
     """Lit facile/moyen/difficile depuis les paramètres de requête (floats).
 
@@ -266,7 +278,7 @@ class PuzzleService:
             f"{self.bank['rows']}x{self.bank['cols']}"
         )
 
-    def fill(self, seed=None, hint_distribution=None):
+    def fill(self, seed=None, hint_distribution=None, difficulty=None):
         # Avec une graine, tout devient reproductible : choix du squelette et
         # des mots. Deux joueurs d'une même partie obtiennent ainsi une grille
         # identique sans que le serveur ait à stocker quoi que ce soit.
@@ -280,6 +292,9 @@ class PuzzleService:
         cells, words_out, metrics = generate_from_bank(
             self.bank, self.words, rng, index=self.index, avoid_words=avoid,
             hint_distribution=hint_distribution_for(daily, hint_distribution),
+            # La grille du jour est la même pour tous : son niveau est fixé
+            # ici, pas par le client (voir DAILY_HINT_DISTRIBUTION).
+            difficulty='difficile' if daily else difficulty,
         )
 
         payload = to_app_puzzle(
@@ -346,9 +361,12 @@ class Handler(BaseHTTPRequestHandler):
             params = parse_qs(parsed.query)
             seed = (params.get("seed") or [None])[0]
             hint_distribution = parse_hint_distribution(params)
+            difficulty = parse_difficulty(params)
             try:
                 t0 = time.perf_counter()
-                payload = self.service.fill(seed, hint_distribution=hint_distribution)
+                payload = self.service.fill(
+                    seed, hint_distribution=hint_distribution, difficulty=difficulty,
+                )
                 payload["generated_in_ms"] = round((time.perf_counter() - t0) * 1000, 2)
                 self._send(200, payload)
             except Exception as exc:  # remplissage impossible
@@ -372,7 +390,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=here.parent / "datasets" / "mots_fleches_enriched_v23_editorial_final.json",
+        default=here.parent / "datasets" / "mots_fleches_enriched_v25_verification_semantique.json",
     )
     parser.add_argument(
         "--bank-file", type=Path, default=here / "banks" / "skeletons_10x10.json"

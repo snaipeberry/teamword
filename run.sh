@@ -75,7 +75,7 @@ case "$cmd" in
     echo "Démarrage des services locaux…"
     start_one "web"      5173 "."                        npm run dev
     start_one "realtime" 8080 "server"                    npm start
-    start_one "puzzles"  8787 "scripts/grid_generation"   python3 serve_puzzles.py
+    start_one "puzzles"  8787 "scripts/grid_generation"   python3 serve_puzzles.py --host 0.0.0.0
     echo
     echo "Front       http://localhost:5173"
     echo "Grilles     http://localhost:8787/health"

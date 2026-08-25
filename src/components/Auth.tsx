@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { login, register, type Session } from '../lib/auth';
+import { screenShell } from '../lib/motion';
 
 /**
  * Connexion et inscription.
@@ -41,17 +42,18 @@ export function AuthScreen({
     'w-full rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] text-organic-text placeholder:font-medium placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500';
 
   return (
-    <div className="flex min-h-0 w-full max-w-[340px] flex-1 flex-col items-center justify-center gap-4 px-5">
-      <h1 className="font-display text-xl text-organic-text">
+    <div className={screenShell}>
+      <h1 className="font-display text-[30px] leading-none text-organic-text">
         {mode === 'login' ? 'Connexion' : 'Créer un compte'}
       </h1>
 
       {mode === 'register' && (
-        <p className="text-center text-[12px] text-organic-neutral-700">
+        <p className="mt-2 text-[12.5px] text-organic-neutral-700">
           Votre progression actuelle sera conservée.
         </p>
       )}
 
+      <div className="mt-6 flex w-full flex-col gap-3">
       <input
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -83,10 +85,11 @@ export function AuthScreen({
         whileTap={{ scale: 0.96 }}
         disabled={enCours || !username || !password}
         onClick={() => void valider()}
-        className="w-full rounded-full bg-organic-accent-500 py-3 font-display text-[15px] text-organic-bg shadow-md active:bg-organic-accent-600 disabled:opacity-40"
+        className="w-full rounded-full bg-organic-accent-500 py-3.5 font-display text-[15px] text-organic-bg shadow-md active:bg-organic-accent-600 disabled:opacity-40"
       >
         {enCours ? '…' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
       </motion.button>
+      </div>
 
       <button
         type="button"
@@ -94,7 +97,7 @@ export function AuthScreen({
           setMode(mode === 'login' ? 'register' : 'login');
           setErreur(null);
         }}
-        className="text-[12px] font-bold text-organic-neutral-700 underline underline-offset-2"
+        className="mt-4 self-center text-[12px] font-bold text-organic-neutral-700 underline underline-offset-2"
       >
         {mode === 'login' ? 'Pas encore de compte ?' : 'J’ai déjà un compte'}
       </button>
@@ -102,7 +105,7 @@ export function AuthScreen({
       <button
         type="button"
         onClick={onClose}
-        className="rounded-full bg-organic-neutral-100 px-5 py-2 text-[13px] text-organic-text active:scale-95"
+        className="mb-3.5 mt-auto self-center rounded-full bg-organic-neutral-100 px-6 py-2.5 text-[13px] text-organic-text active:scale-95"
       >
         {closeLabel}
       </button>

@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Avatar } from './Avatar';
 import { fetchLeaderboard, type LeaderboardRow } from '../lib/roomClient';
 import { activePlayerId } from '../lib/auth';
+import { screenShell } from '../lib/motion';
+import { BackButton } from './BackButton';
 
 /**
  * Classement général (multijoueur) OU solo, au choix — deux économies de
@@ -22,10 +24,11 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
   }, [mode]);
 
   return (
-    <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col gap-3 px-5 py-6">
-      <h1 className="shrink-0 text-center font-display text-xl text-organic-text">Classement</h1>
+    <div className={screenShell}>
+      <BackButton onClick={onClose} />
+      <h1 className="mt-1.5 shrink-0 font-display text-[30px] leading-none text-organic-text">Classement</h1>
 
-      <div className="flex shrink-0 gap-1.5 rounded-full bg-organic-neutral-200 p-1">
+      <div className="mt-4 flex shrink-0 gap-1.5 rounded-full bg-organic-neutral-200 p-1">
         {(['multi', 'solo'] as const).map((m) => (
           <button
             key={m}
@@ -40,7 +43,7 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto pb-3.5">
         {erreur && <p className="text-center text-[12px] text-organic-accent-700">Classement indisponible</p>}
         {rows?.length === 0 && (
           <p className="text-center text-[12px] text-organic-neutral-500">
@@ -81,13 +84,6 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onClose}
-        className="shrink-0 rounded-full bg-organic-neutral-200 py-2.5 font-display text-[14px] text-organic-text active:scale-95"
-      >
-        Retour
-      </button>
     </div>
   );
 }

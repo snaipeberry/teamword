@@ -6,7 +6,6 @@ interface LetterCellProps {
   value: string;
   isActive: boolean;
   isInActiveWord: boolean;
-  isWrong: boolean;
   isLocked: boolean;
   lockDelay: number;
   othersHere: PlayerCursor[];
@@ -17,7 +16,6 @@ export function LetterCell({
   value,
   isActive,
   isInActiveWord,
-  isWrong,
   isLocked,
   lockDelay,
   othersHere,
@@ -51,7 +49,6 @@ export function LetterCell({
       type="button"
       onClick={onSelect}
       whileTap={isLocked ? undefined : { scale: 0.88 }}
-      animate={isWrong ? { x: [0, -4, 4, -4, 4, 0] } : { x: 0 }}
       transition={{ duration: 0.35 }}
       style={isActive ? { boxShadow: 'inset 0 0 0 2px #D67F48' } : undefined}
       className={`relative flex h-full w-full items-center justify-center overflow-hidden border border-cell-border/70 font-grid text-[clamp(1rem,5.5vw,1.5rem)] font-semibold uppercase transition-colors duration-300 ${background} ${
@@ -86,7 +83,7 @@ export function LetterCell({
         // dès qu'elle est juste individuellement révélait la réponse au fur et
         // à mesure de la saisie.
         className={`relative z-10 ${
-          isLocked ? 'text-organic-accent2-900' : isWrong ? 'text-organic-accent-700' : 'text-organic-text'
+          isLocked ? 'text-organic-accent2-900' : 'text-organic-text'
         }`}
       >
         {value}

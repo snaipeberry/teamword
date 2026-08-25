@@ -18,3 +18,20 @@ export const screenVariants: Variants = {
 /** Conteneur neutre : reprend juste la mise en page flex déjà utilisée par
  *  chaque écran, pour que l'ajout de `motion` ne déplace rien. */
 export const screenClassName = 'flex min-h-0 w-full flex-1 flex-col items-center';
+
+/**
+ * Gabarit d'un écran, repris de la maquette Organic.
+ *
+ * Le contenu REMPLIT le cadre du téléphone de haut en bas — titre en haut,
+ * actions de bas de page collées en bas (`mt-auto`) — au lieu d'être un bloc
+ * étroit centré verticalement, qui laissait de grandes zones vides en haut
+ * et en bas et ne ressemblait pas à une application mobile.
+ *
+ * La largeur n'est plafonnée que pour rester lisible sur un écran large
+ * (navigateur de bureau) : sur téléphone, le contenu occupe toute la largeur
+ * moins les 22 px de marge de la maquette.
+ *
+ * Seule exception : la recherche d'adversaire (Matchmaking), centrée dans la
+ * maquette aussi — un écran d'attente n'a rien à aligner en haut.
+ */
+export const screenShell = 'flex min-h-0 w-full max-w-[440px] flex-1 flex-col px-[22px] pt-3';

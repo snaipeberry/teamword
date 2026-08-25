@@ -12,7 +12,10 @@
     "build:mobile": "tsc -b && vite build --mode mobile",
     "cap:sync": "npm run build:mobile && npx cap sync",
     "build:simulator": "tsc -b && vite build --mode simulator",
-    "cap:sync:simulator": "npm run build:simulator && npx cap sync ios"
+    "cap:sync:simulator": "npm run build:simulator && npx cap sync ios",
+    "build:device": "tsc -b && vite build --mode device",
+    "cap:sync:device": "npm run build:device && npx cap sync ios",
+    "check:urls": "bash scripts/check-mobile-urls.sh"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.0",

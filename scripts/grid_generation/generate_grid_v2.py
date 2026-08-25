@@ -92,6 +92,34 @@ def hint_for_level(word, level):
     }.get(level) or word.hint_difficile
 
 
+# Préférence de complexité par niveau de difficulté.
+#
+# Rang 0 = privilégié, 3 = dernier recours (« interdit » en pratique).
+#
+# Volontairement des RANGS et non un filtre dur : sur les suites de 2 cases le
+# stock est minuscule (281 mots, dont 58 seulement en complexité 1-3), et une
+# exclusion ferme rendrait beaucoup de grilles irremplissables — c'est la même
+# leçon que `avoid_words` et `DAILY_MIN_COMPLEXITY`. Les mots de rang 3 ne sont
+# donc essayés que si les autres ne suffisent pas à combler la grille : dans
+# les faits ils n'apparaissent jamais tant qu'il reste une alternative.
+COMPLEXITY_RANK = {
+    # Priorité aux mots simples (1-2) ; 4 et 5 en dernier recours.
+    "facile": {1: 0, 2: 0, 3: 1, 4: 3, 5: 3},
+    # Le trop facile (1) est minimisé, le 5 réservé au dernier recours.
+    "moyen": {1: 2, 2: 0, 3: 0, 4: 0, 5: 3},
+    # Le 1 en dernier recours, le 2 minimisé, le 5 pleinement ouvert.
+    "difficile": {1: 3, 2: 2, 3: 0, 4: 0, 5: 0},
+}
+
+
+def complexity_rank_for(difficulty):
+    """Table de rangs pour un niveau, ou None si le niveau est inconnu.
+
+    None = aucune préférence, comportement d'avant cette fonctionnalité.
+    """
+    return COMPLEXITY_RANK.get(difficulty)
+
+
 def pick_hint_level(rng, distribution):
     """Tire un niveau d'indice selon des poids {facile, moyen, difficile}.
 
@@ -169,6 +197,28 @@ def normalize_word(value):
     return s
 
 
+# Plafond de longueur d'un indice affiché dans une case.
+#
+# 30 et non 15 : les indices FACILES du dataset v24 sont volontairement
+# explicatifs (« Symbole chimique de bore »), et couper à 15 donnait
+# « Symbole chimiqu » — la définition perdait justement le mot qui la rend
+# facile. ClueCell réduit déjà la police jusqu'à un budget de 32 caractères
+# (voir fontRatioFor), donc la case sait afficher cette longueur.
+HINT_MAX_CHARS = 30
+
+
+def clip_hint(text):
+    """Tronque sans jamais couper au milieu d'un mot."""
+    text = text.strip()
+    if len(text) <= HINT_MAX_CHARS:
+        return text
+    coupe = text[:HINT_MAX_CHARS]
+    espace = coupe.rfind(" ")
+    # Un seul mot plus long que le plafond : on coupe quand même, sinon on
+    # renverrait une chaîne vide.
+    return coupe[:espace] if espace > 0 else coupe
+
+
 def load_dictionary(path):
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -235,9 +285,9 @@ def load_dictionary(path):
         result.append(
             Word(
                 word=word,
-                hint_facile=hint_facile[:15],
-                hint_moyen=hint_moyen[:15],
-                hint_difficile=hint_difficile[:15],
+                hint_facile=clip_hint(hint_facile),
+                hint_moyen=clip_hint(hint_moyen),
+                hint_difficile=clip_hint(hint_difficile),
                 complexity=max(1, min(5, complexity)),
             )
         )
@@ -753,7 +803,7 @@ def build_word_index(words):
 
 
 def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index=None,
-               avoid_words=None):
+               avoid_words=None, difficulty=None):
     """Renvoie (assignment, complete). `assignment` couvre tous les slots
     quand complete=True ; sinon c'est le MEILLEUR remplissage partiel
     rencontré pendant la recherche (le plus de slots comblés), pour que
@@ -846,16 +896,31 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
         taken = used_idx[length]
         return (cand - taken) if taken else cand
 
+    rank = complexity_rank_for(difficulty)
+
     def materialize(si, cand):
         length = slots[si].length
         pool = index.by_length[length]
         picks = list(cand)
         rng.shuffle(picks)  # variété entre générations successives
         marked = avoid_idx.get(length)
-        if marked:
+        if rank:
+            # Les complexités « interdites » par le niveau (rang 3) sont
+            # ÉCARTÉES, pas seulement reléguées : les reléguer suffisait à
+            # les rendre rares, pas à les rendre absentes — le backtracking
+            # finissait par les atteindre dès qu'un croisement se tendait
+            # (mesuré : 18 % de mots hors-niveau en facile).
+            #
+            # Le repli reste possible case par case : si AUCUN mot du niveau
+            # ne colle au motif imposé par les croisements, on rouvre le
+            # stock complet plutôt que de rendre la grille irremplissable.
+            preferes = [i for i in picks if rank.get(pool[i].complexity, 0) < 3]
+            if preferes:
+                picks = preferes
+            picks.sort(key=lambda i: (rank.get(pool[i].complexity, 0), i in marked if marked else False))
+        elif marked:
             # Tri STABLE sur un booléen : les mots déjà vus passent derrière,
             # l'ordre aléatoire est conservé à l'intérieur de chaque groupe.
-            # Le plafonnage qui suit les élimine donc en premier.
             picks.sort(key=lambda i: i in marked)
         del picks[candidate_cap:]
         return [(i, pool[i]) for i in picks]
@@ -1324,7 +1389,7 @@ def load_skeleton_bank(path):
 
 
 def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks=2500,
-                       avoid_words=None, hint_distribution=None):
+                       avoid_words=None, hint_distribution=None, difficulty=None):
     """Chemin TEMPS RÉEL : prend un squelette du banc et le remplit.
 
     `index` (WordIndex) doit être construit une fois au démarrage du serveur
@@ -1352,7 +1417,7 @@ def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks
         slots = extract_slots(roles, rows, cols)
         assignment, complete = fill_slots(
             slots, words, rng, max_backtracks=max_backtracks, index=index,
-            avoid_words=avoid_words,
+            avoid_words=avoid_words, difficulty=difficulty,
         )
         if not complete:
             continue

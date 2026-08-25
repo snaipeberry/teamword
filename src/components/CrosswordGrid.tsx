@@ -15,11 +15,9 @@ import {
   hapticTick,
   hapticWin,
   hapticWordFound,
-  hapticWrong,
   playCorrectSound,
   playWinSound,
   playWordFoundSound,
-  playWrongSound,
   unlockAudio,
 } from '../lib/sounds';
 
@@ -46,7 +44,6 @@ export function CrosswordGrid({
   const soloScored = solo || daily;
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
-  const [wrongCells, setWrongCells] = useState<Set<string>>(new Set());
   const [celebrating, setCelebrating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   // Plain state (rather than Framer Motion's initial/animate mount detection) drives the
@@ -243,12 +240,6 @@ export function CrosswordGrid({
     game.revealLetter(target, answer);
     playCorrectSound();
     hapticTick();
-    setWrongCells((prev) => {
-      if (!prev.has(target!)) return prev;
-      const next = new Set(prev);
-      next.delete(target!);
-      return next;
-    });
   }, [activeCellId, activeWordId, cellsByWordId, allLetterCells, answerByCellId, game]);
 
   const activeWordCellIds = activeWordId ? (cellsByWordId.get(activeWordId) ?? []) : [];
@@ -363,12 +354,6 @@ export function CrosswordGrid({
       game.setLetter(activeCellId, letter);
       playCorrectSound();
       hapticTick();
-      setWrongCells((prev) => {
-        if (!prev.has(activeCellId)) return prev;
-        const next = new Set(prev);
-        next.delete(activeCellId);
-        return next;
-      });
       moveWithinWord(1);
     },
     [activeCellId, game, isCellLocked, moveWithinWord],
@@ -430,19 +415,6 @@ export function CrosswordGrid({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-
-  const checkGrid = useCallback(() => {
-    const wrong = new Set<string>();
-    allLetterCells.forEach(({ id, answer }) => {
-      const value = game.getLetter(id);
-      if (value && value !== answer) wrong.add(id);
-    });
-    setWrongCells(wrong);
-    if (wrong.size > 0) {
-      playWrongSound();
-      hapticWrong();
-    }
-  }, [allLetterCells, game]);
 
   // Deux régimes de plafond, demandés séparément : en solo/quotidien une
   // monnaie persistante sur le profil (rechargée en jouant) ; en multijoueur
@@ -523,7 +495,6 @@ export function CrosswordGrid({
                   value={value}
                   isActive={activeCellId === id}
                   isInActiveWord={activeWordCellIds.includes(id)}
-                  isWrong={wrongCells.has(id)}
                   isLocked={isCellLocked(id)}
                   lockDelay={lockDelayByCell.get(id) ?? 0}
                   othersHere={othersByCellId.get(id) ?? []}
@@ -549,15 +520,6 @@ export function CrosswordGrid({
           }`}
         >
           Indice · {hintBudget}
-        </motion.button>
-
-        <motion.button
-          type="button"
-          onClick={checkGrid}
-          whileTap={{ scale: 0.94 }}
-          className="shrink-0 rounded-full border border-organic-neutral-400 px-3 py-1.5 font-display text-[12px] text-organic-text transition active:bg-organic-neutral-200"
-        >
-          Vérifier
         </motion.button>
 
         <ActiveClueBar

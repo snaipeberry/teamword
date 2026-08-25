@@ -66,5 +66,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Nécessaire uniquement pour les builds --mode simulator/device (voir
+		     .env.simulator / .env.device), qui pointent vers les serveurs de dev
+		     locaux en http:// / ws:// plutôt qu'en https:// / wss://. Restreint
+		     aux adresses locales (localhost, IP privées) : la prod continue de
+		     n'utiliser QUE du https/wss, ATS y reste plein. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Utilisé en développement pour joindre les serveurs de jeu tournant sur ton Mac, sur le même Wi-Fi.</string>
 </dict>
 </plist>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AuthScreen } from './Auth';
 import { skipGateForThisTab } from '../lib/auth';
-import { screenClassName, screenTransition, screenVariants } from '../lib/motion';
+import { screenClassName, screenShell, screenTransition, screenVariants } from '../lib/motion';
 
 /**
  * Portail d'entrée : connexion, création de compte, ou invité.
@@ -40,21 +40,28 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
             closeLabel="← Retour au choix"
           />
         ) : (
-    <div className="flex min-h-0 w-full max-w-[360px] flex-1 flex-col items-center justify-center gap-4 px-5">
+    <div className={screenShell}>
+      <motion.p
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-[11px] font-bold uppercase tracking-[0.12em] text-organic-accent-700"
+      >
+        Mots fléchés à plusieurs
+      </motion.p>
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center font-display text-4xl leading-none text-organic-text"
+        className="mt-0.5 font-display text-[40px] leading-none text-organic-text"
       >
         TeamWords
       </motion.h1>
-      <p className="text-center text-[12px] font-medium text-organic-neutral-700">Comment voulez-vous jouer ?</p>
+      <p className="mt-2 text-[12.5px] font-medium text-organic-neutral-700">Comment voulez-vous jouer ?</p>
 
       <motion.button
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={() => setMode('login')}
-        className="w-full rounded-[28px] bg-organic-accent-500 py-4 text-left shadow-md active:bg-organic-accent-600"
+        className="mt-6 w-full rounded-[28px] bg-organic-accent-500 py-4 text-left shadow-md active:bg-organic-accent-600"
       >
         <span className="block px-5 font-display text-[19px] text-organic-bg">Se connecter</span>
         <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-bg/80">
@@ -66,7 +73,7 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={() => setMode('register')}
-        className="w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 py-4 text-left active:bg-organic-neutral-200"
+        className="mt-3 w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 py-4 text-left active:bg-organic-neutral-200"
       >
         <span className="block px-5 font-display text-[19px] text-organic-text">Créer un compte</span>
         <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-neutral-700">
@@ -78,7 +85,7 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={terminer}
-        className="w-full rounded-[28px] py-4 text-left active:bg-organic-neutral-200"
+        className="mt-3 w-full rounded-[28px] border border-transparent py-4 text-left active:bg-organic-neutral-200"
       >
         <span className="block px-5 font-display text-[19px] text-organic-text">Continuer en invité</span>
         <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-neutral-600">

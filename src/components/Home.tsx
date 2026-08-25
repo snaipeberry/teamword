@@ -6,7 +6,8 @@ import { dailyLabel } from '../lib/puzzleApi';
 import { Matchmaking } from './Matchmaking';
 import { ProfileScreen } from './Profile';
 import { LeaderboardScreen } from './Leaderboard';
-import { screenClassName, screenTransition, screenVariants } from '../lib/motion';
+import { BackButton } from './BackButton';
+import { screenClassName, screenShell, screenTransition, screenVariants } from '../lib/motion';
 
 /**
  * Accueil : choisir son nom, puis Solo / Multijoueur / Grille du jour.
@@ -66,47 +67,65 @@ export function Home() {
     screen = <LeaderboardScreen onClose={() => setEcran('accueil')} />;
   } else if (ecran === 'multijoueur') {
     screen = (
-      <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
-        <h1 className="text-center font-display text-2xl text-organic-text">Multijoueur</h1>
+      <div className={screenShell}>
+        <BackButton onClick={() => setEcran('accueil')} />
+        <h1 className="mt-1.5 font-display text-[30px] leading-none text-organic-text">Multijoueur</h1>
 
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.96 }}
-          onClick={() => setEcran('matchmaking')}
-          className="w-full rounded-[28px] bg-organic-accent-500 py-4 text-left font-display text-[15px] text-organic-bg shadow-md active:bg-organic-accent-600"
-        >
-          <span className="block px-5 text-[21px]">Duel aléatoire</span>
-          <span className="mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-bg/80">
-            Contre un joueur au hasard — partie classée
-          </span>
-        </motion.button>
+        {/* Mêmes cartes que le menu d'accueil : les quatre façons de jouer à
+            plusieurs se lisent d'un coup d'œil, au lieu d'un bouton principal
+            suivi de pastilles secondaires de tailles différentes. */}
+        <div className="mt-5 flex flex-col gap-3">
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setEcran('matchmaking')}
+            className="relative w-full overflow-hidden rounded-[28px] bg-organic-accent-500 py-4 text-left shadow-md active:bg-organic-accent-600"
+          >
+            <span className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15" />
+            <span className="relative block px-5 font-display text-[21px] text-organic-bg">Duel aléatoire</span>
+            <span className="relative mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-bg/80">
+              Contre un joueur au hasard — partie classée
+            </span>
+          </motion.button>
 
-        <div className="flex w-full gap-2">
           <motion.button
             type="button"
             whileTap={{ scale: 0.96 }}
             onClick={() => go(generateSessionCode())}
-            className="flex-1 rounded-full bg-organic-neutral-100 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
+            className="relative w-full overflow-hidden rounded-[28px] bg-organic-accent2-300 py-4 text-left text-organic-accent2-900 active:bg-organic-accent2-400"
           >
-            Partie privée
+            <span className="pointer-events-none absolute -bottom-7 -right-5 h-[88px] w-[88px] rounded-full bg-white/35" />
+            <span className="relative block px-5 font-display text-[21px]">Partie privée</span>
+            <span className="relative mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-accent2-800">
+              Coop ou équipes, sur invitation
+            </span>
           </motion.button>
+
           <motion.button
             type="button"
             whileTap={{ scale: 0.96 }}
             onClick={() => go(generateSessionCode(), { bot: true })}
-            className="flex-1 rounded-full bg-organic-neutral-100 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
+            className="w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 px-5 py-4 text-left text-organic-text active:bg-organic-neutral-200"
           >
-            Contre un bot
+            <span className="block font-display text-[19px]">Contre un bot</span>
+            <span className="mt-0.5 block text-[12.5px] font-semibold text-organic-neutral-700">
+              Pour s’entraîner — hors classement
+            </span>
           </motion.button>
         </div>
 
-        <div className="flex w-full items-center gap-3 text-[11px] font-bold uppercase text-organic-neutral-500">
-          <span className="h-px flex-1 bg-organic-divider" /> ou <span className="h-px flex-1 bg-organic-divider" />
-        </div>
-
-        <div className="w-full">
-          <div className="flex gap-2">
+        {/* Rejoindre : une action de saisie, pas un choix de mode — d'où la
+            séparation visuelle plutôt qu'une quatrième carte. */}
+        <div className="mt-6 w-full">
+          <label
+            htmlFor="code-partie"
+            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600"
+          >
+            Rejoindre une partie
+          </label>
+          <div className="flex gap-2.5">
             <input
+              id="code-partie"
               value={code}
               onChange={(e) => {
                 setCode(e.target.value.toUpperCase());
@@ -119,36 +138,35 @@ export function Home() {
               maxLength={8}
               aria-label="Code de la partie"
               placeholder="CODE"
-              className="min-w-0 flex-1 rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] tracking-[0.25em] text-organic-text placeholder:tracking-normal placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500"
+              className="min-w-0 flex-1 rounded-full border border-organic-neutral-300 bg-organic-neutral-100 px-4 py-3 text-center font-display text-[15px] tracking-[0.25em] text-organic-text placeholder:tracking-normal placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500"
             />
             <motion.button
               type="button"
               whileTap={{ scale: 0.96 }}
               onClick={rejoindre}
-              className="shrink-0 rounded-full bg-organic-neutral-100 px-5 py-2.5 font-display text-[14px] text-organic-text active:bg-organic-neutral-200"
+              className="shrink-0 rounded-full bg-organic-neutral-200 px-5 py-3 font-display text-[14px] text-organic-text active:bg-organic-neutral-300"
             >
               Rejoindre
             </motion.button>
           </div>
-          {erreur && <p className="mt-1.5 text-center text-[11px] font-bold text-organic-accent-700">{erreur}</p>}
+          {erreur && <p className="mt-1.5 text-[11px] font-bold text-organic-accent-700">{erreur}</p>}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setEcran('accueil')}
-          className="mt-1 text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
-        >
-          ← Menu
-        </button>
       </div>
     );
   } else {
     screen = (
-      <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
+      <div className={screenShell}>
+      <motion.p
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-[11px] font-bold uppercase tracking-[0.12em] text-organic-accent-700"
+      >
+        Mots fléchés à plusieurs
+      </motion.p>
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center font-display text-4xl leading-none text-organic-text"
+        className="mt-0.5 font-display text-[40px] leading-none text-organic-text"
       >
         TeamWords
       </motion.h1>
@@ -162,17 +180,17 @@ export function Home() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="w-full"
+          className="mt-5 flex items-center gap-2.5 rounded-full border border-organic-neutral-300 bg-organic-neutral-100 py-2 pl-4 pr-2"
         >
-          <label className="mb-1 block text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
-            Votre nom
-          </label>
-          <p className="w-full rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] text-organic-text">
-            {name}
-          </p>
+          <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-organic-neutral-600">Nom</span>
+          <span className="min-w-0 flex-1 truncate text-[15px] font-bold text-organic-text">{name}</span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-organic-accent2-500 text-[12px] font-bold text-white">
+            {name.replace(/^Guest/, '').slice(0, 2).toUpperCase()}
+          </span>
         </motion.div>
       )}
 
+      <div className="mt-[18px] flex flex-col gap-3">
       <motion.button
         type="button"
         initial={{ opacity: 0, y: 10 }}
@@ -232,29 +250,32 @@ export function Home() {
           {estInvite ? 'Nécessite un compte' : 'La même pour tous · plus difficile'}
         </span>
       </motion.button>
+      </div>
 
       {estInvite && (
         <button
           type="button"
           onClick={() => setEcran('profil')}
-          className="text-[11px] font-bold text-organic-neutral-600 underline underline-offset-2"
+          className="mt-3.5 text-left text-[11px] font-bold text-organic-neutral-600 underline underline-offset-2"
         >
           Vous jouez en invité — créer un compte pour tout débloquer
         </button>
       )}
 
-      <div className="flex w-full gap-2">
+      {/* Collé au bas du cadre (maquette Organic) plutôt que flottant sous
+          les boutons : c'est ce qui donne à l'écran sa tenue d'application. */}
+      <div className="mt-auto flex w-full gap-2.5 pb-3.5 pt-4">
         <button
           type="button"
           onClick={() => setEcran('profil')}
-          className="flex-1 rounded-full border border-organic-divider py-2 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
+          className="flex-1 rounded-full border border-organic-neutral-300 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
         >
           Profil
         </button>
         <button
           type="button"
           onClick={() => setEcran('classement')}
-          className="flex-1 rounded-full border border-organic-divider py-2 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
+          className="flex-1 rounded-full border border-organic-neutral-300 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
         >
           Classement
         </button>

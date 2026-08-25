@@ -46,11 +46,32 @@ function distributionAt(t: number): HintDistribution {
   };
 }
 
+/**
+ * Niveau à un point donné de l'échelle — sert à choisir QUELS MOTS entrent
+ * dans la grille (complexité), là où `distributionAt` ne choisit que la
+ * FORMULATION des définitions. Les deux dérivent du même `t`, mais le
+ * serveur les applique à deux endroits différents (voir COMPLEXITY_RANK
+ * dans generate_grid_v2.py).
+ */
+function gradeAt(t: number): MultiplayerGrade {
+  if (t < 1 / 3) return 'facile';
+  if (t < 2 / 3) return 'moyen';
+  return 'difficile';
+}
+
+function soloT(soloPoints: number): number {
+  const lastIndex = SOLO_TIER_MINS.length - 1;
+  return lastIndex > 0 ? soloTierIndex(soloPoints) / lastIndex : 1;
+}
+
 /** Solo : la répartition tend vers plus difficile à chaque palier franchi. */
 export function soloDistribution(soloPoints: number): HintDistribution {
-  const lastIndex = SOLO_TIER_MINS.length - 1;
-  const t = lastIndex > 0 ? soloTierIndex(soloPoints) / lastIndex : 1;
-  return distributionAt(t);
+  return distributionAt(soloT(soloPoints));
+}
+
+/** Solo : niveau de complexité des mots, sur la même progression de paliers. */
+export function soloGrade(soloPoints: number): MultiplayerGrade {
+  return gradeAt(soloT(soloPoints));
 }
 
 /** Grille du jour : fixe, quel que soit le joueur (le serveur l'impose de

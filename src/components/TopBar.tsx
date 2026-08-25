@@ -6,7 +6,7 @@ import { Avatar } from './Avatar';
 import { SoundToggle } from './SoundToggle';
 import { SessionMenu } from './SessionMenu';
 import { AnimatedNumber } from './AnimatedNumber';
-import { buildInviteUrl } from '../lib/sessionCode';
+import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { blockPlayer } from '../lib/roomClient';
 
 /**
@@ -22,11 +22,19 @@ export function TopBar({
   sessionId,
   round,
   dailyLabel = null,
+  partiePrivee = false,
 }: {
   sessionId: string;
   round: number;
   /** Renseigné en mode « grille du jour » : remplace le numéro de grille. */
   dailyLabel?: string | null;
+  /**
+   * Partie privée : seule situation où le menu « ⋯ » a un sens (recommencer
+   * la partie, repartir sur un nouveau code — des actions qui n'existent pas
+   * en solo, en quotidien, contre un bot ou en duel classé). Ailleurs, la
+   * flèche de retour suffit, comme sur les autres écrans.
+   */
+  partiePrivee?: boolean;
 }) {
   const game = useGameState();
   const { teams, ranked } = useRound();
@@ -62,6 +70,15 @@ export function TopBar({
     // La zone sûre du haut est désormais gérée par le conteneur racine
     // (App.tsx) — un second padding ici la doublerait.
     <div className="relative z-50 flex w-full max-w-[560px] shrink-0 items-center gap-1.5 px-2">
+      {/* Même geste de retour que partout ailleurs, au même endroit. */}
+      <button
+        type="button"
+        onClick={goHome}
+        aria-label="Retour vers le menu"
+        className="-ml-1 shrink-0 px-1.5 py-1 text-[15px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
+      >
+        ←
+      </button>
       <span
         className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] ${
           dailyLabel ? 'bg-organic-accent-200 text-organic-accent-800' : 'bg-organic-neutral-200 text-organic-text'
@@ -147,7 +164,7 @@ export function TopBar({
         </button>
       )}
       <SoundToggle />
-      <SessionMenu multiplayer={game.multiplayer} />
+      {partiePrivee && <SessionMenu multiplayer={game.multiplayer} />}
     </div>
   );
 }
