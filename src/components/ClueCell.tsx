@@ -91,8 +91,8 @@ export function ClueCell({
       className={[
         'flex h-full w-full flex-col items-center justify-center overflow-hidden',
         'border border-cell-border/50 px-[2px] py-[1px] text-center font-clue font-bold',
-        'leading-[1.1] text-neutral-800 hyphens-auto [overflow-wrap:anywhere]',
-        isDouble ? 'bg-gradient-to-br from-clue-accent to-amber-200' : 'bg-clue',
+        'leading-[1.1] text-organic-neutral-800 hyphens-auto [overflow-wrap:anywhere]',
+        isDouble ? 'bg-organic-accent-200' : 'bg-clue',
       ].join(' ')}
       style={{ fontSize: `${(cellSize * fontRatioFor(totalChars, data.clues.length)).toFixed(2)}px` }}
     >
@@ -117,9 +117,9 @@ export function ClueCell({
               // n'atteignait donc jamais les définitions, et les cases doubles
               // débordaient en 10x10.
               'w-full cursor-pointer rounded-[2px] text-[1em] transition-all duration-200',
-              i > 0 ? 'mt-[2px] border-t border-neutral-500/30 pt-[2px]' : '',
-              active ? 'bg-cell-active/60 ring-1 ring-cyan-500/60' : '',
-              solved ? 'text-emerald-700 opacity-50 line-through decoration-emerald-600' : '',
+              i > 0 ? 'mt-[2px] border-t border-organic-neutral-500/30 pt-[2px]' : '',
+              active ? 'bg-white/75 ring-1 ring-organic-accent-500/60' : '',
+              solved ? 'text-organic-accent2-700 opacity-50 line-through decoration-organic-accent2-600' : '',
             ].join(' ')}
           >
             {clue.text}
@@ -138,8 +138,8 @@ export function ClueCell({
               className={[
                 'ml-[2px] inline-block align-baseline leading-none',
                 BENT[arrow]
-                  ? 'text-[1.15em] font-bold text-rose-600'
-                  : 'text-[0.9em] text-neutral-600',
+                  ? 'text-[1.15em] font-bold text-organic-accent-700'
+                  : 'text-[0.9em] text-organic-neutral-600',
               ].join(' ')}
             >
               {ARROW_GLYPH[arrow]}

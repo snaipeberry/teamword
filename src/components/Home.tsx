@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { NameField } from './NameField';
+import { AnimatePresence, motion } from 'framer-motion';
 import { generateSessionCode } from '../lib/sessionCode';
-import { activePlayerId, activePlayerName, currentSession, setActivePlayerName } from '../lib/auth';
+import { activePlayerId, activePlayerName, currentSession } from '../lib/auth';
 import { dailyLabel } from '../lib/puzzleApi';
 import { Matchmaking } from './Matchmaking';
 import { ProfileScreen } from './Profile';
 import { LeaderboardScreen } from './Leaderboard';
+import { screenClassName, screenTransition, screenVariants } from '../lib/motion';
 
 /**
  * Accueil : choisir son nom, puis Solo / Multijoueur / Grille du jour.
@@ -18,7 +18,7 @@ import { LeaderboardScreen } from './Leaderboard';
 type Ecran = 'accueil' | 'multijoueur' | 'matchmaking' | 'profil' | 'classement';
 
 export function Home() {
-  const [name, setName] = useState(activePlayerName);
+  const name = activePlayerName();
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
   const [ecran, setEcran] = useState<Ecran>('accueil');
@@ -57,23 +57,26 @@ export function Home() {
     go(clean);
   };
 
-  if (ecran === 'matchmaking') return <Matchmaking onClose={() => setEcran('multijoueur')} />;
-  if (ecran === 'profil') return <ProfileScreen onClose={() => setEcran('accueil')} />;
-  if (ecran === 'classement') return <LeaderboardScreen onClose={() => setEcran('accueil')} />;
-
-  if (ecran === 'multijoueur') {
-    return (
+  let screen: React.ReactNode;
+  if (ecran === 'matchmaking') {
+    screen = <Matchmaking onClose={() => setEcran('multijoueur')} />;
+  } else if (ecran === 'profil') {
+    screen = <ProfileScreen onClose={() => setEcran('accueil')} />;
+  } else if (ecran === 'classement') {
+    screen = <LeaderboardScreen onClose={() => setEcran('accueil')} />;
+  } else if (ecran === 'multijoueur') {
+    screen = (
       <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
-        <h1 className="text-center font-display text-2xl font-bold text-white/90">Multijoueur</h1>
+        <h1 className="text-center font-display text-2xl text-organic-text">Multijoueur</h1>
 
         <motion.button
           type="button"
           whileTap={{ scale: 0.96 }}
           onClick={() => setEcran('matchmaking')}
-          className="w-full rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber py-3 font-display text-[15px] font-bold text-white shadow-xl"
+          className="w-full rounded-[28px] bg-organic-accent-500 py-4 text-left font-display text-[15px] text-organic-bg shadow-md active:bg-organic-accent-600"
         >
-          ⚔️ Duel aléatoire
-          <span className="mt-0.5 block text-[11px] font-medium text-white/70">
+          <span className="block px-5 text-[21px]">Duel aléatoire</span>
+          <span className="mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-bg/80">
             Contre un joueur au hasard — partie classée
           </span>
         </motion.button>
@@ -83,7 +86,7 @@ export function Home() {
             type="button"
             whileTap={{ scale: 0.96 }}
             onClick={() => go(generateSessionCode())}
-            className="flex-1 rounded-full bg-white/20 py-2.5 font-display text-[13px] font-bold text-white"
+            className="flex-1 rounded-full bg-organic-neutral-100 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
           >
             Partie privée
           </motion.button>
@@ -91,14 +94,14 @@ export function Home() {
             type="button"
             whileTap={{ scale: 0.96 }}
             onClick={() => go(generateSessionCode(), { bot: true })}
-            className="flex-1 rounded-full bg-white/20 py-2.5 font-display text-[13px] font-bold text-white"
+            className="flex-1 rounded-full bg-organic-neutral-100 py-2.5 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
           >
-            🤖 Contre un bot
+            Contre un bot
           </motion.button>
         </div>
 
-        <div className="flex w-full items-center gap-3 text-[11px] font-bold uppercase text-white/30">
-          <span className="h-px flex-1 bg-white/20" /> ou <span className="h-px flex-1 bg-white/20" />
+        <div className="flex w-full items-center gap-3 text-[11px] font-bold uppercase text-organic-neutral-500">
+          <span className="h-px flex-1 bg-organic-divider" /> ou <span className="h-px flex-1 bg-organic-divider" />
         </div>
 
         <div className="w-full">
@@ -116,91 +119,117 @@ export function Home() {
               maxLength={8}
               aria-label="Code de la partie"
               placeholder="CODE"
-              className="min-w-0 flex-1 rounded-full border border-white/25 bg-white/15 px-4 py-2.5 text-center font-display text-[15px] font-bold tracking-[0.25em] text-white placeholder:tracking-normal placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/40"
+              className="min-w-0 flex-1 rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] tracking-[0.25em] text-organic-text placeholder:tracking-normal placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500"
             />
             <motion.button
               type="button"
               whileTap={{ scale: 0.96 }}
               onClick={rejoindre}
-              className="shrink-0 rounded-full bg-white/20 px-5 py-2.5 font-display text-[14px] font-bold text-white"
+              className="shrink-0 rounded-full bg-organic-neutral-100 px-5 py-2.5 font-display text-[14px] text-organic-text active:bg-organic-neutral-200"
             >
               Rejoindre
             </motion.button>
           </div>
-          {erreur && <p className="mt-1.5 text-center text-[11px] font-bold text-rose-300">{erreur}</p>}
+          {erreur && <p className="mt-1.5 text-center text-[11px] font-bold text-organic-accent-700">{erreur}</p>}
         </div>
 
         <button
           type="button"
           onClick={() => setEcran('accueil')}
-          className="mt-1 text-[12px] font-bold text-white/60 active:scale-95"
+          className="mt-1 text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
         >
-          ← Retour
+          ← Menu
         </button>
       </div>
     );
-  }
-
-  return (
-    <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
+  } else {
+    screen = (
+      <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-200 bg-clip-text text-center font-display text-3xl font-bold text-transparent drop-shadow"
+        className="text-center font-display text-4xl leading-none text-organic-text"
       >
         TeamWords
       </motion.h1>
 
-      <div className="w-full">
-        <label className="mb-1 block text-center text-[11px] font-bold uppercase tracking-wider text-white/50">
-          Votre nom
-        </label>
-        <NameField value={name} onChange={(n) => setName(setActivePlayerName(n))} />
-      </div>
+      {/* Nom fixe dans les deux cas (pseudo du compte, ou nom généré pour
+          l'invité) : plus aucune UI ne permet de le changer, voir auth.ts.
+          Un compte le connaît déjà (c'est son pseudo de connexion) — inutile
+          de le réafficher ici ; l'invité, lui, ne le découvre que là. */}
+      {estInvite && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="w-full"
+        >
+          <label className="mb-1 block text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
+            Votre nom
+          </label>
+          <p className="w-full rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] text-organic-text">
+            {name}
+          </p>
+        </motion.div>
+      )}
 
       <motion.button
         type="button"
-        whileTap={estInvite ? undefined : { scale: 0.96 }}
-        disabled={estInvite}
-        onClick={jouerSolo}
-        title={estInvite ? 'Créez un compte pour jouer en solo' : undefined}
-        className={`w-full rounded-2xl border border-cyan-200/40 bg-gradient-to-r from-cyan-400/25 to-aurora-violet/25 py-3 font-display text-[15px] font-bold text-white shadow-xl backdrop-blur-md ${
-          estInvite ? 'opacity-40' : ''
-        }`}
-      >
-        🧩 Solo
-        <span className="mt-0.5 block text-[11px] font-medium text-white/60">
-          {estInvite
-            ? '🔒 Nécessite un compte — progression sans lui'
-            : 'Progression infinie — points, paliers et ampoules'}
-        </span>
-      </motion.button>
-
-      <motion.button
-        type="button"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
         whileTap={{ scale: 0.96 }}
         onClick={() => setEcran('multijoueur')}
-        className="w-full rounded-2xl bg-gradient-to-r from-aurora-coral to-aurora-amber py-3 font-display text-[15px] font-bold text-white shadow-xl"
+        className="relative w-full overflow-hidden rounded-[28px] bg-organic-accent-500 py-4 text-left shadow-md active:bg-organic-accent-600"
       >
-        ⚔️ Multijoueur
-        <span className="mt-0.5 block text-[11px] font-medium text-white/70">
+        <span className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15" />
+        <span className="relative block px-5 font-display text-[21px] text-organic-bg">Multijoueur</span>
+        <span className="relative mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-bg/80">
           Duel aléatoire, partie privée ou contre un bot
         </span>
       </motion.button>
 
       <motion.button
         type="button"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        whileTap={estInvite ? undefined : { scale: 0.96 }}
+        disabled={estInvite}
+        onClick={jouerSolo}
+        title={estInvite ? 'Créez un compte pour jouer en solo' : undefined}
+        className={`relative w-full overflow-hidden rounded-[28px] bg-organic-accent2-300 py-4 text-left text-organic-accent2-900 ${
+          estInvite ? 'opacity-50' : ''
+        }`}
+      >
+        <span className="pointer-events-none absolute -bottom-7 -right-5 h-[88px] w-[88px] rounded-full bg-white/35" />
+        <span className="relative block px-5 font-display text-[21px]">Solo</span>
+        <span className="relative mt-0.5 block px-5 text-[12.5px] font-semibold text-organic-accent2-800">
+          {estInvite ? 'Nécessite un compte — progression sans lui' : 'Progression infinie — points, paliers et ampoules'}
+        </span>
+      </motion.button>
+
+      <motion.button
+        type="button"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
         whileTap={estInvite ? undefined : { scale: 0.96 }}
         disabled={estInvite}
         onClick={() => go(generateSessionCode(), { daily: true })}
         title={estInvite ? 'Créez un compte pour jouer la grille du jour' : undefined}
-        className={`w-full rounded-2xl border border-amber-200/40 bg-gradient-to-r from-amber-400/25 to-orange-400/25 py-3 font-display text-[15px] font-bold text-white shadow-xl backdrop-blur-md ${
-          estInvite ? 'opacity-40' : ''
+        className={`w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 px-5 py-4 text-left text-organic-text active:bg-organic-neutral-200 ${
+          estInvite ? 'opacity-50' : ''
         }`}
       >
-        ☀️ Grille du jour
-        <span className="mt-0.5 block text-[11px] font-medium text-white/60">
-          {estInvite ? '🔒 Nécessite un compte' : `${dailyLabel()} — plus difficile, la même pour tous`}
+        <span className="flex items-baseline justify-between gap-2">
+          <span className="font-display text-[19px]">Grille du jour</span>
+          {!estInvite && (
+            <span className="text-[11px] font-bold uppercase tracking-wide text-organic-accent-700">{dailyLabel()}</span>
+          )}
+        </span>
+        <span className="mt-0.5 block text-[12.5px] font-semibold text-organic-neutral-700">
+          {estInvite ? 'Nécessite un compte' : 'La même pour tous · plus difficile'}
         </span>
       </motion.button>
 
@@ -208,7 +237,7 @@ export function Home() {
         <button
           type="button"
           onClick={() => setEcran('profil')}
-          className="text-[11px] font-bold text-white/50 underline underline-offset-2"
+          className="text-[11px] font-bold text-organic-neutral-600 underline underline-offset-2"
         >
           Vous jouez en invité — créer un compte pour tout débloquer
         </button>
@@ -218,18 +247,35 @@ export function Home() {
         <button
           type="button"
           onClick={() => setEcran('profil')}
-          className="flex-1 rounded-full border border-white/20 py-2 text-[12px] font-bold text-white/80 active:scale-95"
+          className="flex-1 rounded-full border border-organic-divider py-2 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
         >
-          👤 Profil
+          Profil
         </button>
         <button
           type="button"
           onClick={() => setEcran('classement')}
-          className="flex-1 rounded-full border border-white/20 py-2 text-[12px] font-bold text-white/80 active:scale-95"
+          className="flex-1 rounded-full border border-organic-divider py-2 font-display text-[13px] text-organic-text active:bg-organic-neutral-200"
         >
-          🏆 Classement
+          Classement
         </button>
       </div>
     </div>
+    );
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={ecran}
+        variants={screenVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={screenTransition}
+        className={screenClassName}
+      >
+        {screen}
+      </motion.div>
+    </AnimatePresence>
   );
 }

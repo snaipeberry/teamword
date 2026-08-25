@@ -9,7 +9,7 @@
  * persistance »), pas un oubli : ne pas être tenté de les stocker « pour
  * plus tard », ça romprait la promesse faite à l'écran d'accueil.
  */
-import { generateRandomName, getOrCreatePlayerName, setPlayerName } from './playerName';
+import { generateRandomName } from './playerName';
 
 const TOKEN_KEY = 'mf_auth_token';
 const ACCOUNT_KEY = 'mf_account_id';
@@ -96,24 +96,13 @@ export function activePlayerId(): string {
 }
 
 /**
- * Nom affiché : celui choisi par le compte (persistant) s'il y en a un,
- * sinon le nom généré de l'invité (éphémère, modifiable pour la session en
- * cours via `setActivePlayerName`, jamais écrit dans le navigateur).
+ * Nom affiché : le pseudo du compte s'il y en a un, sinon le nom généré de
+ * l'invité (préfixé « Guest », voir playerName.ts). Fixe dans les deux cas —
+ * aucune UI ne permet plus de le changer.
  */
 export function activePlayerName(): string {
-  return currentSession() ? getOrCreatePlayerName() : ensureGuestName();
-}
-
-/**
- * Change le nom affiché. Persistant pour un compte ; pour un invité, ne vit
- * que le temps du chargement de page en cours — cohérent avec le reste de
- * son identité.
- */
-export function setActivePlayerName(name: string): string {
-  if (currentSession()) return setPlayerName(name);
-  const clean = name.trim().slice(0, 16);
-  guestName = clean || ensureGuestName();
-  return guestName;
+  const session = currentSession();
+  return session ? session.username : ensureGuestName();
 }
 
 export async function register(username: string, password: string): Promise<Session | string> {
@@ -143,6 +132,22 @@ export async function logout(): Promise<void> {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(ACCOUNT_KEY);
   localStorage.removeItem(USERNAME_KEY);
+}
+
+/**
+ * Supprime le compte (pas seulement la session) : requis par les stores
+ * (Apple 5.1.1v et équivalent Google) — un compte doit pouvoir être
+ * supprimé DEPUIS l'app. Irréversible côté serveur.
+ */
+export async function deleteAccount(): Promise<true | string> {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return 'Aucun compte connecté';
+  const data = await post('/account-delete', { token }).catch(() => ({ error: 'Serveur injoignable' }));
+  if (typeof data.error === 'string') return data.error;
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(ACCOUNT_KEY);
+  localStorage.removeItem(USERNAME_KEY);
+  return true;
 }
 
 /** Vérifie que la session est toujours valable ; la purge sinon. */

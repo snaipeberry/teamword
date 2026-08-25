@@ -9,9 +9,8 @@ import { CompletionCelebration } from './CompletionCelebration';
 import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
 import { SoloRoundResults } from './SoloRoundResults';
-import { PushToTalk, TalkingIndicator } from './PushToTalk';
 import { ActiveClueBar } from './ActiveClueBar';
-import { useSoloProfile } from '../hooks/useSoloProfile';
+import type { UseSoloProfileResult } from '../hooks/useSoloProfile';
 import {
   hapticTick,
   hapticWin,
@@ -29,6 +28,7 @@ export function CrosswordGrid({
   round,
   daily = false,
   solo = false,
+  soloProfile,
 }: {
   puzzle: Puzzle;
   round: number;
@@ -36,14 +36,14 @@ export function CrosswordGrid({
   daily?: boolean;
   /** Mode solo : progression infinie, points pondérés, ampoules limitées. */
   solo?: boolean;
+  /** Chargé par le parent (Round, dans App.tsx) — sa répartition d'indices
+   *  doit être connue AVANT de demander la grille, donc avant même que ce
+   *  composant existe. Voir useSoloProfile. */
+  soloProfile: UseSoloProfileResult;
 }) {
   const game = useGameState();
   const { advanceRound } = useRound();
-  // Solo/quotidien partagent la même économie de points/ampoules côté profil
-  // — voir useSoloProfile pour pourquoi CrosswordGrid et SoloRoundResults
-  // s'appuient sur le même hook plutôt que deux fetchs séparés.
   const soloScored = solo || daily;
-  const soloProfile = useSoloProfile(game.myPlayerId, soloScored);
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
   const [wrongCells, setWrongCells] = useState<Set<string>>(new Set());
@@ -275,6 +275,13 @@ export function CrosswordGrid({
 
   const activeFilled = activeWordCellIds.filter((id) => game.getLetter(id)).length;
 
+  // Pour la carte plein écran de la barre de définition : une case par
+  // lettre, avec son état verrouillé pour la teinter comme dans la grille.
+  const activeWordSlots = activeWordCellIds.map((id) => ({
+    ch: game.getLetter(id),
+    locked: isCellLocked(id),
+  }));
+
   const selectCell = useCallback(
     (row: number, col: number) => {
       const cell = puzzle.grid[row][col];
@@ -318,6 +325,18 @@ export function CrosswordGrid({
       game.setMyActiveCell(target);
     },
     [cellsByWordId, answerByCellId, game],
+  );
+
+  /** Chevrons de la barre de définition : mot précédent/suivant dans l'ordre
+   * de la grille — un simple défilement, pas de logique de jeu. */
+  const cycleWord = useCallback(
+    (delta: number) => {
+      if (puzzle.words.length === 0) return;
+      const i = puzzle.words.findIndex((w) => w.id === activeWordId);
+      const next = puzzle.words[(i + delta + puzzle.words.length) % puzzle.words.length];
+      selectWord(next.id);
+    },
+    [puzzle.words, activeWordId, selectWord],
   );
 
   const moveWithinWord = useCallback(
@@ -458,7 +477,7 @@ export function CrosswordGrid({
         <motion.div
           animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
-          className="rounded-2xl bg-gradient-to-br from-aurora-amber via-aurora-coral to-aurora-magenta p-[3px] shadow-2xl"
+          className="overflow-hidden rounded-lg shadow-sm"
           style={{
             aspectRatio: `${puzzle.cols} / ${puzzle.rows}`,
             // Avant la première mesure on retombe sur la largeur pleine, pour
@@ -469,7 +488,7 @@ export function CrosswordGrid({
           }}
         >
         <div
-          className="grid h-full w-full overflow-hidden rounded-[14px] border border-white/40"
+          className="grid h-full w-full"
           style={{
             gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
             // Lignes explicitement uniformes : sans cette ligne, les rangées
@@ -483,7 +502,7 @@ export function CrosswordGrid({
             rowCells.map((cell, col) => {
               const id = cellId(row, col);
               if (cell.type === 'blank') {
-                return <div key={id} className="bg-neutral-100" />;
+                return <div key={id} className="bg-organic-neutral-400" />;
               }
               if (cell.type === 'clue') {
                 return (
@@ -518,8 +537,6 @@ export function CrosswordGrid({
       </div>
 
       <div className="flex w-full shrink-0 items-center justify-center gap-1.5 px-1">
-        {game.multiplayer && <PushToTalk />}
-
         <motion.button
           type="button"
           onClick={revealActiveCell}
@@ -527,31 +544,33 @@ export function CrosswordGrid({
           whileTap={hintsExhausted ? undefined : { scale: 0.94 }}
           aria-label="Révéler une lettre"
           title={hintsExhausted ? 'Plus d’indice disponible' : 'Révéler une lettre'}
-          className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm shadow-lg backdrop-blur-md transition ${
-            hintsExhausted ? 'opacity-40' : ''
+          className={`shrink-0 rounded-full border border-organic-neutral-400 px-3 py-1.5 font-display text-[12px] text-organic-text transition ${
+            hintsExhausted ? 'opacity-40' : 'active:bg-organic-neutral-200'
           }`}
         >
-          <span aria-hidden="true">💡</span>
-          <span className="absolute -bottom-1 -right-1 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-aurora-violet px-[3px] text-[8px] font-bold text-white">
-            {hintBudget}
-          </span>
+          Indice · {hintBudget}
         </motion.button>
 
         <motion.button
           type="button"
           onClick={checkGrid}
           whileTap={{ scale: 0.94 }}
-          className="flex shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-aurora-violet shadow-xl transition"
+          className="shrink-0 rounded-full border border-organic-neutral-400 px-3 py-1.5 font-display text-[12px] text-organic-text transition active:bg-organic-neutral-200"
         >
-          <span aria-hidden="true">✓</span> Vérifier
+          Vérifier
         </motion.button>
 
-        <ActiveClueBar word={activeWord} arrow={activeArrow} filled={activeFilled} />
+        <ActiveClueBar
+          word={activeWord}
+          arrow={activeArrow}
+          filled={activeFilled}
+          slots={activeWordSlots}
+          onPrev={() => cycleWord(-1)}
+          onNext={() => cycleWord(1)}
+        />
       </div>
 
       <Keyboard onLetter={handleLetter} onBackspace={handleBackspace} />
-
-      <TalkingIndicator />
 
       <AnimatePresence>
         {celebrating && <CompletionCelebration onDone={showRoundResults} />}

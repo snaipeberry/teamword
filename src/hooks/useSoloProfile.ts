@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchProfile, type Profile } from '../lib/roomClient';
 
-interface UseSoloProfileResult {
+export interface UseSoloProfileResult {
   profile: Profile | null;
   /** Recharge le profil — à appeler après `soloGridDone` pour refléter les
    * points/palier/ampoules à jour (le serveur seul connaît le résultat). */

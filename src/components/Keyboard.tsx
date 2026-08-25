@@ -26,7 +26,9 @@ interface KeyboardProps {
 export function Keyboard({ onLetter, onBackspace }: KeyboardProps) {
   return (
     <div
-      className="w-full max-w-[560px] shrink-0 select-none px-1 pb-[max(env(safe-area-inset-bottom),4px)] pt-1"
+      // La zone sûre du bas est désormais gérée par le conteneur racine
+      // (App.tsx) — un second padding ici la doublerait.
+      className="w-full max-w-[560px] shrink-0 select-none px-1 pt-1"
       // Empêche le navigateur de traiter les appuis comme du défilement ou
       // un double-tap-zoom, qui rendaient la frappe rapide peu fiable.
       style={{ touchAction: 'manipulation' }}
@@ -44,7 +46,7 @@ export function Keyboard({ onLetter, onBackspace }: KeyboardProps) {
                 e.preventDefault();
                 onLetter(letter);
               }}
-              className="h-[42px] min-w-0 flex-1 rounded-md bg-white/90 font-display text-[15px] font-semibold text-aurora-violet shadow-sm active:bg-white"
+              className="h-[42px] min-w-0 flex-1 rounded-[9px] border border-organic-neutral-300 bg-organic-neutral-100 font-grid text-[16px] font-bold text-organic-text active:bg-white"
             >
               {letter}
             </motion.button>
@@ -59,7 +61,7 @@ export function Keyboard({ onLetter, onBackspace }: KeyboardProps) {
                 e.preventDefault();
                 onBackspace();
               }}
-              className="h-[42px] flex-[1.6] rounded-md bg-white/25 text-[15px] font-semibold text-white shadow-sm active:bg-white/40"
+              className="h-[42px] flex-[1.7] rounded-[9px] bg-organic-surface text-[15px] font-semibold text-organic-neutral-800 active:bg-organic-neutral-300"
             >
               ⌫
             </motion.button>

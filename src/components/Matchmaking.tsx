@@ -16,15 +16,18 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
   const connection = useRef<RoomConnection | null>(null);
 
   useEffect(() => {
+    const moi = { id: activePlayerId(), name: activePlayerName(), color: '#8E7CFF' };
     const conn = connectRoom(
       null,
-      { id: activePlayerId(), name: activePlayerName(), color: '#8E7CFF' },
+      moi,
       {
         onState: () => {},
         onPresence: () => {},
-        onBroadcast: () => {},
         onStatus: (connected) => {
-          if (connected) conn.send({ t: 'queue' });
+          // Identité transmise ICI (pas seulement à `join`, jamais envoyé en
+          // file d'attente) : le serveur doit savoir qui demande un
+          // adversaire pour pouvoir vérifier les blocages avant d'apparier.
+          if (connected) conn.send({ t: 'queue', player: moi });
           else setErreur(true);
         },
         onMatched: (room) => {
@@ -47,27 +50,34 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <div className="flex min-h-0 w-full max-w-[340px] flex-1 flex-col items-center justify-center gap-5 px-5 text-center">
-      <motion.span
-        animate={{ scale: [1, 1.12, 1] }}
+    <div className="flex min-h-0 w-full max-w-[340px] flex-1 flex-col items-center justify-center gap-0 px-5 text-center">
+      <motion.div
+        animate={{ scale: [1, 1.05, 1] }}
         transition={{ repeat: Infinity, duration: 1.6 }}
-        className="text-5xl"
-        aria-hidden="true"
+        className="flex h-[186px] w-[186px] items-center justify-center rounded-full bg-organic-accent-100"
       >
-        🌍
-      </motion.span>
-      <h1 className="font-display text-xl font-bold text-white">Recherche d’un adversaire…</h1>
-      <p className="text-[13px] text-white/55">
+        <div className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-organic-accent-200">
+          <div className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-organic-accent-500 font-display text-[19px] text-organic-bg">
+            {Math.floor(secondes / 60)}:{String(secondes % 60).padStart(2, '0')}
+          </div>
+        </div>
+      </motion.div>
+      <h1 className="mt-6 font-display text-2xl leading-tight text-organic-text">Recherche d’un adversaire</h1>
+      <p className="mt-2 text-[13.5px] text-organic-neutral-700">
         Vous serez placé dans une partie dès qu’un joueur est disponible.
       </p>
-      <p className="font-display text-2xl font-bold tabular-nums text-white/80">
-        {Math.floor(secondes / 60)}:{String(secondes % 60).padStart(2, '0')}
-      </p>
-      {erreur && <p className="text-[12px] font-bold text-rose-300">Connexion perdue — nouvelle tentative…</p>}
+      <div className="mt-5 flex gap-1.5">
+        <span className="h-[9px] w-[9px] rounded-full bg-organic-accent-500" />
+        <span className="h-[9px] w-[9px] rounded-full bg-organic-accent-300" />
+        <span className="h-[9px] w-[9px] rounded-full bg-organic-neutral-300" />
+      </div>
+      {erreur && (
+        <p className="mt-4 text-[12px] font-bold text-organic-accent-700">Connexion perdue — nouvelle tentative…</p>
+      )}
       <button
         type="button"
         onClick={onClose}
-        className="rounded-full bg-white/20 px-5 py-2.5 font-display text-[14px] font-bold text-white active:scale-95"
+        className="mt-8 rounded-full border border-organic-divider px-7 py-3 font-display text-[14px] text-organic-text active:bg-organic-neutral-200"
       >
         Annuler
       </button>

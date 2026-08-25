@@ -15,7 +15,9 @@ body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  background: linear-gradient(160deg, #3d1f63 0%, #7a2f77 45%, #ff8a5b 100%);
+  /* Organic : fond plein, plus de dégradé — la maquette n'a aucune
+     décoration de fond (voir AuroraBackground.tsx, simplifié en accord). */
+  background: #f5ead8;
 }
 
 /* Grid cells are buttons but shouldn't look/behave like native iOS buttons. */

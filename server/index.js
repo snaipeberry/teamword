@@ -113,6 +113,11 @@ function emptyRoom() {
     // 'solo' | 'daily' | undefined (undefined = multijoueur classique,
     // comportement inchangé). Fixé au premier join, jamais réattribué.
     mode: undefined,
+    // Répartition facile/moyen/difficile des indices — voir lib/difficulty.ts
+    // côté client. Choisi par l'hôte dans le salon ; 'moyen' par défaut pour
+    // les parties sans salon (bot, duel aléatoire), qui n'ont aucun moment
+    // de configuration.
+    grade: 'moyen',
     touchedAt: Date.now(),
   };
 }
@@ -179,6 +184,21 @@ const accounts = new Map();
 const tokens = new Map();
 /** Limitation des tentatives, par adresse : ip -> { count, resetAt } */
 const attempts = new Map();
+/**
+ * Blocages en duel aléatoire : playerId -> Set<playerId bloqué>. Un invité
+ * (id éphémère, régénéré à chaque rechargement — voir auth.ts côté client)
+ * bloque quand même pour la session en cours, juste sans effet au
+ * rechargement suivant — cohérent avec le reste du modèle invité.
+ */
+const blocks = new Map();
+
+function blockedIds(id) {
+  return blocks.get(id) ?? new Set();
+}
+
+function isBlockedPair(a, b) {
+  return blockedIds(a).has(b) || blockedIds(b).has(a);
+}
 
 function hashPassword(password, salt) {
   return new Promise((resolve, reject) => {
@@ -277,6 +297,7 @@ function saveSnapshot() {
     writeJsonAtomic(ACCOUNTS_PATH, {
       accounts: Object.fromEntries(accounts),
       tokens: Object.fromEntries(tokens),
+      blocks: Object.fromEntries([...blocks].map(([id, set]) => [id, [...set]])),
     });
   } catch (err) {
     console.error('[snapshot] échec', err.message);
@@ -291,6 +312,7 @@ function loadAccounts() {
     for (const [token, entry] of Object.entries(raw.tokens ?? {})) {
       if (entry.expiresAt > now) tokens.set(token, entry);
     }
+    for (const [id, list] of Object.entries(raw.blocks ?? {})) blocks.set(id, new Set(list));
     console.log(`[boot] ${accounts.size} compte(s), ${tokens.size} session(s)`);
   } catch {
     console.log('[boot] aucun compte enregistré');
@@ -360,11 +382,13 @@ const INTENTS = {
       // Les points de profil suivent les mots trouvés, pas les grilles : c'est
       // immédiat et cela récompense aussi les parties abandonnées en cours.
       const profile = getProfile(playerId);
-      // Le solo/quotidien a son PROPRE système de points (pondéré par la
-      // complexité, attribué en bloc en fin de grille par `soloGridDone`) :
-      // le classement général ne doit refléter que le multijoueur, sinon
-      // les deux classements se confondraient.
-      if (state.mode !== 'solo' && state.mode !== 'daily') {
+      // Le classement général ne doit refléter QUE le duel aléatoire classé
+      // (state.ranked, posé uniquement par tryMatch) : le solo/quotidien a
+      // son propre système de points (soloGridDone), et le bot comme les
+      // parties privées n'ont aucune valeur compétitive — les y compter
+      // permettrait de gonfler son classement en s'entraînant contre un bot
+      // ou entre amis complices.
+      if (state.ranked === true) {
         profile.points += scored;
       }
       profile.words += scored;
@@ -534,6 +558,18 @@ const INTENTS = {
     return true;
   },
 
+  /**
+   * Grade choisi dans le salon — répartition des indices de la partie.
+   * Contrôle côté serveur comme `kick` : seul l'hôte peut le changer, un
+   * client qui masquerait le bouton ne protégerait de rien.
+   */
+  grade(state, { grade }, playerId) {
+    if (state.hostId !== playerId) return false;
+    if (!['facile', 'moyen', 'difficile'].includes(grade)) return false;
+    state.grade = grade;
+    return true;
+  },
+
   rename(state, { name }, playerId) {
     const clean = String(name ?? '').trim().slice(0, 16);
     if (!clean) return false;
@@ -559,30 +595,41 @@ function leaveQueue(ws) {
 }
 
 function tryMatch() {
-  while (queue.length >= 2) {
-    const a = queue.shift();
-    const b = queue.shift();
-    // Un joueur peut s'être déconnecté en attendant : on le laisse tomber et
-    // on remet l'autre en tête de file plutôt que de l'apparier dans le vide.
-    if (a.readyState !== a.OPEN) {
-      if (b.readyState === b.OPEN) queue.unshift(b);
-      continue;
-    }
-    if (b.readyState !== b.OPEN) {
-      queue.unshift(a);
-      continue;
-    }
+  // Un joueur peut s'être déconnecté en attendant : le laisser tomber plutôt
+  // que de l'apparier dans le vide.
+  for (let i = queue.length - 1; i >= 0; i--) {
+    if (queue[i].readyState !== queue[i].OPEN) queue.splice(i, 1);
+  }
 
-    const code = randomCode();
-    const state = emptyRoom();
-    // Partie déjà lancée : en 1v1 aléatoire, il n'y a personne à attendre ni
-    // rien à régler dans un salon.
-    state.started = true;
-    state.ranked = true;
-    rooms.set(code, state);
+  // Pas un simple shift/shift : deux joueurs qui se sont mutuellement
+  // bloqués ne doivent jamais se retrouver appariés. On cherche la PREMIÈRE
+  // paire valide dans la file plutôt que de perdre les autres en attente —
+  // la file reste minuscule en pratique, le O(n²) est hors de propos.
+  let apparie = true;
+  while (apparie) {
+    apparie = false;
+    outer: for (let i = 0; i < queue.length; i++) {
+      for (let j = i + 1; j < queue.length; j++) {
+        const a = queue[i];
+        const b = queue[j];
+        if (!a.player || !b.player || isBlockedPair(a.player.id, b.player.id)) continue;
 
-    for (const ws of [a, b]) {
-      send(ws, { t: 'matched', room: code });
+        queue.splice(j, 1);
+        queue.splice(i, 1);
+
+        const code = randomCode();
+        const state = emptyRoom();
+        // Partie déjà lancée : en 1v1 aléatoire, il n'y a personne à
+        // attendre ni rien à régler dans un salon.
+        state.started = true;
+        state.ranked = true;
+        rooms.set(code, state);
+
+        for (const ws of [a, b]) send(ws, { t: 'matched', room: code });
+
+        apparie = true;
+        break outer;
+      }
     }
   }
 }
@@ -740,6 +787,49 @@ const http = createServer((req, res) => {
     return json(res, { valid: true, id, username: account?.username ?? null });
   }
 
+  /**
+   * Suppression de compte (obligatoire pour la review App Store/Play Store :
+   * un joueur doit pouvoir supprimer son compte DEPUIS l'app, pas seulement
+   * s'en déconnecter). Efface tout ce qui est identifié par ce compte —
+   * irréversible, d'où l'instantané forcé immédiatement après plutôt que
+   * d'attendre le tick de 10s : un crash entre les deux ne doit pas pouvoir
+   * ressusciter le compte depuis un ancien instantané.
+   */
+  if (req.method === 'POST' && url.pathname === '/account-delete') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 2_000) req.destroy();
+    });
+    req.on('end', () => {
+      try {
+        const { token } = JSON.parse(body);
+        const id = resolveToken(token ?? '');
+        if (!id) return json(res, { error: 'Session invalide' });
+
+        const entree = [...accounts.entries()].find(([, a]) => a.id === id);
+        if (entree) accounts.delete(entree[0]);
+
+        for (const [t, entry] of [...tokens.entries()]) {
+          if (entry.id === id) tokens.delete(t);
+        }
+
+        profiles.delete(id);
+
+        const salleSolo = `solo-${id}`;
+        rooms.delete(salleSolo);
+        sockets.delete(salleSolo);
+
+        saveSnapshot();
+        json(res, { ok: true });
+      } catch {
+        res.writeHead(400);
+        res.end();
+      }
+    });
+    return;
+  }
+
   // Mise à jour du profil hors partie : l'écran de profil est accessible
   // depuis l'accueil, où aucun socket n'est ouvert.
   if (req.method === 'POST' && url.pathname === '/profile-update') {
@@ -769,6 +859,43 @@ const http = createServer((req, res) => {
     return;
   }
 
+  if (req.method === 'POST' && (url.pathname === '/block' || url.pathname === '/unblock')) {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 2_000) req.destroy();
+    });
+    req.on('end', () => {
+      try {
+        const { id, playerId } = JSON.parse(body);
+        if (!id || !playerId || id === playerId) {
+          res.writeHead(400);
+          return res.end();
+        }
+        if (url.pathname === '/block') {
+          if (!blocks.has(id)) blocks.set(id, new Set());
+          blocks.get(id).add(String(playerId).slice(0, 64));
+        } else {
+          blocks.get(id)?.delete(playerId);
+        }
+        json(res, { blocked: [...blockedIds(id)] });
+      } catch {
+        res.writeHead(400);
+        res.end();
+      }
+    });
+    return;
+  }
+
+  if (url.pathname === '/blocks') {
+    const id = url.searchParams.get('id');
+    if (!id) {
+      res.writeHead(400);
+      return res.end();
+    }
+    return json(res, { blocked: [...blockedIds(id)] });
+  }
+
   if (url.pathname === '/health') {
     return json(res, { status: 'ok', rooms: rooms.size, profiles: profiles.size, queue: queue.length });
   }
@@ -779,8 +906,9 @@ const http = createServer((req, res) => {
     const top = [...profiles.values()]
       // Un invité (id préfixé `guest-`, jamais persisté côté client) ne doit
       // jamais apparaître au classement — c'est explicitement ce qu'« aucune
-      // persistance, pas de classement » veut dire.
-      .filter((p) => !p.id.startsWith('guest-'))
+      // persistance, pas de classement » veut dire. L'adversaire artificiel
+      // (id préfixé `bot-`, voir BotGame.tsx) n'est pas un joueur non plus.
+      .filter((p) => !p.id.startsWith('guest-') && !p.id.startsWith('bot-'))
       .filter((p) => (solo ? p.soloPoints > 0 : p.points > 0))
       .sort((a, b) =>
         solo ? b.soloPoints - a.soloPoints || b.soloGrids - a.soloGrids : b.points - a.points || b.words - a.words,
@@ -810,12 +938,12 @@ const http = createServer((req, res) => {
     // Rang calculé à la volée : le nombre de profils reste modeste et cela
     // évite de maintenir un index à jour. Un invité n'a pas de rang — il
     // n'apparaît jamais au classement (voir /leaderboard) — et ne doit pas
-    // non plus en gonfler le calcul pour les autres.
-    const estInvite = id.startsWith('guest-');
+    // non plus en gonfler le calcul pour les autres ; même chose pour le bot.
+    const horsClassement = id.startsWith('guest-') || id.startsWith('bot-');
     const mieux = [...profiles.values()]
-      .filter((p) => !p.id.startsWith('guest-'))
+      .filter((p) => !p.id.startsWith('guest-') && !p.id.startsWith('bot-'))
       .filter((p) => p.points > me.points).length;
-    return json(res, { ...me, rank: !estInvite && me.points > 0 ? mieux + 1 : null });
+    return json(res, { ...me, rank: !horsClassement && me.points > 0 ? mieux + 1 : null });
   }
 
   res.writeHead(404);
@@ -902,6 +1030,18 @@ wss.on('connection', (ws) => {
     // La file d'attente se traite AVANT le garde-fou de partie : on cherche
     // un adversaire précisément quand on n'est encore dans aucune partie.
     if (msg.t === 'queue') {
+      // Il faut connaître le joueur AVANT de l'apparier, pour pouvoir
+      // vérifier les blocages — contrairement à `join`, la file d'attente ne
+      // rejoint aucune salle et n'identifiait donc personne jusqu'ici.
+      const player = msg.player ?? {};
+      if (player.id) {
+        ws.player = {
+          id: String(player.id).slice(0, 64),
+          name: String(player.name ?? 'Joueur').slice(0, 16),
+          color: String(player.color ?? '#9CA3AF').slice(0, 9),
+          activeCell: null,
+        };
+      }
       if (!queue.includes(ws)) queue.push(ws);
       send(ws, { t: 'queued', position: queue.indexOf(ws) + 1 });
       tryMatch();
@@ -920,16 +1060,6 @@ wss.on('connection', (ws) => {
     if (msg.t === 'presence') {
       ws.player.activeCell = msg.activeCell ?? null;
       broadcastPresence(ws.room);
-      return;
-    }
-
-    if (msg.t === 'broadcast') {
-      // Messages éphémères (talkie-walkie) : relayés tels quels, jamais
-      // stockés — ils n'ont de sens qu'à l'instant où ils sont émis.
-      const out = JSON.stringify({ t: 'broadcast', payload: msg.payload });
-      for (const peer of peers(ws.room)) {
-        if (peer !== ws && peer.readyState === peer.OPEN) peer.send(out);
-      }
       return;
     }
 

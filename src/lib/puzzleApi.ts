@@ -1,4 +1,5 @@
 import type { ClueCellPlacement, WordEntry } from '../types/puzzle';
+import type { HintDistribution } from './difficulty';
 
 /**
  * Graine de génération. Le serveur étant déterministe, deux joueurs d'une
@@ -57,9 +58,17 @@ export interface PuzzlePayload {
 
 export async function fetchPuzzle(options: {
   seed: string;
+  /** Répartition facile/moyen/difficile des indices — voir lib/difficulty.ts.
+   *  Absente pour la grille du jour : le serveur l'impose lui-même. */
+  hints?: HintDistribution;
   signal?: AbortSignal;
 }): Promise<PuzzlePayload> {
   const params = new URLSearchParams({ seed: options.seed });
+  if (options.hints) {
+    params.set('facile', String(options.hints.facile));
+    params.set('moyen', String(options.hints.moyen));
+    params.set('difficile', String(options.hints.difficile));
+  }
 
   const response = await fetch(`${API_BASE}/api/puzzle?${params}`, {
     signal: options.signal,

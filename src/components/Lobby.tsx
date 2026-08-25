@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
-import { NameField } from './NameField';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { Avatar } from './Avatar';
+import { MULTIPLAYER_GRADES } from '../lib/difficulty';
+
+const GRADE_LABELS: Record<string, string> = { facile: 'Facile', moyen: 'Moyen', difficile: 'Difficile' };
 
 /**
  * Salon d'attente : code à partager, liste des joueurs, départ.
@@ -13,7 +15,7 @@ import { Avatar } from './Avatar';
  */
 export function Lobby({ sessionId }: { sessionId: string }) {
   const game = useGameState();
-  const { hostId, startGame, kickPlayer, isKicked, teams, setTeam } = useRound();
+  const { hostId, startGame, kickPlayer, isKicked, teams, setTeam, grade, setGrade } = useRound();
   const [copied, setCopied] = useState<'code' | 'lien' | null>(null);
 
   const jeSuisHote = hostId === game.myPlayerId;
@@ -27,43 +29,42 @@ export function Lobby({ sessionId }: { sessionId: string }) {
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const styleEquipe = (playerId: string) =>
+    teams[playerId] === 'A'
+      ? 'bg-organic-accent2-300 text-organic-accent2-900'
+      : teams[playerId] === 'B'
+        ? 'bg-organic-accent-200 text-organic-accent-800'
+        : 'bg-organic-neutral-200 text-organic-neutral-700';
+
   return (
     <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col items-center justify-center gap-4 px-5">
-      <h1 className="font-display text-xl font-bold text-white/90">Salon</h1>
+      <h1 className="font-display text-xl text-organic-text">Salon</h1>
 
       {/* Code de la partie */}
-      <div className="w-full rounded-3xl border border-white/20 bg-white/10 p-4 text-center backdrop-blur-md">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Code de la partie</p>
-        <p className="my-1.5 font-display text-3xl font-bold tracking-[0.3em] text-white">{sessionId}</p>
+      <div className="w-full rounded-[28px] bg-organic-surface p-4 text-center">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">Code de la partie</p>
+        <p className="my-1.5 font-display text-3xl tracking-[0.22em] text-organic-text">{sessionId}</p>
         <div className="flex justify-center gap-2">
           <button
             type="button"
             onClick={() => copier('code')}
-            className="rounded-full bg-white/20 px-3 py-1.5 text-[12px] font-bold text-white active:scale-95"
+            className="rounded-full border border-organic-neutral-400 px-4 py-2 font-display text-[12.5px] text-organic-text active:bg-organic-neutral-200"
           >
-            {copied === 'code' ? '✓ Copié' : 'Copier le code'}
+            {copied === 'code' ? 'Copié' : 'Copier le code'}
           </button>
           <button
             type="button"
             onClick={() => copier('lien')}
-            className="rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber px-3 py-1.5 text-[12px] font-bold text-white active:scale-95"
+            className="rounded-full bg-organic-accent-500 px-4 py-2 font-display text-[12.5px] text-organic-bg active:bg-organic-accent-600"
           >
-            {copied === 'lien' ? '✓ Copié' : '🔗 Lien'}
+            {copied === 'lien' ? 'Copié' : 'Partager le lien'}
           </button>
         </div>
       </div>
 
-      {/* Votre nom */}
-      <div className="w-full">
-        <label className="mb-1 block text-center text-[11px] font-bold uppercase tracking-wider text-white/50">
-          Votre nom
-        </label>
-        <NameField value={game.myName} onChange={game.renameMe} />
-      </div>
-
       {/* Joueurs */}
       <div className="w-full">
-        <p className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-white/50">
+        <p className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
           {presents.length} joueur{presents.length > 1 ? 's' : ''}
         </p>
         <div className="flex flex-col gap-1.5">
@@ -75,15 +76,20 @@ export function Lobby({ sessionId }: { sessionId: string }) {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-2"
+                className="flex items-center gap-2 rounded-[20px] border border-organic-divider bg-organic-neutral-100 px-3 py-2"
               >
                 <Avatar name={p.isMe ? game.myName : p.name} color={p.color} size={28} />
-                <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-white">
+                <span className="min-w-0 flex-1 truncate text-[13.5px] font-bold text-organic-text">
                   {p.isMe ? game.myName : p.name}
-                  {p.isMe && <span className="ml-1 text-[10px] font-medium text-white/50">(vous)</span>}
+                  {p.isMe && <span className="ml-1 text-[10px] font-medium text-organic-neutral-500">(vous)</span>}
                 </span>
                 {hostId === p.playerId && (
-                  <span className="shrink-0 text-[10px]" title="Hôte">👑</span>
+                  <span
+                    className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-organic-accent-700"
+                    title="Hôte"
+                  >
+                    hôte
+                  </span>
                 )}
                 {/* Équipe : chacun choisit la sienne, ce qui couvre 1v1, 2v2
                     et 3v3 sans mode dédié — le nombre de joueurs par camp
@@ -97,13 +103,7 @@ export function Lobby({ sessionId }: { sessionId: string }) {
                   }}
                   disabled={!p.isMe}
                   aria-label={p.isMe ? 'Changer d’équipe' : undefined}
-                  className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${
-                    teams[p.playerId] === 'A'
-                      ? 'bg-cyan-400/30 text-cyan-100'
-                      : teams[p.playerId] === 'B'
-                        ? 'bg-rose-400/30 text-rose-100'
-                        : 'bg-white/10 text-white/40'
-                  } ${p.isMe ? 'active:scale-95' : 'cursor-default'}`}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[10.5px] font-bold ${styleEquipe(p.playerId)} ${p.isMe ? 'active:scale-95' : 'cursor-default'}`}
                 >
                   {teams[p.playerId] ? `Équipe ${teams[p.playerId]}` : 'Coop'}
                 </button>
@@ -114,7 +114,7 @@ export function Lobby({ sessionId }: { sessionId: string }) {
                     onClick={() => kickPlayer(p.playerId)}
                     aria-label={`Exclure ${p.name}`}
                     title={`Exclure ${p.name}`}
-                    className="shrink-0 rounded-full bg-rose-500/25 px-2 py-1 text-[11px] font-bold text-rose-100 active:scale-95"
+                    className="shrink-0 rounded-full bg-organic-accent-100 px-2.5 py-1 text-[11px] font-bold text-organic-accent-700 active:scale-95"
                   >
                     Exclure
                   </button>
@@ -130,24 +130,52 @@ export function Lobby({ sessionId }: { sessionId: string }) {
         const b = presents.filter((p) => teams[p.playerId] === 'B').length;
         if (a === 0 && b === 0) return null;
         return (
-          <p className="text-center text-[12px] font-bold text-white/70">
+          <p className="text-center text-[12px] font-bold text-organic-neutral-700">
             Format {a}v{b}
-            {a !== b && <span className="ml-1 text-amber-300">— équipes déséquilibrées</span>}
+            {a !== b && <span className="ml-1 text-organic-accent-700">— équipes déséquilibrées</span>}
           </p>
         );
       })()}
+
+      {/* Difficulté des indices : réglée par l'hôte, la même pour tous — voir
+          lib/difficulty.ts. Visible même en simple observateur, pour que
+          chacun sache à quoi s'attendre avant que la partie démarre. */}
+      <div className="w-full">
+        <p className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
+          Difficulté des indices
+        </p>
+        <div className="flex justify-center gap-1.5">
+          {MULTIPLAYER_GRADES.map((g) => (
+            <button
+              key={g}
+              type="button"
+              disabled={!jeSuisHote}
+              onClick={() => setGrade(g)}
+              aria-label={`Difficulté ${GRADE_LABELS[g]}`}
+              aria-pressed={grade === g}
+              className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${
+                grade === g
+                  ? 'bg-organic-accent-500 text-organic-bg'
+                  : 'bg-organic-neutral-200 text-organic-neutral-700'
+              } ${jeSuisHote ? 'active:scale-95' : 'cursor-default'}`}
+            >
+              {GRADE_LABELS[g]}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {jeSuisHote ? (
         <motion.button
           type="button"
           whileTap={{ scale: 0.96 }}
           onClick={startGame}
-          className="w-full rounded-full bg-gradient-to-r from-aurora-coral to-aurora-amber py-3 font-display text-[15px] font-bold text-white shadow-xl"
+          className="w-full rounded-full bg-organic-accent-500 py-3 font-display text-[16px] text-organic-bg shadow-md active:bg-organic-accent-600"
         >
           Commencer
         </motion.button>
       ) : (
-        <p className="text-center text-[12px] font-semibold text-white/50">
+        <p className="text-center text-[12px] font-semibold text-organic-neutral-600">
           En attente du lancement par l’hôte…
         </p>
       )}
@@ -155,9 +183,9 @@ export function Lobby({ sessionId }: { sessionId: string }) {
       <button
         type="button"
         onClick={goHome}
-        className="text-[12px] font-bold text-white/50 underline underline-offset-2"
+        className="text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
       >
-        ← Retour au menu
+        ← Menu
       </button>
     </div>
   );
@@ -167,13 +195,12 @@ export function Lobby({ sessionId }: { sessionId: string }) {
 export function KickedScreen() {
   return (
     <div className="flex min-h-0 w-full max-w-[340px] flex-1 flex-col items-center justify-center gap-4 px-5 text-center">
-      <span className="text-4xl" aria-hidden="true">👋</span>
-      <h1 className="font-display text-xl font-bold text-white">Vous avez quitté la partie</h1>
-      <p className="text-[13px] text-white/60">L’hôte vous a retiré du salon.</p>
+      <h1 className="font-display text-xl text-organic-text">Vous avez quitté la partie</h1>
+      <p className="text-[13px] text-organic-neutral-700">L’hôte vous a retiré du salon.</p>
       <button
         type="button"
         onClick={goHome}
-        className="rounded-full bg-white/20 px-5 py-2.5 font-display text-[14px] font-bold text-white active:scale-95"
+        className="rounded-full bg-organic-accent-500 px-5 py-2.5 font-display text-[14px] text-organic-bg active:bg-organic-accent-600"
       >
         Retour à l’accueil
       </button>

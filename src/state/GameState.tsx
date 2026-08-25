@@ -6,10 +6,10 @@ import {
   type RoomPeer,
   type RoomState,
 } from '../lib/roomClient';
-import { getOrCreatePlayerName, setPlayerName } from '../lib/playerName';
-import { activePlayerId, activePlayerName, setActivePlayerName } from '../lib/auth';
+import { getOrCreatePlayerName } from '../lib/playerName';
+import { activePlayerId, activePlayerName } from '../lib/auth';
 import { wordCellIds } from '../lib/gridGeometry';
-import { playRadioClip, splitIntoChunks, startRecording, type Recording } from '../lib/voiceRadio';
+import type { MultiplayerGrade } from '../lib/difficulty';
 import type { Puzzle, WordEntry } from '../types/puzzle';
 
 /**
@@ -59,19 +59,9 @@ export interface GameStateApi {
   /** Ce joueur s'est-il déclaré prêt pour CETTE grille ? */
   isReadyFor: (playerId: string, round: number) => boolean;
 
-  /** Talkie-walkie : maintenir pour parler, relâcher pour envoyer. */
-  startTalking: () => Promise<void>;
-  stopTalking: () => void;
-  /** Noms des joueurs en train de parler, pour l'affichage. */
-  talkingNames: string[];
-  /** Le micro a été refusé (ou est indisponible) : on le signale plutôt que d'échouer en silence. */
-  micDenied: boolean;
-
-  /** Nom affiché du joueur, et son remplacement par un nom choisi. */
+  /** Nom affiché du joueur — fixe (pseudo du compte, ou nom généré pour un
+   *  invité) : voir lib/auth.ts, aucune UI ne permet plus de le changer. */
   myName: string;
-  renameMe: (name: string) => void;
-  /** Met à jour le profil persistant (pseudo et/ou vignette). */
-  updateProfile: (patch: { name?: string; avatar?: string | null }) => void;
   /**
    * Signale une grille solo/quotidienne terminée : `points` (pondérés par la
    * complexité, calculés côté appelant qui seul connaît les mots) rejoint
@@ -125,6 +115,12 @@ export interface RoundApi {
   setTeam: (team: string | null) => void;
   /** Partie classée : issue du 1v1 aléatoire. */
   ranked: boolean;
+
+  // ---- Difficulté (répartition des indices) ----
+  /** Grade choisi par l'hôte dans le salon — 'moyen' par défaut (parties
+   *  sans salon : bot, duel aléatoire). Voir lib/difficulty.ts. */
+  grade: MultiplayerGrade;
+  setGrade: (grade: MultiplayerGrade) => void;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -135,7 +131,10 @@ export function useRound(): RoundApi {
   return ctx;
 }
 
-const PLAYER_COLORS = ['#F5A623', '#4ECDC4', '#FF6B6B', '#8E7CFF', '#2ECC71'];
+// Tons puisés dans les rampes organic (tailwind.config.js) pour ne pas jurer
+// avec le reste de l'habillage — terre cuite, sauge, et quelques repères
+// neutres pour distinguer plus de joueurs que les deux couleurs de rôle.
+const PLAYER_COLORS = ['#D67F48', '#8FA073', '#B2622D', '#728157', '#82796A'];
 
 
 function randomColor(): string {
@@ -185,6 +184,8 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
       teams: {},
       setTeam: () => {},
       ranked: false,
+      grade: 'moyen',
+      setGrade: () => {},
     }),
     [round, game],
   );
@@ -206,7 +207,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
   if (!store) throw new Error('LocalGameProvider must be used within a SessionProvider');
   const { letters, setLetters, revealed, setRevealed } = store;
   const myColor = useMemo(randomColor, []);
-  const [localName, setLocalName] = useState(getOrCreatePlayerName);
+  const localName = useMemo(getOrCreatePlayerName, []);
 
   const api = useMemo<GameStateApi>(
     () => ({
@@ -226,14 +227,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       setReady: () => {},
       allReadyFor: () => true,
       isReadyFor: () => true,
-      // En solo il n'y a personne à qui parler : le bouton est masqué côté UI.
-      startTalking: async () => {},
-      stopTalking: () => {},
-      talkingNames: [],
-      micDenied: false,
       myName: localName,
-      renameMe: (name) => setLocalName(setPlayerName(name)),
-      updateProfile: ({ name }) => { if (name) setLocalName(setPlayerName(name)); },
       reportGridDone: () => {},
     }),
     [letters, revealed, setLetters, setRevealed, myColor, localName],
@@ -276,7 +270,6 @@ interface RoomBridge {
   peers: RoomPeer[];
   send: (message: Record<string, unknown>) => void;
   me: { id: string; name: string; color: string };
-  onBroadcast: (handler: (payload: unknown) => void) => () => void;
 }
 
 const RoomContext = createContext<RoomBridge | null>(null);
@@ -309,10 +302,6 @@ function RemoteSessionProvider({
   const [peers, setPeers] = useState<RoomPeer[]>([]);
   const connection = useRef<RoomConnection | null>(null);
 
-  // Les auditeurs de diffusion (talkie-walkie) s'abonnent ici : le socket est
-  // ouvert une seule fois, mais plusieurs composants peuvent vouloir écouter.
-  const listeners = useRef(new Set<(payload: unknown) => void>());
-
   useEffect(() => {
     const conn = connectRoom(
       sessionId,
@@ -320,7 +309,6 @@ function RemoteSessionProvider({
       {
         onState: setState,
         onPresence: setPeers,
-        onBroadcast: (payload) => listeners.current.forEach((fn) => fn(payload)),
       },
       mode,
     );
@@ -335,14 +323,9 @@ function RemoteSessionProvider({
     connection.current?.send(message);
   }, []);
 
-  const onBroadcast = useCallback((handler: (payload: unknown) => void) => {
-    listeners.current.add(handler);
-    return () => listeners.current.delete(handler);
-  }, []);
-
   const bridge = useMemo<RoomBridge>(
-    () => ({ state, peers, send, me, onBroadcast }),
-    [state, peers, send, me, onBroadcast],
+    () => ({ state, peers, send, me }),
+    [state, peers, send, me],
   );
 
   const roundApi = useMemo<RoundApi>(
@@ -361,6 +344,8 @@ function RemoteSessionProvider({
       teams: state.teams ?? {},
       setTeam: (team) => send({ t: 'team', team }),
       ranked: state.ranked === true,
+      grade: (state.grade as MultiplayerGrade) ?? 'moyen',
+      setGrade: (grade) => send({ t: 'grade', grade }),
     }),
     [state, send],
   );
@@ -383,9 +368,9 @@ function RemoteGameProvider({
   puzzle: Puzzle;
   children: React.ReactNode;
 }) {
-  const { state, peers, send, me, onBroadcast } = useRoom();
+  const { state, peers, send, me } = useRoom();
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
-  const [myName, setMyName] = useState(me.name);
+  const myName = me.name;
 
   /**
    * Saisie optimiste.
@@ -512,116 +497,10 @@ function RemoteGameProvider({
     [peers, state.ready],
   );
 
-  const renameMe = useCallback(
-    (name: string) => {
-      // Persistant pour un compte, éphémère pour un invité — voir
-      // setActivePlayerName. Le profil serveur suit dans les deux cas ;
-      // seul ce qui reste APRÈS un rechargement diffère.
-      const clean = setActivePlayerName(name);
-      setMyName(clean);
-      send({ t: 'profile', name: clean });
-    },
-    [send],
-  );
-
-  const updateProfile = useCallback(
-    (patch: { name?: string; avatar?: string | null }) => {
-      if (patch.name) {
-        const clean = setActivePlayerName(patch.name);
-        setMyName(clean);
-        send({ t: 'profile', name: clean, avatar: patch.avatar });
-      } else {
-        send({ t: 'profile', avatar: patch.avatar });
-      }
-    },
-    [send],
-  );
-
   const reportGridDone = useCallback(
     (points: number, daily: boolean) => send({ t: 'soloGridDone', points, daily }),
     [send],
   );
-
-  // ---------- Talkie-walkie ----------
-  const recordingRef = useRef<Recording | null>(null);
-  const [talking, setTalking] = useState<Record<string, string>>({});
-  const [micDenied, setMicDenied] = useState(false);
-  const talkingNames = useMemo(() => Object.values(talking), [talking]);
-  const inbox = useRef(new Map<string, { parts: Map<number, string>; total: number }>());
-
-  useEffect(
-    () =>
-      onBroadcast((raw) => {
-        const event = raw as Record<string, unknown>;
-        if (event.type === 'voice-start') {
-          setTalking((prev) => ({ ...prev, [event.playerId as string]: event.name as string }));
-        } else if (event.type === 'voice-end') {
-          setTalking((prev) => {
-            const next = { ...prev };
-            delete next[event.playerId as string];
-            return next;
-          });
-        } else if (event.type === 'voice-chunk') {
-          // Les morceaux d'un même message peuvent arriver dans le désordre :
-          // on les range par numéro et on ne joue qu'une fois complet.
-          const clipId = event.clipId as string;
-          const entry =
-            inbox.current.get(clipId) ?? { parts: new Map<number, string>(), total: event.total as number };
-          entry.parts.set(event.seq as number, event.data as string);
-          inbox.current.set(clipId, entry);
-          if (entry.parts.size === entry.total) {
-            inbox.current.delete(clipId);
-            setTalking((prev) => {
-              const next = { ...prev };
-              delete next[event.playerId as string];
-              return next;
-            });
-            const ordered = Array.from({ length: entry.total }, (_, i) => entry.parts.get(i) ?? '').join('');
-            void playRadioClip(ordered);
-          }
-        }
-      }),
-    [onBroadcast],
-  );
-
-  const startTalking = useCallback(async () => {
-    if (recordingRef.current) return;
-    try {
-      recordingRef.current = await startRecording();
-      setMicDenied(false);
-      send({ t: 'broadcast', payload: { type: 'voice-start', playerId: me.id, name: myName } });
-    } catch {
-      recordingRef.current = null;
-      setMicDenied(true);
-    }
-  }, [send, me.id, myName]);
-
-  const stopTalking = useCallback(() => {
-    const rec = recordingRef.current;
-    if (!rec) return;
-    recordingRef.current = null;
-    send({ t: 'broadcast', payload: { type: 'voice-end', playerId: me.id } });
-
-    void rec.stop().then((clip) => {
-      if (!clip) return;
-      const chunks = splitIntoChunks(clip.base64);
-      const clipId = `${me.id}-${Date.now()}`;
-      chunks.forEach((data, seq) =>
-        send({
-          t: 'broadcast',
-          payload: {
-            type: 'voice-chunk',
-            playerId: me.id,
-            name: myName,
-            clipId,
-            seq,
-            total: chunks.length,
-            data,
-          },
-        }),
-      );
-    });
-  }, [send, me.id, myName]);
 
   const api = useMemo<GameStateApi>(
     () => ({
@@ -645,20 +524,10 @@ function RemoteGameProvider({
       setReady: (round) => send({ t: 'ready', round }),
       allReadyFor,
       isReadyFor: (playerId, round) => state.ready[playerId] === round,
-      startTalking,
-      stopTalking,
-      talkingNames,
-      micDenied,
       myName,
-      renameMe,
-      updateProfile,
       reportGridDone,
     }),
-    [
-      getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard,
-      allReadyFor, startTalking, stopTalking, talkingNames, micDenied, myName,
-      renameMe, updateProfile, reportGridDone,
-    ],
+    [getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard, allReadyFor, myName, reportGridDone],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;

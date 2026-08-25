@@ -25,6 +25,8 @@ export interface RoomState {
   teams: Record<string, string>;
   /** Partie classée (1v1 aléatoire) : les points comptent au classement. */
   ranked?: boolean;
+  /** Grade choisi par l'hôte — répartition facile/moyen/difficile des indices. */
+  grade?: string;
 }
 
 export interface Medal {
@@ -99,7 +101,6 @@ export const EMPTY_STATE: RoomState = {
 export interface RoomHandlers {
   onState: (state: RoomState) => void;
   onPresence: (players: RoomPeer[]) => void;
-  onBroadcast: (payload: unknown) => void;
   onStatus?: (connected: boolean) => void;
   /** Adversaire trouvé en 1v1 aléatoire : code de la partie à rejoindre. */
   onMatched?: (room: string) => void;
@@ -165,7 +166,6 @@ export function connectRoom(
       }
       if (msg.t === 'state') handlers.onState(msg.state as RoomState);
       else if (msg.t === 'presence') handlers.onPresence(msg.players as RoomPeer[]);
-      else if (msg.t === 'broadcast') handlers.onBroadcast(msg.payload);
       else if (msg.t === 'matched') handlers.onMatched?.(msg.room as string);
     };
 
@@ -221,4 +221,38 @@ export async function fetchProfile(id: string): Promise<Profile> {
   const res = await fetch(`${httpBase()}/profile?id=${encodeURIComponent(id)}`);
   if (!res.ok) throw new Error(`profil: ${res.status}`);
   return (await res.json()) as Profile;
+}
+
+async function postBlock(path: 'block' | 'unblock', id: string, playerId: string): Promise<string[]> {
+  const res = await fetch(`${httpBase()}/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, playerId }),
+  });
+  if (!res.ok) throw new Error(`${path}: ${res.status}`);
+  return (await res.json()).blocked as string[];
+}
+
+/** Bloque `playerId` pour les futurs duels aléatoires de `id`. */
+export const blockPlayer = (id: string, playerId: string) => postBlock('block', id, playerId);
+export const unblockPlayer = (id: string, playerId: string) => postBlock('unblock', id, playerId);
+
+export async function fetchBlocked(id: string): Promise<string[]> {
+  const res = await fetch(`${httpBase()}/blocks?id=${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(`blocages: ${res.status}`);
+  return (await res.json()).blocked as string[];
+}
+
+/**
+ * Met à jour le pseudo et/ou la photo. Par HTTP plutôt que par le socket
+ * (voir `send({t:'profile',...})` dans GameState.tsx) car l'écran Profil est
+ * accessible hors partie, sans connexion temps réel ouverte.
+ */
+export async function updateProfile(id: string, patch: { name?: string; avatar?: string | null }): Promise<void> {
+  const res = await fetch(`${httpBase()}/profile-update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, ...patch }),
+  });
+  if (!res.ok) throw new Error(`profil: ${res.status}`);
 }

@@ -65,8 +65,54 @@ WORD_RE = re.compile(r"^[a-zàâäæçéèêëîïôöœùûüÿñ]+$")
 @dataclass(frozen=True)
 class Word:
     word: str
-    hint: str
+    # Trois formulations d'un même indice, du plus explicite (facile) au plus
+    # elliptique (difficile) — voir HINT_LEVELS plus bas pour le tirage.
+    hint_facile: str
+    hint_moyen: str
+    hint_difficile: str
     complexity: int
+
+
+# Ordre du plus facile au plus difficile — sert à la fois de liste des clés
+# valides et de repli quand un niveau demandé est absent.
+HINT_LEVELS = ("facile", "moyen", "difficile")
+
+
+def hint_for_level(word, level):
+    """Texte de l'indice pour un niveau donné, avec repli sur le difficile.
+
+    Le repli n'est là que par prudence : le dataset v12 renseigne toujours
+    les trois niveaux, mais un futur dictionnaire moins complet ne doit pas
+    faire planter le remplissage pour autant.
+    """
+    return {
+        "facile": word.hint_facile,
+        "moyen": word.hint_moyen,
+        "difficile": word.hint_difficile,
+    }.get(level) or word.hint_difficile
+
+
+def pick_hint_level(rng, distribution):
+    """Tire un niveau d'indice selon des poids {facile, moyen, difficile}.
+
+    Les poids n'ont pas besoin d'être normalisés (on divise par leur somme).
+    Sans distribution ou si tous les poids sont nuls, on retombe sur
+    « difficile » — c'est exactement le comportement d'avant l'introduction
+    des indices multi-niveaux (un seul `hint_str`, le plus condensé).
+    """
+    if not distribution:
+        return "difficile"
+    weights = [max(0.0, float(distribution.get(level, 0) or 0)) for level in HINT_LEVELS]
+    total = sum(weights)
+    if total <= 0:
+        return "difficile"
+    x = rng.random() * total
+    acc = 0.0
+    for level, w in zip(HINT_LEVELS, weights):
+        acc += w
+        if x <= acc:
+            return level
+    return HINT_LEVELS[-1]
 
 
 # Types de flèches, au sens des vraies grilles de mots fléchés.
@@ -145,9 +191,15 @@ def load_dictionary(path):
             continue
 
         raw = item.get("word")
-        hint = str(item.get("hint_str") or "").strip()
+        # Le dataset v12 porte trois formulations d'un même indice. Le
+        # difficile reste le champ requis (repli des deux autres, et seul
+        # obligatoire pour rester compatible avec un dictionnaire qui
+        # n'aurait pas encore les trois niveaux).
+        hint_difficile = str(item.get("hint_str_difficile") or item.get("hint_str") or "").strip()
+        hint_facile = str(item.get("hint_str_facile") or "").strip() or hint_difficile
+        hint_moyen = str(item.get("hint_str_moyen") or "").strip() or hint_difficile
 
-        if not raw or not hint:
+        if not raw or not hint_difficile:
             continue
 
         word = normalize_word(raw)
@@ -183,7 +235,9 @@ def load_dictionary(path):
         result.append(
             Word(
                 word=word,
-                hint=hint[:15],
+                hint_facile=hint_facile[:15],
+                hint_moyen=hint_moyen[:15],
+                hint_difficile=hint_difficile[:15],
                 complexity=max(1, min(5, complexity)),
             )
         )
@@ -878,7 +932,10 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
 # CONSTRUCTION DU JSON JOUABLE
 # ============================================================
 
-def build_cells_and_words(roles, slots, assignment, rows, cols, black_positions=frozenset()):
+def build_cells_and_words(
+    roles, slots, assignment, rows, cols, black_positions=frozenset(),
+    rng=None, hint_distribution=None,
+):
     cells = [
         [{"type": "letter", "number": None, "solution": None, "clues": []} for _ in range(cols)]
         for _ in range(rows)
@@ -924,11 +981,17 @@ def build_cells_and_words(roles, slots, assignment, rows, cols, black_positions=
             for si in slot_indices:
                 s = slots[si]
                 w = assignment[si]
+                # Un seul tirage par slot : la case-indice et l'entrée
+                # `words_out` désignent le MÊME mot, ils doivent afficher le
+                # même texte.
+                level = pick_hint_level(rng, hint_distribution) if rng is not None else "difficile"
+                hint_text = hint_for_level(w, level)
                 cells[r][c]["clues"].append(
                     {
                         "number": number,
                         "word": w.word,
-                        "hint_str": w.hint,
+                        "hint_str": hint_text,
+                        "hint_level": level,
                         "complexity": w.complexity,
                         "direction": s.direction,
                         "arrow": s.arrow,
@@ -940,7 +1003,8 @@ def build_cells_and_words(roles, slots, assignment, rows, cols, black_positions=
                     {
                         "number": number,
                         "word": w.word,
-                        "hint_str": w.hint,
+                        "hint_str": hint_text,
+                        "hint_level": level,
                         "complexity": w.complexity,
                         "row": s.row,
                         "col": s.col,
@@ -1260,7 +1324,7 @@ def load_skeleton_bank(path):
 
 
 def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks=2500,
-                       avoid_words=None):
+                       avoid_words=None, hint_distribution=None):
     """Chemin TEMPS RÉEL : prend un squelette du banc et le remplit.
 
     `index` (WordIndex) doit être construit une fois au démarrage du serveur
@@ -1293,7 +1357,7 @@ def generate_from_bank(payload, words, rng, index=None, tries=25, max_backtracks
         if not complete:
             continue
         cells, words_out, dead_clues = build_cells_and_words(
-            roles, slots, assignment, rows, cols
+            roles, slots, assignment, rows, cols, rng=rng, hint_distribution=hint_distribution,
         )
         metrics = quality_metrics(cells, words_out, slots, dead_clues, 0, rows, cols)
         return cells, words_out, metrics

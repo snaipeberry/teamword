@@ -2,12 +2,22 @@ import { useEffect, useState } from 'react';
 import { buildGrid } from '../lib/gridBuilder';
 import { demoPuzzle } from '../data/demoPuzzle';
 import { fetchPuzzle } from '../lib/puzzleApi';
+import type { HintDistribution } from '../lib/difficulty';
 import type { Puzzle } from '../types/puzzle';
 
 interface UsePuzzleResult {
   puzzle: Puzzle | null;
   loading: boolean;
   error: string | null;
+}
+
+interface UsePuzzleOptions {
+  hints?: HintDistribution;
+  /** Tant que `false`, aucun fetch n'est déclenché — utilisé en solo, où la
+   *  répartition dépend du palier du joueur, connu seulement une fois son
+   *  profil chargé (voir Round dans App.tsx). Vrai par défaut : les autres
+   *  modes n'ont rien à attendre avant de savoir quelle grille demander. */
+  ready?: boolean;
 }
 
 /**
@@ -21,19 +31,28 @@ interface UsePuzzleResult {
  * pour que `buildGrid` la reconstruise côté client — il revalide au passage
  * l'adjacence indice/mot et la cohérence des croisements.
  */
-export function usePuzzle(seed: string): UsePuzzleResult {
+export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzzleResult {
+  const { hints, ready = true } = options;
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Les poids se comparent par valeur, pas par référence : un objet recréé à
+  // chaque rendu avec les mêmes nombres ne doit pas redéclencher un fetch.
+  const hintsKey = hints ? `${hints.facile},${hints.moyen},${hints.difficile}` : '';
 
   useEffect(() => {
+    if (!ready) {
+      setLoading(true);
+      return;
+    }
+
     const controller = new AbortController();
     let cancelled = false;
 
     setLoading(true);
     setError(null);
 
-    fetchPuzzle({ seed, signal: controller.signal })
+    fetchPuzzle({ seed, hints, signal: controller.signal })
       .then((payload) => {
         if (cancelled) return;
         setPuzzle({
@@ -59,7 +78,8 @@ export function usePuzzle(seed: string): UsePuzzleResult {
       cancelled = true;
       controller.abort();
     };
-  }, [seed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seed, ready, hintsKey]);
 
   return { puzzle, loading, error };
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthScreen } from './Auth';
 import { skipGateForThisTab } from '../lib/auth';
+import { screenClassName, screenTransition, screenVariants } from '../lib/motion';
 
 /**
  * Portail d'entrée : connexion, création de compte, ou invité.
@@ -20,36 +21,43 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
     onDone();
   };
 
-  if (mode !== 'menu') {
-    return (
-      <AuthScreen
-        initialMode={mode}
-        onClose={terminer}
-        onDone={() => terminer()}
-        closeLabel="← Retour au choix"
-      />
-    );
-  }
-
   return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={mode}
+        variants={screenVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={screenTransition}
+        className={screenClassName}
+      >
+        {mode !== 'menu' ? (
+          <AuthScreen
+            initialMode={mode}
+            onClose={terminer}
+            onDone={() => terminer()}
+            closeLabel="← Retour au choix"
+          />
+        ) : (
     <div className="flex min-h-0 w-full max-w-[360px] flex-1 flex-col items-center justify-center gap-4 px-5">
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-200 bg-clip-text text-center font-display text-3xl font-bold text-transparent drop-shadow"
+        className="text-center font-display text-4xl leading-none text-organic-text"
       >
         TeamWords
       </motion.h1>
-      <p className="text-center text-[12px] font-medium text-white/60">Comment voulez-vous jouer ?</p>
+      <p className="text-center text-[12px] font-medium text-organic-neutral-700">Comment voulez-vous jouer ?</p>
 
       <motion.button
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={() => setMode('login')}
-        className="w-full rounded-2xl bg-gradient-to-r from-aurora-coral to-aurora-amber py-3 font-display text-[15px] font-bold text-white shadow-xl"
+        className="w-full rounded-[28px] bg-organic-accent-500 py-4 text-left shadow-md active:bg-organic-accent-600"
       >
-        🔐 Se connecter
-        <span className="mt-0.5 block text-[11px] font-medium text-white/70">
+        <span className="block px-5 font-display text-[19px] text-organic-bg">Se connecter</span>
+        <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-bg/80">
           Retrouvez votre progression et votre classement
         </span>
       </motion.button>
@@ -58,10 +66,10 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={() => setMode('register')}
-        className="w-full rounded-2xl border border-amber-200/40 bg-gradient-to-r from-amber-400/25 to-orange-400/25 py-3 font-display text-[15px] font-bold text-white shadow-xl backdrop-blur-md"
+        className="w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 py-4 text-left active:bg-organic-neutral-200"
       >
-        ✨ Créer un compte
-        <span className="mt-0.5 block text-[11px] font-medium text-white/60">
+        <span className="block px-5 font-display text-[19px] text-organic-text">Créer un compte</span>
+        <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-neutral-700">
           Sauvegardez vos points — solo, grille du jour, classement
         </span>
       </motion.button>
@@ -70,13 +78,16 @@ export function LoginGate({ onDone }: { onDone: () => void }) {
         type="button"
         whileTap={{ scale: 0.96 }}
         onClick={terminer}
-        className="w-full rounded-2xl bg-white/12 py-3 font-display text-[15px] font-bold text-white/90"
+        className="w-full rounded-[28px] py-4 text-left active:bg-organic-neutral-200"
       >
-        👤 Continuer en invité
-        <span className="mt-0.5 block text-[11px] font-medium text-white/50">
+        <span className="block px-5 font-display text-[19px] text-organic-text">Continuer en invité</span>
+        <span className="mt-0.5 block px-5 text-[12px] font-semibold text-organic-neutral-600">
           Multijoueur uniquement — nom généré, rien n’est sauvegardé
         </span>
       </motion.button>
     </div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -64,11 +64,13 @@ try:
     from serve_puzzles import (  # noqa: E402
         DAILY_MIN_COMPLEXITY as _DAILY_MIN_COMPLEXITY,
         DAILY_PREFIX as _DAILY_PREFIX,
+        hint_distribution_for as _hint_distribution_for,
+        parse_hint_distribution as _parse_hint_distribution,
         rotation_avoid as _rotation_avoid,
         to_app_puzzle as _to_app_puzzle,
     )
 
-    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v11_expert_hints.json"
+    DATASET_PATH = ROOT / "scripts" / "datasets" / "mots_fleches_enriched_v23_editorial_final.json"
     BANK_PATH = GEN_DIR / "banks" / "skeletons_10x10.json"
 
     _WORDS = load_dictionary(DATASET_PATH)
@@ -81,7 +83,7 @@ except Exception:  # noqa: BLE001 — on veut le détail dans la réponse
     _BOOT_ERROR = traceback.format_exc()
 
 
-def build_payload(seed=None):
+def build_payload(seed=None, hint_distribution=None):
     rng = random.Random(seed) if seed is not None else random.Random()
 
     # La grille du jour vise plus difficile ; les autres alternent le stock
@@ -91,6 +93,7 @@ def build_payload(seed=None):
 
     cells, words_out, metrics = generate_from_bank(
         _BANK, _WORDS, rng, index=_INDEX, avoid_words=avoid,
+        hint_distribution=_hint_distribution_for(daily, hint_distribution),
     )
 
     payload = _to_app_puzzle(
@@ -133,10 +136,11 @@ class handler(BaseHTTPRequestHandler):
 
         params = parse_qs(urlparse(self.path).query)
         seed = (params.get("seed") or [None])[0]
+        hint_distribution = _parse_hint_distribution(params)
 
         try:
             t0 = time.perf_counter()
-            payload = build_payload(seed)
+            payload = build_payload(seed, hint_distribution=hint_distribution)
             payload["generated_in_ms"] = round((time.perf_counter() - t0) * 1000, 2)
             payload["boot_ms"] = round(_BOOT_MS, 2)
             self._send(200, payload)

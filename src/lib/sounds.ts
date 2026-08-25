@@ -2,6 +2,7 @@
 // no binary audio assets to ship or go missing. Howler (already a dependency)
 // stays ready below for when you drop in real sound-designed files, e.g. an
 // ambient loop or polished SFX — see the example at the bottom.
+import { isNative } from './native';
 
 const MUTE_STORAGE_KEY = 'mf_muted';
 
@@ -33,17 +34,36 @@ export function onMuteChange(listener: (muted: boolean) => void): () => void {
  * Vibration API — Android Chrome supports it, iOS Safari never has (Apple hasn't
  * implemented it, even in recent versions), so this silently no-ops there. Kept
  * as progressive enhancement rather than a real cross-platform haptics guarantee.
+ *
+ * Sous Capacitor natif, on bascule sur @capacitor/haptics (import dynamique :
+ * inutile de charger un module natif quand on tourne dans un navigateur
+ * normal) — le vrai moteur haptique du téléphone, là où l'API Vibration ne
+ * faisait déjà rien sur iOS. `pattern` (impulsions en ms) se traduit en une
+ * intensité d'impact plutôt qu'une reproduction exacte : l'API native ne
+ * prend pas de motif arbitraire, mais un simple impact léger/moyen/fort est
+ * ce qui « sent » natif — reproduire le motif web n'apporterait rien.
  */
 export function vibrate(pattern: number | number[]): void {
   if (muted) return;
+  if (isNative) {
+    void nativeImpact(pattern);
+    return;
+  }
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     navigator.vibrate(pattern);
   }
 }
 
+async function nativeImpact(pattern: number | number[]): Promise<void> {
+  const total = Array.isArray(pattern) ? pattern.reduce((n, ms) => n + ms, 0) : pattern;
+  const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+  const style = total >= 100 ? ImpactStyle.Heavy : total >= 30 ? ImpactStyle.Medium : ImpactStyle.Light;
+  await Haptics.impact({ style }).catch(() => {});
+}
+
 let audioCtx: AudioContext | null = null;
 
-/** Partagé avec le talkie-walkie : les navigateurs limitent le nombre d'AudioContext. */
+/** Un seul AudioContext partagé : les navigateurs en limitent le nombre. */
 export function getAudioContext(): AudioContext {
   if (!audioCtx) {
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;

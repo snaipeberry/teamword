@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   GameStateProvider,
   SessionProvider,
@@ -14,17 +15,28 @@ import { Lobby, KickedScreen } from './components/Lobby';
 import { BotPlayer } from './components/BotGame';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
+import { useSoloProfile } from './hooks/useSoloProfile';
 import { readSessionCode } from './lib/sessionCode';
-import { currentSession, shouldSkipGate } from './lib/auth';
+import { activePlayerId, currentSession, shouldSkipGate } from './lib/auth';
 import { dailyLabel, dailySeed, seedFor } from './lib/puzzleApi';
 import { demoPuzzle } from './data/demoPuzzle';
+import { screenClassName, screenTransition, screenVariants } from './lib/motion';
+import { multiplayerDistribution, soloDistribution } from './lib/difficulty';
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-white">
-      <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-white/25 border-t-white" />
-      <p className="text-sm font-semibold text-white/80">Chargement de la grille…</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-3"
+    >
+      <motion.div
+        animate={{ scale: [1, 1.25, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ repeat: Infinity, duration: 1.1, ease: 'easeInOut' }}
+        className="h-3 w-3 rounded-full bg-organic-accent-500"
+      />
+      <p className="text-sm font-semibold text-organic-neutral-600">Chargement de la grille…</p>
+    </motion.div>
   );
 }
 
@@ -43,13 +55,34 @@ function Round({
   bot: boolean;
   solo: boolean;
 }) {
-  const { round, game } = useRound();
+  const { round, game, grade } = useRound();
   // En mode « grille du jour », la graine ne dépend NI de la session NI du
   // numéro de grille : elle est commune à tous les joueurs du monde. En solo,
   // `sessionId` est déjà propre au joueur (`solo-<playerId>`) : `seedFor`
   // suffit à produire une graine stable par joueur ET par numéro de grille.
   const seed = daily ? dailySeed() : seedFor(sessionId, game, round);
-  const { puzzle, loading, error } = usePuzzle(seed);
+
+  // Solo et quotidien partagent la même économie de points/ampoules — voir
+  // useSoloProfile. Remonté ici (plutôt que dans CrosswordGrid) car le palier
+  // du profil détermine la répartition des indices AVANT même de savoir
+  // quelle grille demander.
+  const soloScored = solo || daily;
+  const soloProfile = useSoloProfile(activePlayerId(), soloScored);
+
+  // Le service de remplissage est sans état : c'est ici qu'on décide QUI voit
+  // quels indices. Le serveur applique les poids reçus tels quels, sauf pour
+  // la grille du jour qu'il fixe lui-même (80/15/5, identique pour tout le
+  // monde) — envoyer `undefined` laisse ce choix au serveur plutôt que de le
+  // dupliquer côté client.
+  const hints = daily
+    ? undefined
+    : solo
+      ? (soloProfile.profile ? soloDistribution(soloProfile.profile.soloPoints) : undefined)
+      : multiplayerDistribution(grade);
+  // En solo, la répartition dépend du palier : pas la peine de demander une
+  // grille avant de le connaître, elle partirait avec la mauvaise proportion.
+  const puzzleReady = !solo || soloProfile.profile !== null;
+  const { puzzle, loading, error } = usePuzzle(seed, { hints, ready: puzzleReady });
 
   if (loading || !puzzle) return <LoadingScreen />;
 
@@ -65,7 +98,13 @@ function Round({
         </p>
       )}
       {bot && <BotPlayer puzzle={puzzle} sessionId={sessionId} />}
-      <CrosswordGrid puzzle={puzzle} round={round} daily={daily} solo={solo} />
+      <CrosswordGrid
+        puzzle={puzzle}
+        round={round}
+        daily={daily}
+        solo={solo}
+        soloProfile={soloProfile}
+      />
     </GameStateProvider>
   );
 }
@@ -91,11 +130,31 @@ function SessionRouter({
   const { started, isKicked } = useRound();
   const game = useGameState();
 
-  if (isKicked(game.myPlayerId)) return <KickedScreen />;
   // Grille du jour, partie contre un bot et solo se jouent directement : il
   // n'y a personne à attendre dans un salon (le solo n'a même qu'un joueur).
-  if (!started && !daily && !bot && !solo) return <Lobby sessionId={sessionId} />;
-  return <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />;
+  const key = isKicked(game.myPlayerId) ? 'kicked' : !started && !daily && !bot && !solo ? 'lobby' : 'round';
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={key}
+        variants={screenVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={screenTransition}
+        className={screenClassName}
+      >
+        {key === 'kicked' ? (
+          <KickedScreen />
+        ) : key === 'lobby' ? (
+          <Lobby sessionId={sessionId} />
+        ) : (
+          <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
+        )}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 /**
@@ -148,21 +207,61 @@ export default function App() {
     // Hauteur d'écran FIXE (100dvh suit la barre d'URL mobile, contrairement
     // à 100vh) et `overflow-hidden` : la page ne défile plus, donc la grille
     // et le clavier tiennent ensemble à l'écran en permanence.
-    <div className="flex h-[100dvh] flex-col items-center overflow-hidden">
+    //
+    // Zones sûres centralisées ICI plutôt que dispersées par écran : avant,
+    // seuls TopBar (haut) et Keyboard (bas) en tenaient compte — tous les
+    // écrans SANS les deux (accueil, salon, portail, profil, classement,
+    // matchmaking) n'avaient AUCUNE marge contre l'encoche/l'indicateur
+    // d'accueil. `AuroraBackground` est `fixed inset-0`, donc ce padding ne
+    // le concerne pas : le fond continue de couvrir tout l'écran, seul le
+    // CONTENU en tient compte.
+    <div className="flex h-[100dvh] flex-col items-center overflow-hidden pt-[max(env(safe-area-inset-top),6px)] pb-[max(env(safe-area-inset-bottom),6px)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <AuroraBackground />
-      {!identityChosen ? (
-        <LoginGate onDone={() => setIdentityChosen(true)} />
-      ) : sessionId === null ? (
-        <Home />
-      ) : (
-        <SessionProvider sessionId={sessionId} mode={mode}>
-          {hasMultiplayer ? (
-            <SessionShell sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
-          ) : (
-            <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
-          )}
-        </SessionProvider>
-      )}
+      <AnimatePresence mode="wait">
+        {!identityChosen ? (
+          <motion.div
+            key="gate"
+            variants={screenVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={screenTransition}
+            className={screenClassName}
+          >
+            <LoginGate onDone={() => setIdentityChosen(true)} />
+          </motion.div>
+        ) : sessionId === null ? (
+          <motion.div
+            key="home"
+            variants={screenVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={screenTransition}
+            className={screenClassName}
+          >
+            <Home />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="session"
+            variants={screenVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={screenTransition}
+            className={screenClassName}
+          >
+            <SessionProvider sessionId={sessionId} mode={mode}>
+              {hasMultiplayer ? (
+                <SessionShell sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
+              ) : (
+                <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
+              )}
+            </SessionProvider>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

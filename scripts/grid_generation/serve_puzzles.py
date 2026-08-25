@@ -161,6 +161,52 @@ DAILY_PREFIX = "daily-"
 # remplissage retombe sur les faciles (2,78, moins bon qu'à 4).
 DAILY_MIN_COMPLEXITY = 4
 
+# Répartition facile/moyen/difficile des indices affichés pour la grille du
+# jour — FIXE, quel que soit le joueur : c'est la même grille pour tout le
+# monde, elle doit rester la même dans les deux sens du terme.
+DAILY_HINT_DISTRIBUTION = {"facile": 0.05, "moyen": 0.15, "difficile": 0.80}
+
+# Repli quand le client n'envoie aucune répartition (ancien client, requête
+# sans les paramètres facile/moyen/difficile) : 100 % difficile reproduit
+# exactement le comportement d'avant les indices multi-niveaux, où
+# `hint_str` était déjà le plus condensé des trois.
+DEFAULT_HINT_DISTRIBUTION = {"facile": 0.0, "moyen": 0.0, "difficile": 1.0}
+
+
+def hint_distribution_for(daily, requested):
+    """Répartition à appliquer, connaissant le contexte de la requête.
+
+    La grille du jour est TOUJOURS fixe, même si le client a envoyé autre
+    chose (il ne devrait jamais le faire, mais mieux vaut que le serveur
+    fasse autorité sur ce point plutôt que de faire confiance à l'appelant).
+    En dehors de ça, `requested` (solo : palier du joueur ; multijoueur :
+    grade choisi par l'hôte) prime, sinon on retombe sur 100 % difficile.
+    """
+    if daily:
+        return DAILY_HINT_DISTRIBUTION
+    if requested:
+        return requested
+    return DEFAULT_HINT_DISTRIBUTION
+
+
+def parse_hint_distribution(params):
+    """Lit facile/moyen/difficile depuis les paramètres de requête (floats).
+
+    `None` si aucun des trois n'est présent — distinct d'une répartition où
+    tous seraient à 0, qui serait un choix explicite (mais absurde) plutôt
+    qu'une absence d'info.
+    """
+    keys = ("facile", "moyen", "difficile")
+    if not any(k in params for k in keys):
+        return None
+    out = {}
+    for k in keys:
+        try:
+            out[k] = max(0.0, float((params.get(k) or ["0"])[0]))
+        except (TypeError, ValueError):
+            out[k] = 0.0
+    return out
+
 
 def rotation_avoid(index, seed):
     """Mots à rétrograder pour que deux grilles consécutives ne se ressemblent pas.
@@ -220,7 +266,7 @@ class PuzzleService:
             f"{self.bank['rows']}x{self.bank['cols']}"
         )
 
-    def fill(self, seed=None):
+    def fill(self, seed=None, hint_distribution=None):
         # Avec une graine, tout devient reproductible : choix du squelette et
         # des mots. Deux joueurs d'une même partie obtiennent ainsi une grille
         # identique sans que le serveur ait à stocker quoi que ce soit.
@@ -233,6 +279,7 @@ class PuzzleService:
 
         cells, words_out, metrics = generate_from_bank(
             self.bank, self.words, rng, index=self.index, avoid_words=avoid,
+            hint_distribution=hint_distribution_for(daily, hint_distribution),
         )
 
         payload = to_app_puzzle(
@@ -298,9 +345,10 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path in ("/puzzle", "/api/puzzle"):
             params = parse_qs(parsed.query)
             seed = (params.get("seed") or [None])[0]
+            hint_distribution = parse_hint_distribution(params)
             try:
                 t0 = time.perf_counter()
-                payload = self.service.fill(seed)
+                payload = self.service.fill(seed, hint_distribution=hint_distribution)
                 payload["generated_in_ms"] = round((time.perf_counter() - t0) * 1000, 2)
                 self._send(200, payload)
             except Exception as exc:  # remplissage impossible
@@ -324,7 +372,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=here.parent / "datasets" / "mots_fleches_enriched_v11_expert_hints.json",
+        default=here.parent / "datasets" / "mots_fleches_enriched_v23_editorial_final.json",
     )
     parser.add_argument(
         "--bank-file", type=Path, default=here / "banks" / "skeletons_10x10.json"

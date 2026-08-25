@@ -62,7 +62,6 @@ export function BotPlayer({
           stateRef.current = s;
         },
         onPresence: () => {},
-        onBroadcast: () => {},
       },
     );
 

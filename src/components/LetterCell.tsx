@@ -39,12 +39,12 @@ export function LetterCell({
   }, [isLocked]);
 
   const background = isLocked
-    ? 'bg-gradient-to-br from-emerald-100 to-emerald-200'
+    ? 'bg-organic-accent2-200'
     : isActive
-      ? 'bg-cell-active'
+      ? 'bg-white'
       : isInActiveWord
-        ? 'bg-amber-50'
-        : 'bg-white';
+        ? 'bg-organic-accent-100'
+        : 'bg-organic-neutral-100';
 
   return (
     <motion.button
@@ -53,13 +53,13 @@ export function LetterCell({
       whileTap={isLocked ? undefined : { scale: 0.88 }}
       animate={isWrong ? { x: [0, -4, 4, -4, 4, 0] } : { x: 0 }}
       transition={{ duration: 0.35 }}
-      style={isActive ? { boxShadow: '0 0 0 3px rgba(77,232,239,0.55), 0 0 14px 2px rgba(77,232,239,0.5)' } : undefined}
+      style={isActive ? { boxShadow: 'inset 0 0 0 2px #D67F48' } : undefined}
       className={`relative flex h-full w-full items-center justify-center overflow-hidden border border-cell-border/70 font-grid text-[clamp(1rem,5.5vw,1.5rem)] font-semibold uppercase transition-colors duration-300 ${background} ${
         isLocked ? 'cursor-default' : ''
       }`}
     >
       {isActive && !isLocked && (
-        <span aria-hidden="true" className="absolute -left-1 top-1/2 -translate-y-1/2 text-[10px] text-rose-500">
+        <span aria-hidden="true" className="absolute -left-1 top-1/2 -translate-y-1/2 text-[10px] text-organic-accent-700">
           ▶
         </span>
       )}
@@ -72,7 +72,7 @@ export function LetterCell({
             animate={{ scale: 1.8, opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="pointer-events-none absolute inset-0 rounded-sm bg-emerald-400"
+            className="pointer-events-none absolute inset-0 rounded-sm bg-organic-accent2-400"
           />
         )}
       </AnimatePresence>
@@ -82,11 +82,11 @@ export function LetterCell({
         initial={{ scale: 0.4, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-        // Vert UNIQUEMENT quand le mot entier est trouvé. Colorer une lettre
+        // Sauge UNIQUEMENT quand le mot entier est trouvé. Colorer une lettre
         // dès qu'elle est juste individuellement révélait la réponse au fur et
         // à mesure de la saisie.
         className={`relative z-10 ${
-          isLocked ? 'text-emerald-700' : isWrong ? 'text-red-600' : 'text-neutral-900'
+          isLocked ? 'text-organic-accent2-900' : isWrong ? 'text-organic-accent-700' : 'text-organic-text'
         }`}
       >
         {value}

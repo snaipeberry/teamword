@@ -66,7 +66,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
         aria-label="Menu de la partie"
         aria-expanded={open}
         onClick={() => (open ? close() : setOpen(true))}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition active:scale-90"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-organic-neutral-200 text-organic-text transition active:scale-90"
       >
         <span className="text-base leading-none" aria-hidden="true">⋯</span>
       </button>
@@ -78,7 +78,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: 0.14 }}
-            className="absolute right-0 top-11 z-50 w-56 overflow-hidden rounded-2xl border border-white/20 bg-[#3D1F63]/95 p-1.5 shadow-2xl backdrop-blur-lg"
+            className="absolute right-0 top-11 z-50 w-56 overflow-hidden rounded-[20px] border border-organic-divider bg-organic-bg p-1.5 shadow-lg"
           >
             {/* Sans conséquence à confirmer, contrairement aux actions
                 ci-dessous : quitter n'efface aucun score, pour personne — la
@@ -86,10 +86,10 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
             <button
               type="button"
               onClick={goHome}
-              className="w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold text-white transition active:bg-white/15"
+              className="w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold text-organic-text transition active:bg-organic-neutral-200"
             >
-              🏠 Retour au menu
-              <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+              Retour au menu
+              <span className="mt-0.5 block text-[10px] font-medium text-organic-neutral-600">
                 Quitte cette partie, rien n’est effacé
               </span>
             </button>
@@ -99,12 +99,12 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
               onClick={() => confirm('restart')}
               className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
                 pending === 'restart'
-                  ? 'bg-amber-400 text-neutral-900'
-                  : 'text-white active:bg-white/15'
+                  ? 'bg-organic-accent-500 text-organic-bg'
+                  : 'text-organic-text active:bg-organic-neutral-200'
               }`}
             >
-              {pending === 'restart' ? '⚠️ Confirmer la remise à zéro' : '↻ Recommencer la partie'}
-              <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+              {pending === 'restart' ? 'Confirmer la remise à zéro' : 'Recommencer la partie'}
+              <span className={`mt-0.5 block text-[10px] font-medium ${pending === 'restart' ? 'text-organic-bg/80' : 'text-organic-neutral-600'}`}>
                 {pending === 'restart'
                   ? 'Scores et grilles effacés pour tout le monde'
                   : multiplayer
@@ -119,12 +119,12 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
                 onClick={() => confirm('new')}
                 className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
                   pending === 'new'
-                    ? 'bg-amber-400 text-neutral-900'
-                    : 'text-white active:bg-white/15'
+                    ? 'bg-organic-accent-500 text-organic-bg'
+                    : 'text-organic-text active:bg-organic-neutral-200'
                 }`}
               >
-                {pending === 'new' ? '⚠️ Confirmer' : '✦ Nouvelle session'}
-                <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+                {pending === 'new' ? 'Confirmer' : 'Nouvelle session'}
+                <span className={`mt-0.5 block text-[10px] font-medium ${pending === 'new' ? 'text-organic-bg/80' : 'text-organic-neutral-600'}`}>
                   {pending === 'new'
                     ? 'Vous quitterez la partie en cours'
                     : 'Nouveau code — les autres restent sur l’ancien'}
