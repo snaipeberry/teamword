@@ -2,7 +2,7 @@
 #
 # Lance (ou arrête) les trois services nécessaires en développement local :
 #   web       Vite (front)                        :5173
-#   realtime  Serveur temps réel des parties       :8080  (server/index.js)
+#   realtime  Serveur temps réel des parties       :8080  (server/websocket/index.js)
 #   puzzles   Service de remplissage des grilles   :8787  (Python, stdlib seul)
 #
 # Chacun tourne en arrière-plan (nohup), sa sortie va dans logs/<nom>.log.
@@ -74,7 +74,11 @@ case "$cmd" in
   start)
     echo "Démarrage des services locaux…"
     start_one "web"      5173 "."                        npm run dev
-    start_one "realtime" 8080 "server"                    npm start
+    # cwd = server/ (et non server/websocket/) : le serveur écrit ses
+    # instantanés dans « ./data », donc dans server/data — là où vivent les
+    # comptes et profils réels. Lancé depuis server/websocket il repartirait
+    # sur la copie périmée server/websocket/data.
+    start_one "realtime" 8080 "server"                    node websocket/index.js
     start_one "puzzles"  8787 "scripts/grid_generation"   python3 serve_puzzles.py --host 0.0.0.0
     echo
     echo "Front       http://localhost:5173"

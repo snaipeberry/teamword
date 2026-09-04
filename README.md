@@ -105,12 +105,12 @@ This only drafts `{word, clue}` pairs — it does **not** lay out a grid (placin
 
 Le dépôt se déploie tel quel : `vercel.json` déclare explicitement le preset
 Vite (sans lui, Vercel retombe sur le runtime Node et échoue avec
-« No entrypoint found »), et `api/puzzle.py` devient une fonction serverless.
+« No entrypoint found »), et `server/api/puzzle.py` devient une fonction serverless.
 
 ```
 teamwword/
 ├── vercel.json          preset Vite + includeFiles pour la fonction
-├── api/puzzle.py        GET /api/puzzle  (fonction serverless Python)
+├── server/api/puzzle.py GET /api/puzzle  (fonction serverless Python)
 ├── dist/                site statique (build)
 └── scripts/
     ├── datasets/…json   dictionnaire (448 Ko, versionné)

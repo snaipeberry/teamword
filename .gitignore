@@ -9,3 +9,8 @@ logs/
 
 # artefact de build TypeScript : ne doit pas etre versionne
 tsconfig.tsbuildinfo
+
+# Données d'exécution du serveur temps réel (comptes, jetons de session,
+# profils) : jamais versionnées.
+data/
+server/data/

@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/puzzle.py": {
-      "includeFiles": "scripts/**"
+      "includeFiles": "scripts/grid_generation/**,scripts/datasets/mots_fleches_enriched_v25_verification_semantique.json"
     }
   }
 }

@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "websocket/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node websocket/index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "ws": "^8.18.0"
