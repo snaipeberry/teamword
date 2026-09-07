@@ -7,6 +7,7 @@ import { activePlayerId, activePlayerName, currentSession, deleteAccount, logout
 import { AuthScreen } from './Auth';
 import { screenClassName, screenShell, screenTransition, screenVariants } from '../lib/motion';
 import { BackButton } from './BackButton';
+import { MedalIcon } from './MedalIcon';
 
 /**
  * Profil du joueur : pseudo, photo, statistiques et médailles.
@@ -87,70 +88,87 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
     <div className={`${screenShell} overflow-y-auto`}>
       <BackButton onClick={onClose} />
 
-      {/* En-tête : photo à gauche, nom et statut à droite (maquette Organic)
-          — plus compact que la grande carte centrée, et laisse la place aux
-          statistiques sans faire défiler. */}
-      <div className="mt-2.5 flex items-center gap-3.5">
-        <button
-          type="button"
-          onClick={() => setChoixAvatarOuvert((v) => !v)}
-          aria-expanded={choixAvatarOuvert}
-          aria-label="Changer de photo"
-          className="relative shrink-0 active:scale-95"
-        >
-          <Avatar name={name} color="#D67F48" src={profile?.avatar} size={66} />
-          <span className="absolute -bottom-1 -right-1 rounded-full bg-organic-bg px-1.5 py-0.5 text-[10px] font-bold text-organic-accent-700 shadow-sm">
-            ✎
-          </span>
-        </button>
-        <div className="min-w-0">
-          {/* Nom fixe (pseudo du compte, ou nom généré pour l'invité) : plus
-              aucune UI ne permet de le changer, voir auth.ts. */}
-          <h1 className="truncate font-display text-[26px] leading-[1.05] text-organic-text">{name}</h1>
-          {profile && (
-            <p className="mt-0.5 text-[12px] font-bold uppercase tracking-[0.06em] text-organic-accent-700">
-              {profile.title} · {profile.points} pts
-            </p>
-          )}
+      {/* Tout le contenu dépendant du profil apparaît D'UN SEUL COUP une
+          fois chargé — un en-tête qui s'affiche puis des statistiques qui
+          « popent » une seconde après donne une impression d'écran cassé.
+          Le bouton retour reste seul en dehors : la navigation ne doit pas
+          attendre le réseau. */}
+      {!profile ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <motion.div
+            animate={{ scale: [1, 1.25, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ repeat: Infinity, duration: 1.1, ease: 'easeInOut' }}
+            className="h-3 w-3 rounded-full bg-organic-accent-500"
+          />
+          <p className="text-sm font-semibold text-organic-neutral-600">Chargement du profil…</p>
         </div>
-      </div>
-
-      {choixAvatarOuvert && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="mt-3 grid w-full grid-cols-5 gap-2"
-        >
-          {AVATAR_PRESETS.map((p) => (
+      ) : (
+        <>
+          {/* En-tête : photo à gauche, nom et statut à droite (maquette
+              Organic) — plus compact que la grande carte centrée, et laisse
+              la place aux statistiques sans faire défiler. */}
+          <div className="mt-2.5 flex items-center gap-3.5">
             <button
-              key={p.id}
               type="button"
-              onClick={() => void choisirAvatar(p.id)}
-              aria-label={p.id}
-              className="active:scale-90"
+              onClick={() => setChoixAvatarOuvert((v) => !v)}
+              aria-expanded={choixAvatarOuvert}
+              aria-label="Changer de photo"
+              className="relative shrink-0 active:scale-95"
             >
-              <span
-                className="flex h-11 w-11 items-center justify-center rounded-full text-xl"
-                style={{ backgroundColor: p.color }}
-              >
-                {p.emoji}
+              <Avatar name={name} color="#D67F48" src={profile.avatar} size={66} />
+              <span className="absolute -bottom-1 -right-1 rounded-full bg-organic-bg px-1.5 py-0.5 text-[10px] font-bold text-organic-accent-700 shadow-sm">
+                ✎
               </span>
             </button>
-          ))}
-        </motion.div>
-      )}
+            <div className="min-w-0">
+              {/* Nom fixe (pseudo du compte, ou nom généré pour l'invité) :
+                  plus aucune UI ne permet de le changer, voir auth.ts. */}
+              <h1 className="truncate font-display text-[26px] leading-[1.05] text-organic-text">{name}</h1>
+              <p className="mt-0.5 text-[12px] font-bold uppercase tracking-[0.06em] text-organic-accent-700">
+                {profile.title} · {profile.tier.icon} {profile.tier.label}
+              </p>
+            </div>
+          </div>
 
-      {profile && (
-        <>
-          {/* 2×2 plutôt que 4 colonnes : les nombres et leurs libellés
-              tiennent sans être tronqués ni réduits à 9 px. */}
+          {choixAvatarOuvert && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 grid w-full grid-cols-5 gap-2"
+            >
+              {AVATAR_PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => void choisirAvatar(p.id)}
+                  aria-label={p.id}
+                  className="active:scale-90"
+                >
+                  <span
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-xl"
+                    style={{ backgroundColor: p.color }}
+                  >
+                    {p.emoji}
+                  </span>
+                </button>
+              ))}
+            </motion.div>
+          )}
+
+          {/* 2 colonnes plutôt que 4 : les nombres et leurs libellés tiennent
+              sans être tronqués ni réduits à 9 px. Points/Rang (classement
+              multijoueur) et Palier (progression solo) rejoignent les trois
+              compteurs bruts — auparavant seuls ces trois-là étaient visibles
+              ici, points et palier n'apparaissaient nulle part. */}
           <div className="mt-[18px] grid w-full grid-cols-2 gap-2">
             {[
+              ['Points', profile.points],
+              ['Rang', profile.rank ? `#${profile.rank}` : '—'],
+              ['Palier', `${profile.tier.icon} ${profile.tier.label}`],
               ['Grilles', profile.games],
               ['Mots trouvés', profile.words],
               ['Victoires', profile.wins],
-              ['Rang', profile.rank ? `#${profile.rank}` : '—'],
             ].map(([label, value]) => (
               <div key={label} className="rounded-[20px] bg-organic-surface px-4 py-3.5">
                 <p className="font-display text-[23px] tabular-nums text-organic-text">{value}</p>
@@ -162,30 +180,37 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
           </div>
 
           <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
-            Médailles ({profile.medals.length}/7)
+            Médailles ({profile.medals.length}/{profile.allMedals.length})
           </p>
           <div className="flex flex-wrap gap-[7px]">
-            {profile.medals.length === 0 && (
-              <p className="text-[12.5px] text-organic-neutral-700">Aucune pour l’instant — jouez une partie !</p>
-            )}
-            {/* Les deux premières médailles reprennent les teintes de la
-                maquette (sauge, terre cuite) ; les suivantes restent neutres,
-                pour que le regard aille aux plus récentes. */}
-            {profile.medals.map((m, i) => (
+            {/* Catalogue COMPLET : les verrouillées restent visibles, en
+                grisé, pour qu'on sache ce qui existe encore à débloquer —
+                avant, une médaille non obtenue n'apparaissait tout
+                simplement pas. Les deux premières du catalogue reprennent
+                les teintes de la maquette (sauge, terre cuite) quand
+                obtenues ; les suivantes restent neutres. */}
+            {profile.allMedals.map((m, i) => (
               <motion.span
                 key={m.id}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className={`rounded-full px-3 py-1.5 text-[12px] font-bold ${
-                  i === 0
-                    ? 'bg-organic-accent2-300 text-organic-accent2-900'
-                    : i === 1
-                      ? 'bg-organic-accent-200 text-organic-accent-800'
-                      : 'bg-organic-surface text-organic-neutral-800'
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold ${
+                  m.earned
+                    ? i === 0
+                      ? 'bg-organic-accent2-300 text-organic-accent2-900'
+                      : i === 1
+                        ? 'bg-organic-accent-200 text-organic-accent-800'
+                        : 'bg-organic-surface text-organic-neutral-800'
+                    : 'bg-organic-neutral-100 text-organic-neutral-500 opacity-70'
                 }`}
-                title={m.label}
+                title={m.earned ? `${m.label} — obtenue : ${m.reason}` : `Verrouillée — condition : ${m.reason}`}
               >
-                {m.icon} {m.label}
+                <MedalIcon id={m.id} className="h-[15px] w-[15px] shrink-0" />
+                {m.label}
+                {/* La raison ne s'affiche que pour les obtenues : pour les
+                    verrouillées, on ne veut qu'un aperçu (icône + nom), la
+                    condition reste dans l'infobulle plutôt qu'à l'écran. */}
+                {m.earned && <span className="font-medium opacity-70">· {m.reason}</span>}
               </motion.span>
             ))}
           </div>

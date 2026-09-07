@@ -3,10 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { Avatar } from './Avatar';
-import { MULTIPLAYER_GRADES } from '../lib/difficulty';
+import { GRADE_LABELS, MULTIPLAYER_GRADES } from '../lib/difficulty';
 import { screenShell } from '../lib/motion';
-
-const GRADE_LABELS: Record<string, string> = { facile: 'Facile', moyen: 'Moyen', difficile: 'Difficile' };
 
 /**
  * Salon d'attente : code à partager, liste des joueurs, départ.

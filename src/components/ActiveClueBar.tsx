@@ -79,7 +79,7 @@ export function ActiveClueBar({
             {filled}/{word.length}
           </span>
           <span className="block truncate font-clue text-[13px] font-bold leading-tight text-organic-text">
-            {word.clue}
+            {word.clue.toUpperCase()}
           </span>
         </button>
         <button
@@ -113,7 +113,7 @@ export function ActiveClueBar({
                 {arrow && <span aria-hidden="true">{ARROW_GLYPH[arrow]}</span>}
                 {word.length} lettres · {word.direction === 'right' ? 'horizontal' : 'vertical'}
               </p>
-              <p className="mt-2 font-display text-[27px] leading-tight text-organic-text">{word.clue}</p>
+              <p className="mt-2 font-display text-[27px] leading-tight text-organic-text">{word.clue.toUpperCase()}</p>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {slots.map((s, i) => (
                   <span

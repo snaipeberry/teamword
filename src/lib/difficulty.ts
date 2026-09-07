@@ -14,29 +14,17 @@ export interface HintDistribution {
   difficile: number;
 }
 
-// Miroir de SOLO_TIERS (server/index.js) — seuls les seuils comptent ici,
-// pour retrouver l'INDEX du palier courant à partir de `soloPoints`. Un
-// changement des paliers côté serveur doit être répercuté ici.
-const SOLO_TIER_MINS = [0, 4_200, 12_600, 30_000, 70_000, 150_000, 300_000, 600_000, 1_200_000];
-
-function soloTierIndex(soloPoints: number): number {
-  let i = 0;
-  for (let n = 0; n < SOLO_TIER_MINS.length; n++) {
-    if (soloPoints >= SOLO_TIER_MINS[n]) i = n;
-  }
-  return i;
-}
-
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
 /**
- * Répartition à une progression `t` ∈ [0, 1] sur l'échelle de difficulté
- * commune : 0 = tout début (80 % facile / 20 % moyen), 1 = palier maximum
- * (2 % facile / 8 % moyen / 90 % difficile). Partagée entre le solo (t tiré
- * du palier) et le multijoueur (t tiré du grade choisi par l'hôte), pour que
- * les deux progressent sur la même échelle plutôt que deux barèmes distincts.
+ * Répartition à une position `t` ∈ [0, 1] sur l'échelle de difficulté
+ * commune : 0 = niveau facile (80 % facile / 20 % moyen), 1 = niveau
+ * difficile (2 % facile / 8 % moyen / 90 % difficile). Le solo (rotation,
+ * voir plus bas) et le multijoueur (grade choisi par l'hôte) retombent tous
+ * les deux sur un des trois grades nommés, donc sur la même échelle plutôt
+ * que deux barèmes distincts.
  */
 function distributionAt(t: number): HintDistribution {
   return {
@@ -46,32 +34,34 @@ function distributionAt(t: number): HintDistribution {
   };
 }
 
+// Rotation stricte du solo : facile -> moyen -> difficile -> facile -> ...
+// Un cran par grille solo jouée. Remplace l'ancienne progression continue
+// par palier de points (qui dérivait lentement vers le plus dur au fil de
+// la partie) — ici les trois niveaux reviennent dans l'ordre, à intervalle
+// régulier, quel que soit le score.
+const SOLO_ROTATION: MultiplayerGrade[] = ['facile', 'moyen', 'difficile'];
+
 /**
- * Niveau à un point donné de l'échelle — sert à choisir QUELS MOTS entrent
- * dans la grille (complexité), là où `distributionAt` ne choisit que la
- * FORMULATION des définitions. Les deux dérivent du même `t`, mais le
- * serveur les applique à deux endroits différents (voir COMPLEXITY_RANK
- * dans generate_grid_v2.py).
+ * Index de rotation à partir du profil : `soloGrids` compte TOUTES les
+ * grilles solo terminées, grille du jour incluse (voir `soloGridDone` côté
+ * serveur) — or la grille du jour a sa propre difficulté fixe et ne doit
+ * pas décaler la rotation des vraies grilles solo. On la retranche donc
+ * (`dailies`, déjà suivi séparément) plutôt que d'ajouter un compteur dédié
+ * côté serveur.
  */
-function gradeAt(t: number): MultiplayerGrade {
-  if (t < 1 / 3) return 'facile';
-  if (t < 2 / 3) return 'moyen';
-  return 'difficile';
+function soloRotationIndex(soloGrids: number, dailies: number): number {
+  const n = SOLO_ROTATION.length;
+  return ((soloGrids - dailies) % n + n) % n;
 }
 
-function soloT(soloPoints: number): number {
-  const lastIndex = SOLO_TIER_MINS.length - 1;
-  return lastIndex > 0 ? soloTierIndex(soloPoints) / lastIndex : 1;
+/** Solo : niveau du moment dans la rotation. */
+export function soloGrade(soloGrids: number, dailies: number): MultiplayerGrade {
+  return SOLO_ROTATION[soloRotationIndex(soloGrids, dailies)];
 }
 
-/** Solo : la répartition tend vers plus difficile à chaque palier franchi. */
-export function soloDistribution(soloPoints: number): HintDistribution {
-  return distributionAt(soloT(soloPoints));
-}
-
-/** Solo : niveau de complexité des mots, sur la même progression de paliers. */
-export function soloGrade(soloPoints: number): MultiplayerGrade {
-  return gradeAt(soloT(soloPoints));
+/** Solo : répartition des indices pour le niveau courant de la rotation. */
+export function soloDistribution(soloGrids: number, dailies: number): HintDistribution {
+  return multiplayerDistribution(soloGrade(soloGrids, dailies));
 }
 
 /** Grille du jour : fixe, quel que soit le joueur (le serveur l'impose de
@@ -81,6 +71,13 @@ export const DAILY_DISTRIBUTION: HintDistribution = { facile: 0.05, moyen: 0.15,
 export type MultiplayerGrade = 'facile' | 'moyen' | 'difficile';
 
 export const MULTIPLAYER_GRADES: MultiplayerGrade[] = ['facile', 'moyen', 'difficile'];
+
+/** Libellé affiché — partagé entre le sélecteur de salon et le bandeau de jeu. */
+export const GRADE_LABELS: Record<MultiplayerGrade, string> = {
+  facile: 'Facile',
+  moyen: 'Moyen',
+  difficile: 'Difficile',
+};
 
 /** Multijoueur : grade choisi par l'hôte, sur la même échelle que le solo. */
 export function multiplayerDistribution(grade: MultiplayerGrade): HintDistribution {

@@ -1,7 +1,7 @@
 {
   "name": "mots-fleches",
   "version": "0.1.0",
-  "description": "Jeu de mots fléchés multijoueur en temps réel, pensé mobile-first.",
+  "description": "Jeu de mots fl\u00e9ch\u00e9s multijoueur en temps r\u00e9el, pens\u00e9 mobile-first.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,7 +22,6 @@
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
-    "@supabase/supabase-js": "^2.45.4",
     "framer-motion": "^11.11.17",
     "howler": "^2.2.4",
     "react": "^18.3.1",

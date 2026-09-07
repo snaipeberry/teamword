@@ -105,6 +105,17 @@ export function activePlayerName(): string {
   return session ? session.username : ensureGuestName();
 }
 
+/**
+ * Jeton du compte actif, ou `null` en mode invité. Transmis au serveur pour
+ * PROUVER l'identité revendiquée par `activePlayerId()` — un id de compte
+ * (`acc_…`) est visible de tous (classement, salons partagés) ; sans preuve,
+ * n'importe qui pourrait s'en servir pour se faire passer pour ce compte et
+ * en modifier le profil ou les points (voir `verifiedId` côté serveur).
+ */
+export function activePlayerToken(): string | null {
+  return currentSession()?.token ?? null;
+}
+
 export async function register(username: string, password: string): Promise<Session | string> {
   // `migrateFrom` transmet l'identité active pour reprendre la progression
   // déjà jouée dans CETTE visite — celle d'un invité qui décide de créer un

@@ -7,7 +7,7 @@ import {
   type RoomState,
 } from '../lib/roomClient';
 import { getOrCreatePlayerName } from '../lib/playerName';
-import { activePlayerId, activePlayerName } from '../lib/auth';
+import { activePlayerId, activePlayerName, activePlayerToken } from '../lib/auth';
 import { wordCellIds } from '../lib/gridGeometry';
 import type { MultiplayerGrade } from '../lib/difficulty';
 import type { Puzzle, WordEntry } from '../types/puzzle';
@@ -294,6 +294,7 @@ function RemoteSessionProvider({
       id: activePlayerId(),
       name: activePlayerName(),
       color: randomColor(),
+      token: activePlayerToken(),
     }),
     [],
   );

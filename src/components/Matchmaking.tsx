@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { connectRoom, type RoomConnection } from '../lib/roomClient';
-import { activePlayerId, activePlayerName } from '../lib/auth';
+import { activePlayerId, activePlayerName, activePlayerToken } from '../lib/auth';
 
 /**
  * File d'attente du 1v1 aléatoire.
@@ -16,7 +16,7 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
   const connection = useRef<RoomConnection | null>(null);
 
   useEffect(() => {
-    const moi = { id: activePlayerId(), name: activePlayerName(), color: '#8E7CFF' };
+    const moi = { id: activePlayerId(), name: activePlayerName(), color: '#8E7CFF', token: activePlayerToken() };
     const conn = connectRoom(
       null,
       moi,

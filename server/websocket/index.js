@@ -1,8 +1,7 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
-import { dirname } from 'node:path';
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { WebSocketServer } from 'ws';
+import { pool, ensureSchema } from './db.js';
 
 /**
  * Serveur temps réel des parties — remplace Liveblocks.
@@ -23,13 +22,10 @@ import { WebSocketServer } from 'ws';
  */
 
 const PORT = process.env.PORT || 8080;
-const SNAPSHOT_PATH = process.env.SNAPSHOT_PATH || './data/rooms.json';
 const SNAPSHOT_EVERY_MS = 10_000;
 // Une partie sans personne pendant ce délai est oubliée, pour ne pas garder
 // indéfiniment en mémoire des salons abandonnés.
 const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
-const PROFILES_PATH = process.env.PROFILES_PATH || './data/profiles.json';
-const ACCOUNTS_PATH = process.env.ACCOUNTS_PATH || './data/accounts.json';
 
 /** Durée de validité d'une session. Au-delà, il faut se reconnecter. */
 const TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
@@ -42,13 +38,21 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
  * rétroactif sans migration.
  */
 const MEDALS = [
-  { id: 'first_win', label: 'Première victoire', icon: '🥉', test: (p) => p.wins >= 1 },
-  { id: 'win_10', label: 'Habitué du podium', icon: '🥈', test: (p) => p.wins >= 10 },
-  { id: 'win_50', label: 'Champion', icon: '🥇', test: (p) => p.wins >= 50 },
-  { id: 'words_100', label: 'Centurion', icon: '💯', test: (p) => p.words >= 100 },
-  { id: 'words_1000', label: 'Verbicruciste', icon: '📚', test: (p) => p.words >= 1000 },
-  { id: 'daily_7', label: 'Assidu', icon: '🔥', test: (p) => p.dailies >= 7 },
-  { id: 'no_hint', label: 'Sans filet', icon: '🎯', test: (p) => p.cleanGrids >= 5 },
+  { id: 'first_win', label: 'Première victoire', icon: '🥉', reason: '1 victoire', test: (p) => p.wins >= 1 },
+  { id: 'win_10', label: 'Habitué du podium', icon: '🥈', reason: '10 victoires', test: (p) => p.wins >= 10 },
+  { id: 'win_50', label: 'Champion', icon: '🥇', reason: '50 victoires', test: (p) => p.wins >= 50 },
+  { id: 'words_100', label: 'Centurion', icon: '💯', reason: '100 mots trouvés', test: (p) => p.words >= 100 },
+  { id: 'words_1000', label: 'Verbicruciste', icon: '📚', reason: '1 000 mots trouvés', test: (p) => p.words >= 1000 },
+  { id: 'daily_7', label: 'Assidu', icon: '🔥', reason: '7 grilles du jour', test: (p) => p.dailies >= 7 },
+  { id: 'no_hint', label: 'Sans filet', icon: '🎯', reason: '5 grilles sans indice', test: (p) => p.cleanGrids >= 5 },
+  // Le solo avait sa propre économie (soloPoints/soloGrids) mais aucune
+  // médaille dédiée ; les trois suivantes sont aussi des paliers au-dessus
+  // d'une médaille existante, pour qui la dépasse largement.
+  { id: 'ermite', label: 'Ermite', icon: '🌱', reason: '50 grilles solo jouées', test: (p) => p.soloGrids >= 50 },
+  { id: 'increvable', label: 'Increvable', icon: '⏳', reason: '100 parties jouées', test: (p) => p.games >= 100 },
+  { id: 'perfectionniste', label: 'Perfectionniste', icon: '🏹', reason: '25 grilles sans indice', test: (p) => p.cleanGrids >= 25 },
+  { id: 'fidele', label: 'Fidèle', icon: '☀️', reason: '30 grilles du jour', test: (p) => p.dailies >= 30 },
+  { id: 'encyclopediste', label: 'Encyclopédiste', icon: '🗂️', reason: '5 000 mots trouvés', test: (p) => p.words >= 5000 },
 ];
 
 /** Titre affiché : la médaille la plus haute obtenue. */
@@ -167,6 +171,11 @@ function publicProfile(id) {
   return {
     ...p,
     medals: MEDALS.filter((m) => m.test(p)).map(({ id, label, icon }) => ({ id, label, icon })),
+    // Catalogue COMPLET (obtenues et non obtenues), pour que l'écran profil
+    // puisse montrer les verrouillées en aperçu grisé plutôt que les omettre
+    // — `medals` ci-dessus reste la liste filtrée (obtenues seulement), pour
+    // ne rien casser chez qui l'utilisait déjà pour le compte "x/7".
+    allMedals: MEDALS.map(({ id, label, icon, reason, test }) => ({ id, label, icon, reason, earned: test(p) })),
     title: titleFor(p),
     ...soloTierFor(p),
   };
@@ -217,6 +226,7 @@ async function createAccount(username, password) {
     createdAt: Date.now(),
   };
   accounts.set(username.toLowerCase(), account);
+  markDirty();
   return account;
 }
 
@@ -230,6 +240,7 @@ async function verifyPassword(account, password) {
 function issueToken(id) {
   const token = randomBytes(32).toString('hex');
   tokens.set(token, { id, expiresAt: Date.now() + TOKEN_TTL_MS });
+  markDirty();
   return token;
 }
 
@@ -241,6 +252,29 @@ function resolveToken(token) {
     return null;
   }
   return entry.id;
+}
+
+/**
+ * Vérifie qu'un id revendiqué comme COMPTE (`acc_…`) correspond bien au
+ * jeton de session fourni, avant de le laisser agir sous ce nom.
+ *
+ * Jusqu'ici `player.id` (join/queue) et `id` (profile-update, block,
+ * unblock) étaient acceptés tels quels : n'importe qui connaissant l'id
+ * d'un compte — visible partout, classement compris — pouvait s'en servir
+ * pour accumuler des points en son nom, changer son avatar, ou manipuler
+ * ses blocages. Un id invité (`guest-…`) n'a par nature aucun secret à
+ * vérifier (pas de mot de passe) : il reste falsifiable entre invités (rien
+ * de précieux n'y est attaché — exclu du classement, voir /leaderboard),
+ * mais ne peut plus se faire passer pour un compte réel.
+ *
+ * Renvoie l'id si la revendication est légitime (ou n'avait rien à
+ * prouver), `null` si elle doit être rejetée.
+ */
+function verifiedId(claimedId, token) {
+  const id = String(claimedId ?? '').slice(0, 64);
+  if (!id) return null;
+  if (!id.startsWith('acc_')) return id;
+  return resolveToken(token ?? '') === id ? id : null;
 }
 
 /** Renvoie true si l'appelant a droit à une tentative supplémentaire. */
@@ -258,87 +292,159 @@ function allowAttempt(ip) {
 /** File d'attente du 1v1 aléatoire. Volontairement non persistée. */
 const queue = [];
 
-// ---------- persistance ----------
+// ---------- persistance (Postgres — voir db.js) ----------
 // Sans elle, un simple redémarrage effacerait toutes les parties en cours —
 // or reprendre une partie plus tard fait partie des attentes du jeu.
-function loadSnapshot() {
+//
+// Toujours pas de fichiers : les Map en mémoire (rooms/profiles/accounts/
+// tokens/blocks) restent la source de vérité PENDANT que le process tourne
+// — chaque intent continue de les muter directement, aucun appelant
+// n'attend une écriture DB pour progresser. Seule la PERSISTANCE change de
+// support : chargée depuis Postgres au démarrage, réécrite dedans par
+// snapshot périodique (`saveSnapshot`, identique dans son principe à
+// l'ancien `writeJsonAtomic`, juste vers une table plutôt qu'un fichier).
+
+async function loadSnapshot() {
   try {
-    const raw = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8'));
+    const { rows } = await pool.query('SELECT code, data FROM rooms');
     const now = Date.now();
-    for (const [code, state] of Object.entries(raw)) {
+    for (const { code, data } of rows) {
       // Une salle solo n'expire jamais : la progression (numéro de grille en
       // cours) doit survivre indéfiniment, pas seulement les points/ampoules
       // déjà pérennes sur le profil.
-      if (state.mode === 'solo' || now - (state.touchedAt ?? 0) < ROOM_TTL_MS) {
-        rooms.set(code, state);
+      if (data.mode === 'solo' || now - (data.touchedAt ?? 0) < ROOM_TTL_MS) {
+        rooms.set(code, data);
       }
     }
     console.log(`[boot] ${rooms.size} partie(s) restaurée(s)`);
-  } catch {
-    console.log('[boot] aucun instantané, démarrage à vide');
-  }
-}
-
-// Écriture atomique : on écrit dans un fichier temporaire puis on le
-// `rename` sur la cible. Un `writeFileSync` direct tronque le fichier en
-// cas de crash pendant l'écriture — sur accounts.json, ça veut dire tous
-// les comptes perdus. `rename` sur un même volume est atomique.
-function writeJsonAtomic(path, data) {
-  mkdirSync(dirname(path), { recursive: true });
-  const tmp = `${path}.tmp`;
-  writeFileSync(tmp, JSON.stringify(data));
-  renameSync(tmp, path);
-}
-
-function saveSnapshot() {
-  try {
-    writeJsonAtomic(SNAPSHOT_PATH, Object.fromEntries(rooms));
-    writeJsonAtomic(PROFILES_PATH, Object.fromEntries(profiles));
-    writeJsonAtomic(ACCOUNTS_PATH, {
-      accounts: Object.fromEntries(accounts),
-      tokens: Object.fromEntries(tokens),
-      blocks: Object.fromEntries([...blocks].map(([id, set]) => [id, [...set]])),
-    });
   } catch (err) {
-    console.error('[snapshot] échec', err.message);
+    console.log('[boot] aucune partie restaurée —', err.message);
   }
 }
 
-function loadAccounts() {
+async function loadProfiles() {
   try {
-    const raw = JSON.parse(readFileSync(ACCOUNTS_PATH, 'utf8'));
-    for (const [key, acc] of Object.entries(raw.accounts ?? {})) accounts.set(key, acc);
-    const now = Date.now();
-    for (const [token, entry] of Object.entries(raw.tokens ?? {})) {
-      if (entry.expiresAt > now) tokens.set(token, entry);
-    }
-    for (const [id, list] of Object.entries(raw.blocks ?? {})) blocks.set(id, new Set(list));
-    console.log(`[boot] ${accounts.size} compte(s), ${tokens.size} session(s)`);
-  } catch {
-    console.log('[boot] aucun compte enregistré');
-  }
-}
-
-function loadProfiles() {
-  try {
-    const raw = JSON.parse(readFileSync(PROFILES_PATH, 'utf8'));
-    for (const [id, p] of Object.entries(raw)) profiles.set(id, { ...emptyProfile(id), ...p });
+    const { rows } = await pool.query('SELECT id, data FROM profiles');
+    for (const { id, data } of rows) profiles.set(id, { ...emptyProfile(id), ...data });
     console.log(`[boot] ${profiles.size} profil(s) restauré(s)`);
-  } catch {
-    console.log('[boot] aucun profil enregistré');
+  } catch (err) {
+    console.log('[boot] aucun profil restauré —', err.message);
+  }
+}
+
+async function loadAccounts() {
+  try {
+    const { rows: comptes } = await pool.query('SELECT id, username, salt, hash, created_at FROM accounts');
+    for (const a of comptes) {
+      accounts.set(a.username.toLowerCase(), {
+        id: a.id, username: a.username, salt: a.salt, hash: a.hash, createdAt: Number(a.created_at),
+      });
+    }
+
+    const now = Date.now();
+    const { rows: sessions } = await pool.query(
+      'SELECT token, account_id, expires_at FROM sessions WHERE expires_at > $1',
+      [now],
+    );
+    for (const s of sessions) tokens.set(s.token, { id: s.account_id, expiresAt: Number(s.expires_at) });
+
+    const { rows: blocages } = await pool.query('SELECT blocker_id, blocked_id FROM blocks');
+    for (const b of blocages) {
+      if (!blocks.has(b.blocker_id)) blocks.set(b.blocker_id, new Set());
+      blocks.get(b.blocker_id).add(b.blocked_id);
+    }
+
+    console.log(`[boot] ${accounts.size} compte(s), ${tokens.size} session(s)`);
+  } catch (err) {
+    console.log('[boot] aucun compte restauré —', err.message);
+  }
+}
+
+/**
+ * Remplace intégralement le contenu d'une table par les lignes fournies,
+ * DANS la transaction du client donné — un `DELETE` + `INSERT` en masse
+ * plutôt qu'un UPSERT ligne à ligne : ce qui est en mémoire EST la vérité
+ * complète du moment (une suppression en mémoire — compte supprimé, salle
+ * expirée — doit disparaître de la table aussi), exactement le même
+ * principe que l'ancien fichier réécrit en entier à chaque instantané.
+ * `table` est toujours un littéral appelé ci-dessous, jamais une entrée
+ * utilisateur : l'interpoler dans la requête est sûr ici.
+ */
+async function bulkReplace(client, table, columns, rows) {
+  await client.query(`DELETE FROM ${table}`);
+  if (!rows.length) return;
+  const placeholders = rows
+    .map((row, i) => `(${row.map((_, j) => `$${i * columns.length + j + 1}`).join(',')})`)
+    .join(',');
+  await client.query(`INSERT INTO ${table} (${columns.join(',')}) VALUES ${placeholders}`, rows.flat());
+}
+
+// Un instantané complet sur 5 tables à chaque cycle, même quand rien n'a
+// bougé (aucune partie active), gaspille des écritures Postgres pour rien —
+// à la différence d'un fichier local, celles-ci ont un coût réseau et
+// comptent contre les quotas de l'hébergeur. `markDirty()` est appelé à
+// chaque mutation connue (intent de salle, connexion, compte, blocage) ;
+// `saveSnapshot` n'écrit que si quelque chose a changé depuis la dernière
+// fois — `force` (utilisé à l'extinction) contourne ce filtre.
+let dirty = false;
+function markDirty() {
+  dirty = true;
+}
+
+async function saveSnapshot(force = false) {
+  if (!dirty && !force) return;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await bulkReplace(client, 'rooms', ['code', 'data'],
+      [...rooms].map(([code, state]) => [code, JSON.stringify(state)]));
+    await bulkReplace(client, 'profiles', ['id', 'data'],
+      [...profiles].map(([id, p]) => [id, JSON.stringify(p)]));
+    await bulkReplace(client, 'accounts', ['id', 'username', 'salt', 'hash', 'created_at'],
+      [...accounts.values()].map((a) => [a.id, a.username, a.salt, a.hash, a.createdAt]));
+    await bulkReplace(client, 'sessions', ['token', 'account_id', 'expires_at'],
+      [...tokens].map(([token, entry]) => [token, entry.id, entry.expiresAt]));
+    await bulkReplace(client, 'blocks', ['blocker_id', 'blocked_id'],
+      [...blocks].flatMap(([blocker, set]) => [...set].map((blocked) => [blocker, blocked])));
+    await client.query('COMMIT');
+    // Effacé seulement après succès CONFIRMÉ : un échec laisse `dirty` à
+    // true pour que le cycle suivant réessaie, plutôt que de perdre le
+    // changement silencieusement.
+    dirty = false;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('[snapshot] échec', err.message);
+  } finally {
+    client.release();
   }
 }
 
 function pruneRooms() {
   const now = Date.now();
+  let retire = false;
+
   for (const [code, state] of rooms) {
     if (state.mode === 'solo') continue; // jamais oubliée, voir loadSnapshot
     const vivants = sockets.get(code);
     if ((!vivants || vivants.size === 0) && now - state.touchedAt > ROOM_TTL_MS) {
       rooms.delete(code);
       sockets.delete(code);
+      retire = true;
     }
   }
+
+  // Un jeton expiré n'était jusqu'ici retiré qu'à sa PROCHAINE consultation
+  // (voir resolveToken) — une session ouverte puis jamais réutilisée restait
+  // en mémoire (et en base) indéfiniment. Le même passage périodique que les
+  // salles s'en charge maintenant.
+  for (const [token, entry] of tokens) {
+    if (entry.expiresAt < now) {
+      tokens.delete(token);
+      retire = true;
+    }
+  }
+
+  if (retire) markDirty();
 }
 
 // ---------- diffusion ----------
@@ -635,9 +741,10 @@ function tryMatch() {
 }
 
 // ---------- serveur ----------
-loadSnapshot();
-loadProfiles();
-loadAccounts();
+await ensureSchema();
+await loadSnapshot();
+await loadProfiles();
+await loadAccounts();
 setInterval(saveSnapshot, SNAPSHOT_EVERY_MS);
 setInterval(pruneRooms, 60 * 60 * 1000);
 
@@ -771,7 +878,10 @@ const http = createServer((req, res) => {
     req.on('end', () => {
       try {
         const { token } = JSON.parse(body);
-        if (token) tokens.delete(token);
+        if (token) {
+          tokens.delete(token);
+          markDirty();
+        }
       } catch {
         /* rien à faire : se déconnecter ne doit jamais échouer bruyamment */
       }
@@ -801,7 +911,7 @@ const http = createServer((req, res) => {
       body += chunk;
       if (body.length > 2_000) req.destroy();
     });
-    req.on('end', () => {
+    req.on('end', async () => {
       try {
         const { token } = JSON.parse(body);
         const id = resolveToken(token ?? '');
@@ -820,7 +930,10 @@ const http = createServer((req, res) => {
         rooms.delete(salleSolo);
         sockets.delete(salleSolo);
 
-        saveSnapshot();
+        // force=true : une suppression de compte doit être durablement
+        // actée immédiatement, pas attendre le prochain changement pour
+        // qu'un cycle d'instantané la remarque.
+        await saveSnapshot(true);
         json(res, { ok: true });
       } catch {
         res.writeHead(400);
@@ -840,7 +953,8 @@ const http = createServer((req, res) => {
     });
     req.on('end', () => {
       try {
-        const { id, name, avatar } = JSON.parse(body);
+        const { id: claimedId, token, name, avatar } = JSON.parse(body);
+        const id = verifiedId(claimedId, token);
         if (!id) {
           res.writeHead(400);
           return res.end();
@@ -850,6 +964,7 @@ const http = createServer((req, res) => {
         if (typeof avatar === 'string') profile.avatar = avatar.length <= 40_000 ? avatar : profile.avatar;
         else if (avatar === null) profile.avatar = null;
         profile.updatedAt = Date.now();
+        markDirty();
         json(res, publicProfile(id));
       } catch {
         res.writeHead(400);
@@ -867,7 +982,8 @@ const http = createServer((req, res) => {
     });
     req.on('end', () => {
       try {
-        const { id, playerId } = JSON.parse(body);
+        const { id: claimedId, token, playerId } = JSON.parse(body);
+        const id = verifiedId(claimedId, token);
         if (!id || !playerId || id === playerId) {
           res.writeHead(400);
           return res.end();
@@ -878,6 +994,7 @@ const http = createServer((req, res) => {
         } else {
           blocks.get(id)?.delete(playerId);
         }
+        markDirty();
         json(res, { blocked: [...blockedIds(id)] });
       } catch {
         res.writeHead(400);
@@ -976,7 +1093,12 @@ wss.on('connection', (ws) => {
       const player = msg.player ?? {};
       if (!code || !player.id) return;
 
-      const playerId = String(player.id).slice(0, 64);
+      const playerId = verifiedId(player.id, player.token);
+      if (!playerId) {
+        send(ws, { t: 'error', reason: 'identité invalide' });
+        ws.close();
+        return;
+      }
 
       // Isolation des salles solo : le propriétaire se déduit du code
       // lui-même, aucun champ à faire confiance séparément. Un tiers qui
@@ -1020,6 +1142,7 @@ wss.on('connection', (ws) => {
       // classement alors qu'il porte un nom en partie.
       const profile = getProfile(ws.player.id);
       if (profile.name === 'Joueur' || !profile.name) profile.name = ws.player.name;
+      markDirty(); // nouvelle salle et/ou nouveau profil potentiellement créés
 
       send(ws, { t: 'welcome', connectionId: ws.connectionId });
       broadcastState(code);
@@ -1035,8 +1158,13 @@ wss.on('connection', (ws) => {
       // rejoint aucune salle et n'identifiait donc personne jusqu'ici.
       const player = msg.player ?? {};
       if (player.id) {
+        const playerId = verifiedId(player.id, player.token);
+        if (!playerId) {
+          send(ws, { t: 'error', reason: 'identité invalide' });
+          return;
+        }
         ws.player = {
-          id: String(player.id).slice(0, 64),
+          id: playerId,
           name: String(player.name ?? 'Joueur').slice(0, 16),
           color: String(player.color ?? '#9CA3AF').slice(0, 9),
           activeCell: null,
@@ -1064,7 +1192,11 @@ wss.on('connection', (ws) => {
     }
 
     const intent = INTENTS[msg.t];
-    if (intent && intent(state, msg, ws.player.id)) broadcastState(ws.room);
+    if (intent) {
+      const changed = intent(state, msg, ws.player.id);
+      markDirty();
+      if (changed) broadcastState(ws.room);
+    }
   });
 
   ws.on('close', () => {
@@ -1093,10 +1225,10 @@ http.listen(PORT, () => console.log(`[ws] écoute sur :${PORT}`));
 // Un hébergeur (Railway, Fly, ...) envoie SIGTERM avant de tuer le process à
 // chaque redéploiement. Sans ce handler, Node quitte immédiatement et perd
 // jusqu'à SNAPSHOT_EVERY_MS de parties, points et comptes non encore
-// écrits sur disque.
-function arreterProprement() {
+// écrits en base.
+async function arreterProprement() {
   console.log('[arrêt] instantané final avant extinction');
-  saveSnapshot();
+  await saveSnapshot(true); // force : même si rien n'a été marqué "dirty"
   process.exit(0);
 }
 process.on('SIGTERM', arreterProprement);

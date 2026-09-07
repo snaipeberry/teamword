@@ -63,21 +63,21 @@ function Round({
   const seed = daily ? dailySeed() : seedFor(sessionId, game, round);
 
   // Solo et quotidien partagent la même économie de points/ampoules — voir
-  // useSoloProfile. Remonté ici (plutôt que dans CrosswordGrid) car le palier
-  // du profil détermine la répartition des indices AVANT même de savoir
-  // quelle grille demander.
+  // useSoloProfile. Remonté ici (plutôt que dans CrosswordGrid) car le rang
+  // dans la rotation (soloGrids/dailies) détermine la répartition des
+  // indices AVANT même de savoir quelle grille demander.
   const soloScored = solo || daily;
   const soloProfile = useSoloProfile(activePlayerId(), soloScored);
 
   // Le service de remplissage est sans état : c'est ici qu'on décide QUI voit
   // quels indices. Le serveur applique les poids reçus tels quels, sauf pour
-  // la grille du jour qu'il fixe lui-même (80/15/5, identique pour tout le
-  // monde) — envoyer `undefined` laisse ce choix au serveur plutôt que de le
-  // dupliquer côté client.
+  // la grille du jour qu'il fixe lui-même (5 % facile / 15 % moyen / 80 %
+  // difficile, identique pour tout le monde) — envoyer `undefined` laisse ce
+  // choix au serveur plutôt que de le dupliquer côté client.
   const hints = daily
     ? undefined
     : solo
-      ? (soloProfile.profile ? soloDistribution(soloProfile.profile.soloPoints) : undefined)
+      ? (soloProfile.profile ? soloDistribution(soloProfile.profile.soloGrids, soloProfile.profile.dailies) : undefined)
       : multiplayerDistribution(grade);
   // Niveau de COMPLEXITÉ des mots retenus — distinct de `hints`, qui ne
   // choisit que la formulation des définitions. Non transmis en quotidien :
@@ -85,12 +85,18 @@ function Round({
   const difficulty = daily
     ? undefined
     : solo
-      ? (soloProfile.profile ? soloGrade(soloProfile.profile.soloPoints) : undefined)
+      ? (soloProfile.profile ? soloGrade(soloProfile.profile.soloGrids, soloProfile.profile.dailies) : undefined)
       : grade;
-  // En solo, la répartition dépend du palier : pas la peine de demander une
-  // grille avant de le connaître, elle partirait avec la mauvaise proportion.
+  // En solo, le niveau dépend de la rotation (soloGrids/dailies) : pas la
+  // peine de demander une grille avant de la connaître, elle partirait avec
+  // la mauvaise proportion.
   const puzzleReady = !solo || soloProfile.profile !== null;
   const { puzzle, loading, error } = usePuzzle(seed, { hints, difficulty, ready: puzzleReady });
+  // Pour l'affichage (TopBar) : `difficulty` est `undefined` en quotidien
+  // (volontairement, voir plus haut — le serveur ne doit pas le recevoir du
+  // client) mais le joueur doit quand même voir le niveau réellement
+  // appliqué, qui y est toujours fixe à « difficile ».
+  const displayDifficulty = difficulty ?? 'difficile';
 
   if (loading || !puzzle) return <LoadingScreen />;
 
@@ -107,6 +113,7 @@ function Round({
         round={round}
         dailyLabel={daily ? dailyLabel() : null}
         partiePrivee={!daily && !bot && !solo && !ranked}
+        difficulty={displayDifficulty}
       />
       {error && (
         <p className="mt-1 shrink-0 rounded-full bg-amber-400/20 px-3 py-0.5 text-[10px] text-amber-100">

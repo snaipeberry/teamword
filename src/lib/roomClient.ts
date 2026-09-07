@@ -9,6 +9,8 @@
  * verrouiller son téléphone ne doit pas sortir de la partie.
  */
 
+import { activePlayerToken } from './auth';
+
 export interface RoomState {
   round: number;
   game: number;
@@ -35,6 +37,12 @@ export interface Medal {
   icon: string;
 }
 
+export interface CatalogMedal extends Medal {
+  /** Condition d'obtention, en toutes lettres (ex. « 10 victoires »). */
+  reason: string;
+  earned: boolean;
+}
+
 export interface SoloTier {
   id: string;
   label: string;
@@ -52,6 +60,8 @@ export interface Profile {
   games: number;
   dailies: number;
   medals: Medal[];
+  /** Catalogue complet (obtenues et non), pour un aperçu des verrouillées. */
+  allMedals: CatalogMedal[];
   title: string;
   rank: number | null;
   /** Économie solo — séparée du classement général ci-dessus. */
@@ -127,7 +137,10 @@ export function connectRoom(
    * avant d'avoir la moindre partie.
    */
   room: string | null,
-  player: { id: string; name: string; color: string },
+  /** `token` prouve l'id revendiqué quand c'est un compte (`acc_…`) — voir
+   *  `activePlayerToken` côté client et `verifiedId` côté serveur. Inutile
+   *  (et absent) pour un invité ou un bot, qui n'ont rien à prouver. */
+  player: { id: string; name: string; color: string; token?: string | null },
   handlers: RoomHandlers,
   /** 'solo' | 'daily' — fixe le mode de la salle à sa création (voir server/index.js). */
   mode?: string,
@@ -227,7 +240,7 @@ async function postBlock(path: 'block' | 'unblock', id: string, playerId: string
   const res = await fetch(`${httpBase()}/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, playerId }),
+    body: JSON.stringify({ id, playerId, token: activePlayerToken() }),
   });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return (await res.json()).blocked as string[];
@@ -249,10 +262,15 @@ export async function fetchBlocked(id: string): Promise<string[]> {
  * accessible hors partie, sans connexion temps réel ouverte.
  */
 export async function updateProfile(id: string, patch: { name?: string; avatar?: string | null }): Promise<void> {
+  // `id` est toujours celui de l'appelant lui-même (voir Profile.tsx) — le
+  // jeton se lit donc directement ici plutôt que de le faire remonter par
+  // chaque appelant. Absent pour un invité : `verifiedId` côté serveur ne
+  // l'exige que pour un id de compte (`acc_…`).
+  const token = activePlayerToken();
   const res = await fetch(`${httpBase()}/profile-update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, ...patch }),
+    body: JSON.stringify({ id, token, ...patch }),
   });
   if (!res.ok) throw new Error(`profil: ${res.status}`);
 }

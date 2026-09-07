@@ -122,7 +122,7 @@ export function ClueCell({
               solved ? 'text-organic-accent2-700 opacity-50 line-through decoration-organic-accent2-600' : '',
             ].join(' ')}
           >
-            {clue.text}
+            {clue.text.toUpperCase()}
             {/*
               La flèche est rendue DANS le flux de sa propre définition, et
               non plus en position absolue sur un bord de la case.

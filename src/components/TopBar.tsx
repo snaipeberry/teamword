@@ -8,6 +8,7 @@ import { SessionMenu } from './SessionMenu';
 import { AnimatedNumber } from './AnimatedNumber';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { blockPlayer } from '../lib/roomClient';
+import { GRADE_LABELS, type MultiplayerGrade } from '../lib/difficulty';
 
 /**
  * Bandeau unique regroupant numéro de grille, scores et actions.
@@ -23,6 +24,7 @@ export function TopBar({
   round,
   dailyLabel = null,
   partiePrivee = false,
+  difficulty,
 }: {
   sessionId: string;
   round: number;
@@ -35,6 +37,9 @@ export function TopBar({
    * flèche de retour suffit, comme sur les autres écrans.
    */
   partiePrivee?: boolean;
+  /** Niveau de la grille en cours (rotation solo, grade multijoueur, ou
+   *  « difficile » fixe en quotidien) — affiché à côté du numéro de grille. */
+  difficulty?: MultiplayerGrade;
 }) {
   const game = useGameState();
   const { teams, ranked } = useRound();
@@ -86,6 +91,11 @@ export function TopBar({
       >
         {dailyLabel ?? `#${round + 1}`}
       </span>
+      {difficulty && (
+        <span className="shrink-0 rounded-full bg-organic-accent2-200 px-2 py-1 font-display text-[11px] text-organic-accent2-900">
+          {GRADE_LABELS[difficulty]}
+        </span>
+      )}
 
       {/* En partie par équipes, on affiche les TOTAUX de camp : c'est le score
           qui compte, celui de chacun n'étant qu'un détail. */}

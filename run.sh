@@ -33,8 +33,15 @@ start_one() {
     return
   fi
   ( cd "$ROOT/$cwd" && nohup "$@" >"$LOG_DIR/$name.log" 2>&1 & )
-  sleep 0.5
-  pid="$(port_pid "$port")"
+  # jusqu'à 8s par pas de 0.5s : "realtime" fait maintenant un aller-retour
+  # réseau vers Postgres au démarrage (schéma + rechargement), plus lent
+  # qu'un simple bind de port — un sleep fixe trop court le déclarait "pas
+  # démarré" alors qu'il continuait de charger juste après le contrôle.
+  for _ in $(seq 1 16); do
+    pid="$(port_pid "$port")"
+    [ -n "$pid" ] && break
+    sleep 0.5
+  done
   if [ -n "$pid" ]; then
     echo "  ✓ $name démarré sur :$port (pid $pid) — log: logs/$name.log"
   else
@@ -50,10 +57,25 @@ stop_one() {
     echo "  – $name : rien sur :$port"
     return
   fi
-  if kill "$pid" 2>/dev/null; then
-    echo "  ✓ $name arrêté (pid $pid)"
-  else
+  if ! kill "$pid" 2>/dev/null; then
     echo "  ✗ impossible d'arrêter $name (pid $pid)"
+    return
+  fi
+  # Attend que le port se libère pour de vrai avant de rendre la main :
+  # "realtime" reçoit SIGTERM puis fait un aller-retour réseau (instantané
+  # Postgres) avant de sortir — un `kill` suivi d'un retour immédiat laissait
+  # `restart` relancer pendant que l'ancien process terminait encore, et
+  # `start_one` prenait alors ce dernier souffle pour "déjà en écoute".
+  local encore
+  for _ in $(seq 1 16); do
+    encore="$(port_pid "$port")"
+    [ -z "$encore" ] && break
+    sleep 0.5
+  done
+  if [ -n "$encore" ]; then
+    echo "  ✗ $name (pid $pid) ne s'est pas arrêté à temps"
+  else
+    echo "  ✓ $name arrêté (pid $pid)"
   fi
 }
 
