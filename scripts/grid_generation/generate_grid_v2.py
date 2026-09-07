@@ -50,6 +50,7 @@ Exemples :
 
 import argparse
 import json
+import multiprocessing as mp
 import random
 import re
 import time
@@ -760,6 +761,76 @@ def count_dead_clue_cells(roles, slots, rows, cols):
     )
 
 
+def sparsify_skeleton(roles, rows, cols, target_words, rng, max_passes=2000):
+    """Réduit le nombre de mots en fusionnant des suites voisines.
+
+    `generate_skeleton_spaced` pose ses cases-indices sans se soucier de la
+    longueur des mots que ça introduit — mesuré, ça donne ~38 mots sur une
+    grille 10x10 dont presque les deux tiers font 2 ou 3 lettres. Baisser la
+    densité de tirage n'y change quasi rien (voir historique) : la vraie
+    variable, c'est le nombre de cases-indices qui SURVIVENT, pas combien on
+    en tente.
+
+    On retire donc des cases-indices existantes une à une — chaque retrait
+    fusionne les deux suites qu'elle séparait en une seule, plus longue — en
+    ne gardant le retrait QUE s'il laisse le squelette valide (aucun
+    orphelin, aucune case-indice à plus de 2 définitions, aucun indice mort).
+    Piloté par un nombre de mots CIBLE plutôt qu'une longueur minimale : viser
+    une longueur minimale sans plafond fait dégénérer vers une grille quasi
+    ouverte (des suites de 9-10 lettres partout), injouable au remplissage —
+    mesuré à 0 % de succès de remplissage même à peine sous ~28 mots. 30-32
+    mots est le meilleur compromis mesuré : la part de mots courts descend
+    d'environ deux tiers à deux cinquièmes, pour un coût de génération encore
+    absorbable par un banc construit hors-ligne.
+    """
+
+    def snapshot():
+        if find_orphan_positions(roles, rows, cols):
+            return None
+        slots = extract_slots(roles, rows, cols)
+        if not slots_are_valid(roles, slots, rows, cols):
+            return None
+        if count_dead_clue_cells(roles, slots, rows, cols) > 0:
+            return None
+        return slots
+
+    slots = snapshot()
+    if slots is None:
+        return roles, None
+
+    for _ in range(max_passes):
+        if len(slots) <= target_words:
+            break
+
+        load = defaultdict(list)
+        for s in slots:
+            load[s.clue_pos()].append(s.length)
+
+        # Priorité aux cases-indices qui n'introduisent que des mots courts
+        # (2-3 lettres) : c'est justement ce qu'on veut faire disparaître en
+        # premier, pas un retrait au hasard.
+        clue_cells = [
+            (r, c) for r in range(rows) for c in range(cols)
+            if not roles[r][c] and (r, c) != (0, 0)
+        ]
+        clue_cells.sort(key=lambda rc: (min(load.get(rc, [99])), rng.random()))
+
+        removed = False
+        for (r, c) in clue_cells:
+            roles[r][c] = True  # tentative : rendu à la grille en lettre
+            new_slots = snapshot()
+            if new_slots is not None and len(new_slots) < len(slots):
+                slots = new_slots
+                removed = True
+                break
+            roles[r][c] = False  # annulé, aurait cassé une invariante
+
+        if not removed:
+            break  # plus aucun retrait sûr : on s'arrête où on en est
+
+    return roles, slots
+
+
 # ============================================================
 # REMPLISSAGE (mot-croisé classique : les mots les plus longs
 # — donc les plus contraints — sont posés en premier)
@@ -896,33 +967,84 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
         taken = used_idx[length]
         return (cand - taken) if taken else cand
 
+    # Cache de domaines. `candidate_set(si)` ne dépend que (a) des slots
+    # croisés déjà posés et (b) du pool restant pour SA longueur — deux
+    # choses qui ne changent que quand un slot voisin (croisé, ou de même
+    # longueur) est posé/dé-posé. Le recalculer pour TOUS les slots restants
+    # à CHAQUE nœud (ancien comportement de pick_next) était de très loin le
+    # premier poste de coût mesuré : 19,6M appels, 66 % du temps total sur
+    # un échantillon profilé. On ne recalcule donc plus que les slots
+    # explicitement invalidés depuis leur dernier calcul.
+    slots_by_length = defaultdict(list)
+    for si, s in enumerate(slots):
+        slots_by_length[s.length].append(si)
+
+    domain_cache = {}
+    dirty = set(range(n))
+
+    def get_candidates(si):
+        if si in dirty:
+            domain_cache[si] = candidate_set(si)
+            dirty.discard(si)
+        return domain_cache[si]
+
+    def invalidate_around(si):
+        # Appelé juste après avoir posé OU retiré le mot de `si` : ses
+        # voisins croisés viennent de voir une de leurs lettres se fixer ou
+        # se libérer, et ses semblables de même longueur viennent de voir
+        # leur pool de mots restants changer — dans les deux cas, leur
+        # candidate_set mis en cache n'est plus à jour (si lui-même n'a pas
+        # besoin d'être invalidé : sa propre formule ne dépend jamais de son
+        # propre mot).
+        length = slots[si].length
+        for osi in neighbors[si]:
+            dirty.add(osi)
+        for osi in slots_by_length[length]:
+            if osi != si:
+                dirty.add(osi)
+
     rank = complexity_rank_for(difficulty)
 
     def materialize(si, cand):
         length = slots[si].length
         pool = index.by_length[length]
-        picks = list(cand)
-        rng.shuffle(picks)  # variété entre générations successives
         marked = avoid_idx.get(length)
-        if rank:
-            # Les complexités « interdites » par le niveau (rang 3) sont
-            # ÉCARTÉES, pas seulement reléguées : les reléguer suffisait à
-            # les rendre rares, pas à les rendre absentes — le backtracking
-            # finissait par les atteindre dès qu'un croisement se tendait
-            # (mesuré : 18 % de mots hors-niveau en facile).
-            #
-            # Le repli reste possible case par case : si AUCUN mot du niveau
-            # ne colle au motif imposé par les croisements, on rouvre le
-            # stock complet plutôt que de rendre la grille irremplissable.
-            preferes = [i for i in picks if rank.get(pool[i].complexity, 0) < 3]
-            if preferes:
-                picks = preferes
-            picks.sort(key=lambda i: (rank.get(pool[i].complexity, 0), i in marked if marked else False))
-        elif marked:
-            # Tri STABLE sur un booléen : les mots déjà vus passent derrière,
-            # l'ordre aléatoire est conservé à l'intérieur de chaque groupe.
-            picks.sort(key=lambda i: i in marked)
-        del picks[candidate_cap:]
+
+        if rank or marked:
+            # Le tri par palier de difficulté / mots à éviter a besoin de
+            # voir tout le pool de candidats AVANT la coupe à candidate_cap
+            # (sinon on prioriserait sur un sous-ensemble déjà tronqué) :
+            # on garde donc le mélange complet dans ce cas.
+            picks = list(cand)
+            rng.shuffle(picks)  # variété entre générations successives
+            if rank:
+                # Les complexités « interdites » par le niveau (rang 3) sont
+                # ÉCARTÉES, pas seulement reléguées : les reléguer suffisait à
+                # les rendre rares, pas à les rendre absentes — le backtracking
+                # finissait par les atteindre dès qu'un croisement se tendait
+                # (mesuré : 18 % de mots hors-niveau en facile).
+                #
+                # Le repli reste possible case par case : si AUCUN mot du
+                # niveau ne colle au motif imposé par les croisements, on
+                # rouvre le stock complet plutôt que de rendre la grille
+                # irremplissable.
+                preferes = [i for i in picks if rank.get(pool[i].complexity, 0) < 3]
+                if preferes:
+                    picks = preferes
+                picks.sort(key=lambda i: (rank.get(pool[i].complexity, 0), i in marked if marked else False))
+            else:
+                # Tri STABLE sur un booléen : les mots déjà vus passent
+                # derrière, l'ordre aléatoire est conservé dans chaque groupe.
+                picks.sort(key=lambda i: i in marked)
+            del picks[candidate_cap:]
+        else:
+            # Cas courant (fabrication du banc : ni palier, ni mots à
+            # éviter) : mélanger tout le pool (mesuré jusqu'à ~3200 mots
+            # pour une longueur) pour n'en garder que candidate_cap (60) est
+            # un travail O(pool) inutile — un tirage direct est O(candidate_cap).
+            seq = list(cand)
+            picks = rng.sample(seq, min(len(seq), candidate_cap))
+
         return [(i, pool[i]) for i in picks]
 
     def pick_next(remaining):
@@ -937,7 +1059,7 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
         # l'essentiel du coût de l'ancienne version.
         best_si, best_cand, best_count = None, None, None
         for si in remaining:
-            cand = candidate_set(si)
+            cand = get_candidates(si)
             size = len(cand)
             if best_count is None or size < best_count:
                 best_si, best_cand, best_count = si, cand, size
@@ -969,6 +1091,7 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
         for wi, w in materialize(si, cand):
             assignment[si] = w
             taken.add(wi)
+            invalidate_around(si)
 
             # Vérification anticipée (forward checking) : un choix qui laisse
             # un slot voisin à 0 candidat est perdant à coup sûr ; le
@@ -976,7 +1099,7 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
             # milliers d'essais gâchés.
             doomed = False
             for osi in neighbors[si]:
-                if assignment[osi] is None and not candidate_set(osi):
+                if assignment[osi] is None and not get_candidates(osi):
                     doomed = True
                     break
 
@@ -985,6 +1108,7 @@ def fill_slots(slots, words, rng, max_backtracks=150000, candidate_cap=60, index
 
             taken.discard(wi)
             assignment[si] = None
+            invalidate_around(si)
 
         return False
 
@@ -1272,10 +1396,106 @@ def decode_roles(rows_str):
     return [[ch == "1" for ch in row] for row in rows_str]
 
 
+def _try_one_skeleton(rng, words, index, weights, rows, cols, viable,
+                       target_words, max_isolated, max_dead_clues, min_words):
+    """Un essai complet : squelette -> (fusion optionnelle) -> filtres de
+    qualité -> remplissage. Renvoie (clé encodée, nb de mots, indices morts)
+    en cas de succès, sinon None.
+
+    Fonction PURE des arguments reçus (le seul état qu'elle mute est `rng`,
+    qui lui est propre) — aucune fermeture sur des variables partagées. C'est
+    ce qui la rend appelable aussi bien depuis la boucle séquentielle que
+    depuis un worker de `multiprocessing` (voir `build_skeleton_bank`).
+    """
+
+    # Générateur à indices espacés : c'est le seul qui garantisse qu'aucune
+    # case-indice n'en touche une autre (voir sa docstring).
+    roles = generate_skeleton_spaced(rows, cols, rng)
+
+    if target_words is not None:
+        # Fusionne des cases-indices pour viser moins de mots — revalide
+        # tout en interne (orphelins, >2 définitions/case, indices morts),
+        # donc les deux contrôles suivants sont déjà couverts.
+        roles, slots = sparsify_skeleton(roles, rows, cols, target_words, rng)
+        if slots is None:
+            return None
+    else:
+        # Zéro tolérance ici : une case orpheline deviendrait une case
+        # noire au runtime, or on veut un banc utilisable tel quel.
+        if find_orphan_positions(roles, rows, cols):
+            return None
+        slots = extract_slots(roles, rows, cols)
+        if not slots_are_valid(roles, slots, rows, cols):
+            return None
+
+    if len(slots) < 3 or any(s.length not in viable for s in slots):
+        return None
+
+    # Filtres de qualité : purement structurels, donc évalués avant le
+    # remplissage (voir docstring de build_skeleton_bank).
+    if max_isolated is not None and count_isolated_slots(slots) > max_isolated:
+        return None
+    if (
+        max_dead_clues is not None
+        and count_dead_clue_cells(roles, slots, rows, cols) > max_dead_clues
+    ):
+        return None
+
+    demand = defaultdict(int)
+    for s in slots:
+        demand[s.length] += 1
+    if any(cnt > length_capacity(L, weights) for L, cnt in demand.items()):
+        return None
+
+    assignment, complete = fill_slots(slots, words, rng, index=index)
+    if not complete:
+        return None
+
+    cells, words_out, dead_clues = build_cells_and_words(
+        roles, slots, assignment, rows, cols
+    )
+    if len(words_out) < min_words:
+        return None
+
+    key = tuple("".join("1" if v else "0" for v in row) for row in roles)
+    return key, len(words_out), dead_clues
+
+
+# État d'un worker de `multiprocessing` : construit une seule fois par
+# processus (voir `_pool_init`), pas à chaque tâche — reconstruire l'index
+# inversé à chaque lot serait aussi coûteux que la recherche elle-même.
+_WORKER = {}
+
+
+def _pool_init(words, max_len):
+    _WORKER["words"] = words
+    _WORKER["index"] = build_word_index(words)
+    _WORKER["weights"] = word_length_weights(words, max_len)
+
+
+def _pool_search_batch(task):
+    (seed, n_attempts, rows, cols, viable, target_words,
+     max_isolated, max_dead_clues, min_words) = task
+    rng = random.Random(seed)
+    words = _WORKER["words"]
+    index = _WORKER["index"]
+    weights = _WORKER["weights"]
+    found = []
+    for _ in range(n_attempts):
+        result = _try_one_skeleton(
+            rng, words, index, weights, rows, cols, viable,
+            target_words, max_isolated, max_dead_clues, min_words,
+        )
+        if result is not None:
+            found.append(result)
+    return found, n_attempts
+
+
 def build_skeleton_bank(
     words, rows, cols, target, max_word_len=None, seed=None,
     min_words=18, max_dead_clues=None, max_isolated=0,
-    max_attempts_per_hit=4000, progress=True,
+    max_attempts_per_hit=4000, progress=True, target_words=None,
+    workers=1,
 ):
     """Cherche `target` squelettes distincts, entièrement pavés et dont on a
     prouvé qu'ils se remplissent complètement. Renvoie la liste des rôles
@@ -1286,77 +1506,86 @@ def build_skeleton_bank(
     le seul squelette, donc on filtre AVANT le remplissage : un squelette
     médiocre est rejeté pour quelques microsecondes au lieu de plusieurs
     millisecondes de recherche inutile.
+
+    `target_words`, s'il est fourni, fait passer chaque squelette par
+    `sparsify_skeleton` avant les autres filtres pour viser ce nombre de
+    mots (voir sa docstring — 30-32 est le compromis mesuré entre part de
+    mots courts et taux de réussite du remplissage). `None` (défaut)
+    préserve le comportement d'origine.
+
+    `workers` > 1 distribue les essais sur des processus séparés
+    (`multiprocessing.Pool`) : chaque essai est indépendant des autres (rien
+    n'est partagé sauf la liste de mots et l'index, immuables), donc le
+    problème est directement parallélisable — mesuré ~1 seul cœur utilisé
+    sur 12 disponibles avant ce changement. Chaque worker reçoit sa PROPRE
+    graine dérivée de `seed` : à `workers` ou `max_attempts_per_hit` égaux
+    le résultat est reproductible, mais PAS bit-à-bit identique à une
+    exécution séquentielle (le partitionnement des essais entre workers
+    change quel essai tombe sur quelle graine).
     """
 
-    rng = random.Random(seed)
     max_len = max_word_len or min(max(len(w.word) for w in words), max(rows, cols))
     weights = word_length_weights(words, max_len)
     viable = {L for L, n in weights.items() if n > 0 and 2 <= L <= max_len}
-    index = build_word_index(words)
 
     bank = []
     seen = set()
     attempts = 0
     budget = target * max_attempts_per_hit
 
-    while len(bank) < target and attempts < budget:
-        attempts += 1
-
-        # Générateur à indices espacés : c'est le seul qui garantisse qu'aucune
-        # case-indice n'en touche une autre (voir sa docstring).
-        roles = generate_skeleton_spaced(rows, cols, rng)
-
-        # Zéro tolérance ici : une case orpheline deviendrait une case noire
-        # au runtime, or on veut un banc utilisable tel quel.
-        if find_orphan_positions(roles, rows, cols):
-            continue
-
-        key = tuple("".join("1" if v else "0" for v in row) for row in roles)
+    def record(result):
+        key, n_words, dead_clues = result
         if key in seen:
-            continue
-
-        slots = extract_slots(roles, rows, cols)
-        if len(slots) < 3 or any(s.length not in viable for s in slots):
-            continue
-
-        if not slots_are_valid(roles, slots, rows, cols):
-            continue
-
-        # Filtres de qualité : purement structurels, donc évalués avant le
-        # remplissage (voir docstring).
-        if max_isolated is not None and count_isolated_slots(slots) > max_isolated:
-            continue
-        if (
-            max_dead_clues is not None
-            and count_dead_clue_cells(roles, slots, rows, cols) > max_dead_clues
-        ):
-            continue
-
-        demand = defaultdict(int)
-        for s in slots:
-            demand[s.length] += 1
-        if any(cnt > length_capacity(L, weights) for L, cnt in demand.items()):
-            continue
-
-        assignment, complete = fill_slots(slots, words, rng, index=index)
-        if not complete:
-            continue
-
-        cells, words_out, dead_clues = build_cells_and_words(
-            roles, slots, assignment, rows, cols
-        )
-        if len(words_out) < min_words:
-            continue
-
+            return
         seen.add(key)
         bank.append(list(key))
-
         if progress:
             print(
                 f"\r[BANC] {len(bank)}/{target} squelettes "
-                f"({attempts} essais, {len(words_out)} mots, {dead_clues} indices morts)",
+                f"({attempts} essais, {n_words} mots, {dead_clues} indices morts)",
                 end="", flush=True,
             )
+
+    if workers and workers > 1:
+        # Lots de plusieurs essais par tâche (pas un essai par tâche) : la
+        # communication entre processus a un coût fixe, l'amortir sur un lot
+        # évite qu'il ne domine sur des essais individuellement rapides.
+        chunk = max(4, max_attempts_per_hit // 40)
+        base_seed = seed if seed is not None else random.SystemRandom().randrange(2**31)
+
+        def task_stream():
+            s = base_seed
+            while True:
+                yield (s, chunk, rows, cols, viable, target_words,
+                       max_isolated, max_dead_clues, min_words)
+                s += 1
+
+        pool = mp.Pool(workers, initializer=_pool_init, initargs=(words, max_len))
+        try:
+            for found, n_attempts in pool.imap_unordered(_pool_search_batch, task_stream()):
+                attempts += n_attempts
+                for result in found:
+                    record(result)
+                    if len(bank) >= target:
+                        break
+                if len(bank) >= target or attempts >= budget:
+                    break
+        finally:
+            # terminate(), pas close()+join() : task_stream() est infini,
+            # attendre qu'il s'épuise bloquerait pour toujours.
+            pool.terminate()
+            pool.join()
+    else:
+        rng = random.Random(seed)
+        index = build_word_index(words)
+        while len(bank) < target and attempts < budget:
+            attempts += 1
+            result = _try_one_skeleton(
+                rng, words, index, weights, rows, cols, viable,
+                target_words, max_isolated, max_dead_clues, min_words,
+            )
+            if result is not None:
+                record(result)
 
     if progress:
         print()
@@ -1539,6 +1768,20 @@ def main():
         help="Nombre max de cases-indices sans définition, c.-à-d. de trous "
              "visibles dans la grille (défaut : illimité).",
     )
+    parser.add_argument(
+        "--workers", type=int, default=1,
+        help="Nombre de processus pour --build-bank (défaut 1 = séquentiel). "
+             "Les essais sont indépendants -> parallélisable directement ; "
+             "essaie os.cpu_count().",
+    )
+    parser.add_argument(
+        "--target-words", type=int, default=None,
+        help="Fusionne des cases-indices pour viser ce nombre de mots par "
+             "grille (voir sparsify_skeleton). Mesuré : 30-32 est le "
+             "meilleur compromis part de mots courts / taux de réussite du "
+             "remplissage sur 10x10 — en dessous de ~28 le remplissage "
+             "échoue quasi systématiquement.",
+    )
 
     args = parser.parse_args()
 
@@ -1565,6 +1808,7 @@ def main():
             words, args.rows, args.cols, args.build_bank, seed=args.seed,
             max_isolated=args.max_isolated, max_dead_clues=args.max_dead_clues,
             max_attempts_per_hit=args.max_attempts_per_hit,
+            target_words=args.target_words, workers=args.workers,
         )
         if not bank:
             raise SystemExit(
