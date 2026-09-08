@@ -13,3 +13,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/** Court hash de commit (ou "dev") injecté à la build — voir vite.config.ts. */
+declare const __APP_VERSION__: string;

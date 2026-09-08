@@ -1,8 +1,30 @@
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * Identifiant du build affiché en tout petit au pied de l'accueil — utile
+ * pour vérifier QUELLE version tourne réellement en prod (un déploiement qui
+ * traîne, un cache de service worker périmé, voir les mésaventures de cette
+ * session). `VERCEL_GIT_COMMIT_SHA` est déjà posé par Vercel à la build,
+ * sans dépendre de la présence du dossier `.git` dans son environnement de
+ * build ; `git rev-parse` reste le repli pour un build local.
+ */
+function getBuildVersion(): string {
+  const vercelSha = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (vercelSha) return vercelSha.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'dev';
+  }
+}
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(getBuildVersion()),
+  },
   plugins: [
     react(),
     VitePWA({

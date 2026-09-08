@@ -287,7 +287,7 @@ export function Home() {
 
       {/* Collé au bas du cadre (maquette Organic) plutôt que flottant sous
           les boutons : c'est ce qui donne à l'écran sa tenue d'application. */}
-      <div className="mt-auto flex w-full gap-2.5 pb-3.5 pt-4">
+      <div className="mt-auto flex w-full gap-2.5 pt-4">
         <button
           type="button"
           onClick={() => setEcran('profil')}
@@ -303,6 +303,10 @@ export function Home() {
           Classement
         </button>
       </div>
+      {/* Identifiant de build, en tout petit — pour vérifier quelle version
+          tourne réellement (déploiement en cours, cache de service worker
+          périmé…) sans avoir à ouvrir les outils de dev. */}
+      <p className="mt-1.5 pb-3.5 text-center text-[9px] text-organic-neutral-400">{__APP_VERSION__}</p>
     </div>
     );
   }
