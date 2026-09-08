@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { consumeReturnScreen, generateSessionCode, rememberReturnScreen } from '../lib/sessionCode';
+import { clearReturnScreen, generateSessionCode, peekReturnScreen, rememberReturnScreen } from '../lib/sessionCode';
 import { activePlayerId, activePlayerName, currentSession } from '../lib/auth';
 import { dailyLabel } from '../lib/puzzleApi';
 import { Matchmaking } from './Matchmaking';
@@ -20,18 +20,6 @@ type Ecran = 'accueil' | 'multijoueur' | 'matchmaking' | 'profil' | 'classement'
 
 const ECRANS_VALIDES: Ecran[] = ['accueil', 'multijoueur', 'matchmaking', 'profil', 'classement'];
 
-// Consommé une seule fois PAR CHARGEMENT DE PAGE (portée module, pas
-// composant) : `consumeReturnScreen` efface l'entrée en la lisant, donc un
-// appel direct dans l'initialiseur paresseux de `useState` se ferait piéger
-// par le double-appel de React 18 StrictMode (exprès, pour détecter ce genre
-// d'impureté) — le second appel trouverait le stockage déjà vidé par le
-// premier et retomberait toujours sur 'accueil'. Ici, en dehors de tout
-// rendu, ce module n'est évalué qu'une fois par page.
-const ecranRestaure = (() => {
-  const restored = consumeReturnScreen();
-  return (ECRANS_VALIDES as string[]).includes(restored ?? '') ? (restored as Ecran) : 'accueil';
-})();
-
 export function Home() {
   const name = activePlayerName();
   const [code, setCode] = useState('');
@@ -41,7 +29,20 @@ export function Home() {
   // renverrait toujours à l'accueil pur, même quand on venait de
   // « Multijoueur ». On restaure donc l'écran mémorisé juste avant ce
   // rechargement, au lieu de systématiquement redémarrer à 'accueil'.
-  const [ecran, setEcran] = useState<Ecran>(ecranRestaure);
+  //
+  // `peekReturnScreen` (SANS effet de bord) plutôt qu'une lecture qui efface
+  // en même temps : `Home` n'est monté que si `App.tsx` a décidé qu'il n'y a
+  // PAS de session dans l'URL — quand on atterrit sur `?session=…` juste
+  // après un `go()`, ce composant n'existe même pas, donc rien ne doit
+  // consommer le repère à ce moment-là. Seul l'effet ci-dessous, qui ne
+  // s'exécute QUE si `Home` monte réellement, l'efface — une fois utilisé.
+  const [ecran, setEcran] = useState<Ecran>(() => {
+    const restored = peekReturnScreen();
+    return (ECRANS_VALIDES as string[]).includes(restored ?? '') ? (restored as Ecran) : 'accueil';
+  });
+  useEffect(() => {
+    clearReturnScreen();
+  }, []);
   // Solo et grille du jour n'ont de sens qu'avec une progression qui
   // survit : inutile de les proposer à un invité dont l'identité disparaît
   // au prochain rechargement — ça ne ferait que promettre une "progression

@@ -93,12 +93,25 @@ export function rememberReturnScreen(screen: string): void {
 }
 
 /**
- * Lit puis efface l'écran mémorisé — consommé une seule fois, au montage de
- * l'accueil, pour qu'une visite ultérieure normale (nouvelle session, lien
- * direct) reparte bien de zéro plutôt que de rejouer un retour périmé.
+ * Lit l'écran mémorisé, SANS l'effacer (voir `clearReturnScreen`).
+ *
+ * Volontairement sans effet de bord : `Home` l'appelle depuis l'initialiseur
+ * paresseux d'un `useState`, que React 18 StrictMode double-invoque exprès en
+ * développement pour détecter ce genre d'impureté — un `getItem`+`removeItem`
+ * combinés y répondraient correctement une fois, puis `null` la seconde,
+ * l'écran restauré retombant alors toujours à 'accueil'.
  */
-export function consumeReturnScreen(): string | null {
-  const v = sessionStorage.getItem(RETURN_SCREEN_KEY);
+export function peekReturnScreen(): string | null {
+  return sessionStorage.getItem(RETURN_SCREEN_KEY);
+}
+
+/**
+ * Efface l'écran mémorisé — à appeler séparément, une fois l'accueil
+ * effectivement monté (dans un effet, pas l'initialiseur), pour qu'une visite
+ * ultérieure normale (nouvelle session, lien direct) reparte de zéro plutôt
+ * que de rejouer un retour périmé. `removeItem` est idempotent : peu importe
+ * que StrictMode déclenche l'effet deux fois.
+ */
+export function clearReturnScreen(): void {
   sessionStorage.removeItem(RETURN_SCREEN_KEY);
-  return v;
 }
