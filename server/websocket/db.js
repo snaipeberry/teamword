@@ -69,12 +69,25 @@ export async function ensureSchema() {
     CREATE TABLE IF NOT EXISTS accounts (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL,
-      salt TEXT NOT NULL,
-      hash TEXT NOT NULL,
+      salt TEXT,
+      hash TEXT,
       created_at BIGINT NOT NULL
     );
     CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_username_lower
       ON accounts (lower(username));
+
+    -- Comptes liés à Google/Apple ("Se connecter avec…") : pas de mot de
+    -- passe, donc salt/hash y restent NULL — d'où leur passage en colonnes
+    -- optionnelles ci-dessus. Ajoutées via ALTER plutôt que dans le CREATE
+    -- pour rester rétrocompatible avec la table déjà en production (les
+    -- comptes existants, mot de passe uniquement, ne changent pas de forme).
+    ALTER TABLE accounts ALTER COLUMN salt DROP NOT NULL;
+    ALTER TABLE accounts ALTER COLUMN hash DROP NOT NULL;
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS provider TEXT;
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS provider_id TEXT;
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS email TEXT;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_provider
+      ON accounts (provider, provider_id) WHERE provider IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS sessions (
       token TEXT PRIMARY KEY,

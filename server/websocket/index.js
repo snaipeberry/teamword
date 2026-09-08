@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { WebSocketServer } from 'ws';
 import { pool, ensureSchema } from './db.js';
+import { verifyGoogleIdToken, verifyAppleIdToken } from './oauth.js';
 
 /**
  * Serveur temps réel des parties — remplace Liveblocks.
@@ -31,6 +32,17 @@ const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 const TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 const MIN_PASSWORD = 8;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+/**
+ * "Se connecter avec…" : identifiants PUBLICS des applications OAuth
+ * (Client ID Google, Services ID Apple) — pas des secrets, ils vont dans le
+ * jeton `aud` que Google/Apple signent, exactement comme ils sont déjà
+ * visibles dans le code du client. Aucun jeton ne sera accepté tant qu'ils
+ * ne sont pas renseignés (voir .env.example) : `verifyXIdToken` échoue sur
+ * un `aud` vide, ce qui ferme le flux plutôt que de l'accepter à l'aveugle.
+ */
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const APPLE_AUDIENCE = process.env.APPLE_SERVICES_ID || '';
 
 /**
  * Médailles : dérivées des compteurs, jamais stockées telles quelles.
@@ -189,6 +201,10 @@ function publicProfile(id) {
 
 /** clé = pseudo en minuscules ; permet un pseudo insensible à la casse. */
 const accounts = new Map();
+/** clé = "provider:providerId" ; retrouver un compte Google/Apple à la
+ *  reconnexion sans reparcourir tous les comptes. Reconstruit au chargement
+ *  (voir loadAccounts), tenu à jour à chaque création. */
+const accountsByProvider = new Map();
 /** token -> { id, expiresAt } */
 const tokens = new Map();
 /** Limitation des tentatives, par adresse : ip -> { count, resetAt } */
@@ -223,6 +239,9 @@ async function createAccount(username, password) {
     username,
     salt: salt.toString('hex'),
     hash: hash.toString('hex'),
+    provider: null,
+    providerId: null,
+    email: null,
     createdAt: Date.now(),
   };
   accounts.set(username.toLowerCase(), account);
@@ -235,6 +254,96 @@ async function verifyPassword(account, password) {
   const fourni = await hashPassword(password, Buffer.from(account.salt, 'hex'));
   // timingSafeEqual exige des longueurs égales, sinon il lève.
   return attendu.length === fourni.length && timingSafeEqual(attendu, fourni);
+}
+
+/**
+ * Dérive un pseudo valide (règles de USERNAME_RE) et disponible à partir
+ * d'un indice — nom ou email renvoyé par Google/Apple, parfois absent
+ * (Apple ne le fournit qu'au tout premier consentement). Ni Google ni Apple
+ * ne garantissent un format compatible (espaces, accents, longueur libre) :
+ * on ne peut donc jamais utiliser l'indice tel quel.
+ */
+function pickUsername(hint) {
+  const base = String(hint ?? '')
+    .split('@')[0]
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // accents décomposés (NFD) -> lettre nue
+    .replace(/[^a-zA-Z0-9_]/g, '')
+    .slice(0, 16);
+  const racine = base.length >= 3 ? base : `Joueur${base}`;
+
+  let candidat = racine.slice(0, 20);
+  let n = 1;
+  while (accounts.has(candidat.toLowerCase())) {
+    n += 1;
+    candidat = `${racine}${n}`.slice(0, 20);
+  }
+  return candidat;
+}
+
+/**
+ * Compte lié à Google ou Apple ("Se connecter avec…") — pas de mot de passe
+ * ici, `sub` (l'identifiant stable du fournisseur) en tient lieu de secret :
+ * seul Google/Apple peut le prouver, via la signature du jeton (voir
+ * oauth.js), donc pas besoin de scrypt ici.
+ */
+/**
+ * Reprise de la progression jouée sans compte — commune à la création par
+ * mot de passe (/register) et par Google/Apple (/oauth/callback), les deux
+ * créant un compte de la même façon derrière des identités différentes.
+ *
+ * `claimed` garantit qu'un profil anonyme ne peut être revendiqué qu'UNE
+ * fois : sans cela, quelqu'un qui devinerait l'identifiant d'un autre
+ * joueur pourrait s'approprier ses points.
+ */
+function migrateAnonymousProgress(profile, accountId, migrateFrom) {
+  const depuis = String(migrateFrom ?? '');
+  if (!depuis || !profiles.has(depuis)) return;
+
+  const ancien = profiles.get(depuis);
+  if (ancien.claimed || ancien.id.startsWith('acc_')) return;
+
+  profile.points += ancien.points;
+  profile.words += ancien.words;
+  profile.wins += ancien.wins;
+  profile.games += ancien.games;
+  profile.dailies += ancien.dailies;
+  profile.cleanGrids += ancien.cleanGrids;
+  profile.soloPoints += ancien.soloPoints;
+  profile.soloGrids += ancien.soloGrids;
+  // La monnaie d'indices s'ajoute (pas de remplacement) : le solde de
+  // départ du nouveau profil ne doit pas être perdu.
+  profile.hintBalance += ancien.hintBalance;
+  if (!profile.avatar) profile.avatar = ancien.avatar;
+  ancien.claimed = true;
+
+  // La salle solo elle-même doit suivre : sans ce transfert, la progression
+  // de points migre mais le numéro de grille repart de zéro (la salle solo
+  // du nouveau compte est encore vierge).
+  const salleAnonyme = `solo-${depuis}`;
+  if (rooms.has(salleAnonyme) && !rooms.has(`solo-${accountId}`)) {
+    const salle = rooms.get(salleAnonyme);
+    rooms.delete(salleAnonyme);
+    sockets.delete(salleAnonyme);
+    rooms.set(`solo-${accountId}`, salle);
+  }
+}
+
+function createOAuthAccount(provider, providerId, email, username) {
+  const account = {
+    id: `acc_${randomBytes(12).toString('hex')}`,
+    username,
+    salt: null,
+    hash: null,
+    provider,
+    providerId,
+    email,
+    createdAt: Date.now(),
+  };
+  accounts.set(username.toLowerCase(), account);
+  accountsByProvider.set(`${provider}:${providerId}`, account);
+  markDirty();
+  return account;
 }
 
 function issueToken(id) {
@@ -334,11 +443,17 @@ async function loadProfiles() {
 
 async function loadAccounts() {
   try {
-    const { rows: comptes } = await pool.query('SELECT id, username, salt, hash, created_at FROM accounts');
+    const { rows: comptes } = await pool.query(
+      'SELECT id, username, salt, hash, provider, provider_id, email, created_at FROM accounts',
+    );
     for (const a of comptes) {
-      accounts.set(a.username.toLowerCase(), {
-        id: a.id, username: a.username, salt: a.salt, hash: a.hash, createdAt: Number(a.created_at),
-      });
+      const account = {
+        id: a.id, username: a.username, salt: a.salt, hash: a.hash,
+        provider: a.provider, providerId: a.provider_id, email: a.email,
+        createdAt: Number(a.created_at),
+      };
+      accounts.set(a.username.toLowerCase(), account);
+      if (a.provider && a.provider_id) accountsByProvider.set(`${a.provider}:${a.provider_id}`, account);
     }
 
     const now = Date.now();
@@ -400,8 +515,11 @@ async function saveSnapshot(force = false) {
       [...rooms].map(([code, state]) => [code, JSON.stringify(state)]));
     await bulkReplace(client, 'profiles', ['id', 'data'],
       [...profiles].map(([id, p]) => [id, JSON.stringify(p)]));
-    await bulkReplace(client, 'accounts', ['id', 'username', 'salt', 'hash', 'created_at'],
-      [...accounts.values()].map((a) => [a.id, a.username, a.salt, a.hash, a.createdAt]));
+    await bulkReplace(client, 'accounts', ['id', 'username', 'salt', 'hash', 'provider', 'provider_id', 'email', 'created_at'],
+      [...accounts.values()].map((a) => [
+        a.id, a.username, a.salt ?? null, a.hash ?? null,
+        a.provider ?? null, a.providerId ?? null, a.email ?? null, a.createdAt,
+      ]));
     await bulkReplace(client, 'sessions', ['token', 'account_id', 'expires_at'],
       [...tokens].map(([token, entry]) => [token, entry.id, entry.expiresAt]));
     await bulkReplace(client, 'blocks', ['blocker_id', 'blocked_id'],
@@ -811,44 +929,7 @@ const http = createServer((req, res) => {
         const account = await createAccount(username, password);
         const profile = getProfile(account.id);
         profile.name = username;
-
-        /**
-         * Reprise de la progression jouée sans compte.
-         *
-         * `claimed` garantit qu'un profil anonyme ne peut être revendiqué
-         * qu'UNE fois : sans cela, quelqu'un qui devinerait l'identifiant
-         * d'un autre joueur pourrait s'approprier ses points.
-         */
-        const depuis = String(payload.migrateFrom ?? '');
-        if (depuis && profiles.has(depuis)) {
-          const ancien = profiles.get(depuis);
-          if (!ancien.claimed && !ancien.id.startsWith('acc_')) {
-            profile.points += ancien.points;
-            profile.words += ancien.words;
-            profile.wins += ancien.wins;
-            profile.games += ancien.games;
-            profile.dailies += ancien.dailies;
-            profile.cleanGrids += ancien.cleanGrids;
-            profile.soloPoints += ancien.soloPoints;
-            profile.soloGrids += ancien.soloGrids;
-            // La monnaie d'indices s'ajoute (pas de remplacement) : le solde
-            // de départ du nouveau profil ne doit pas être perdu.
-            profile.hintBalance += ancien.hintBalance;
-            if (!profile.avatar) profile.avatar = ancien.avatar;
-            ancien.claimed = true;
-
-            // La salle solo elle-même doit suivre : sans ce transfert, la
-            // progression de points migre mais le numéro de grille repart
-            // de zéro (la salle solo du nouveau compte est encore vierge).
-            const salleAnonyme = `solo-${depuis}`;
-            if (rooms.has(salleAnonyme) && !rooms.has(`solo-${account.id}`)) {
-              const salle = rooms.get(salleAnonyme);
-              rooms.delete(salleAnonyme);
-              sockets.delete(salleAnonyme);
-              rooms.set(`solo-${account.id}`, salle);
-            }
-          }
-        }
+        migrateAnonymousProgress(profile, account.id, payload.migrateFrom);
 
         return json(res, { id: account.id, username, token: issueToken(account.id) });
       }
@@ -865,6 +946,62 @@ const http = createServer((req, res) => {
         username: account.username,
         token: issueToken(account.id),
       });
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/oauth/callback') {
+    const ip = req.socket.remoteAddress ?? 'inconnu';
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 8_000) req.destroy();
+    });
+    req.on('end', async () => {
+      if (!allowAttempt(ip)) {
+        res.writeHead(429, { 'Access-Control-Allow-Origin': '*' });
+        return res.end(JSON.stringify({ error: 'Trop de tentatives, réessayez plus tard' }));
+      }
+
+      let payload;
+      try {
+        payload = JSON.parse(body);
+      } catch {
+        res.writeHead(400, { 'Access-Control-Allow-Origin': '*' });
+        return res.end();
+      }
+
+      const provider = payload.provider === 'google' || payload.provider === 'apple' ? payload.provider : null;
+      const credential = String(payload.credential ?? '');
+      if (!provider || !credential) return json(res, { error: 'Requête invalide' });
+
+      // Un jeton refusé ici veut dire : signature invalide, expiré, ou pas
+      // destiné à CETTE app (`aud`) — jamais un problème de compte, donc un
+      // seul message, générique, comme pour /login.
+      let claims;
+      try {
+        claims = provider === 'google'
+          ? await verifyGoogleIdToken(credential, GOOGLE_CLIENT_ID)
+          : await verifyAppleIdToken(credential, APPLE_AUDIENCE);
+      } catch (err) {
+        console.error(`[oauth] jeton ${provider} refusé —`, err.message);
+        return json(res, { error: 'Connexion refusée, réessaie' });
+      }
+
+      let account = accountsByProvider.get(`${provider}:${claims.sub}`);
+      if (!account) {
+        // Le nom n'est fourni qu'à la toute première connexion (surtout
+        // vrai pour Apple) : `payload.name`, capturé côté client à cet
+        // instant précis, sert de repli quand le jeton lui-même n'en a pas.
+        const indice = ('name' in claims ? claims.name : null) || payload.name || claims.email;
+        const username = pickUsername(indice);
+        account = createOAuthAccount(provider, claims.sub, claims.email, username);
+        const profile = getProfile(account.id);
+        profile.name = username;
+        migrateAnonymousProgress(profile, account.id, payload.migrateFrom);
+      }
+
+      return json(res, { id: account.id, username: account.username, token: issueToken(account.id) });
     });
     return;
   }

@@ -137,6 +137,27 @@ export async function login(username: string, password: string): Promise<Session
   return store(data as unknown as Session);
 }
 
+/**
+ * "Se connecter avec Google/Apple" — `credential` est le jeton d'identité
+ * obtenu via oauthProviders.ts, vérifié côté serveur (voir
+ * server/websocket/oauth.js), jamais ici. Même logique de reprise de
+ * progression invité que `register` (voir `migrateFrom` là-bas).
+ */
+export async function oauthLogin(
+  provider: 'google' | 'apple',
+  credential: string,
+  name?: string | null,
+): Promise<Session | string> {
+  const data = await post('/oauth/callback', {
+    provider,
+    credential,
+    name: name ?? undefined,
+    migrateFrom: activePlayerId(),
+  });
+  if (typeof data.error === 'string') return data.error;
+  return store(data as unknown as Session);
+}
+
 export async function logout(): Promise<void> {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) await post('/logout', { token }).catch(() => undefined);
