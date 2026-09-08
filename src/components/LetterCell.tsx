@@ -10,6 +10,10 @@ interface LetterCellProps {
   lockDelay: number;
   othersHere: PlayerCursor[];
   onSelect: () => void;
+  /** Duel classé uniquement : couleur du joueur qui a trouvé ce mot — la
+   *  case verrouillée se teinte à SA couleur plutôt que le sauge générique,
+   *  pour distinguer d'un coup d'œil qui a trouvé quoi. */
+  lockedColor?: string | null;
 }
 
 export function LetterCell({
@@ -20,6 +24,7 @@ export function LetterCell({
   lockDelay,
   othersHere,
   onSelect,
+  lockedColor,
 }: LetterCellProps) {
   const [showLockFlash, setShowLockFlash] = useState(false);
 
@@ -36,13 +41,16 @@ export function LetterCell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLocked]);
 
-  const background = isLocked
-    ? 'bg-organic-accent2-200'
-    : isActive
-      ? 'bg-white'
-      : isInActiveWord
-        ? 'bg-organic-accent-100'
-        : 'bg-organic-neutral-100';
+  const background =
+    isLocked && !lockedColor
+      ? 'bg-organic-accent2-200'
+      : isLocked
+        ? '' // teinte posée en style inline ci-dessous
+        : isActive
+          ? 'bg-white'
+          : isInActiveWord
+            ? 'bg-organic-accent-100'
+            : 'bg-organic-neutral-100';
 
   return (
     <motion.button
@@ -50,7 +58,13 @@ export function LetterCell({
       onClick={onSelect}
       whileTap={isLocked ? undefined : { scale: 0.88 }}
       transition={{ duration: 0.35 }}
-      style={isActive ? { boxShadow: 'inset 0 0 0 2px #D67F48' } : undefined}
+      style={
+        isActive
+          ? { boxShadow: 'inset 0 0 0 2px #D67F48' }
+          : isLocked && lockedColor
+            ? { backgroundColor: `${lockedColor}2E` }
+            : undefined
+      }
       className={`relative flex h-full w-full items-center justify-center overflow-hidden border border-cell-border/70 font-grid text-[clamp(1rem,5.5vw,1.5rem)] font-semibold uppercase transition-colors duration-300 ${background} ${
         isLocked ? 'cursor-default' : ''
       }`}
@@ -69,7 +83,8 @@ export function LetterCell({
             animate={{ scale: 1.8, opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="pointer-events-none absolute inset-0 bg-organic-accent2-400"
+            className={`pointer-events-none absolute inset-0 ${lockedColor ? '' : 'bg-organic-accent2-400'}`}
+            style={lockedColor ? { backgroundColor: lockedColor } : undefined}
           />
         )}
       </AnimatePresence>
@@ -83,8 +98,9 @@ export function LetterCell({
         // dès qu'elle est juste individuellement révélait la réponse au fur et
         // à mesure de la saisie.
         className={`relative z-10 ${
-          isLocked ? 'text-organic-accent2-900' : 'text-organic-text'
+          isLocked && !lockedColor ? 'text-organic-accent2-900' : !isLocked ? 'text-organic-text' : ''
         }`}
+        style={isLocked && lockedColor ? { color: lockedColor } : undefined}
       >
         {value}
       </motion.span>

@@ -139,10 +139,39 @@ function emptyRoom() {
     mode: undefined,
     // Répartition facile/moyen/difficile des indices — voir lib/difficulty.ts
     // côté client. Choisi par l'hôte dans le salon ; 'moyen' par défaut pour
-    // les parties sans salon (bot, duel aléatoire), qui n'ont aucun moment
-    // de configuration.
+    // les parties sans salon (bot), qui n'ont aucun moment de configuration.
+    // Le duel classé (ranked) l'écrase lui-même à chaque grille — voir
+    // `tryMatch` et l'intent `advance`.
     grade: 'moyen',
     touchedAt: Date.now(),
+
+    // ---------- duel classé (1v1 aléatoire) ----------
+    // Rien de tout ceci n'est utilisé hors ranked — laissé à sa valeur par
+    // défaut ailleurs, sans effet sur les parties privées/bot/solo/quotidien.
+
+    /** Horodatage de fin de match (Date.now() + 10 min), posé par `tryMatch`. */
+    matchEndsAt: null,
+    /** Le match est-il conclu (temps écoulé ou abandon) ? */
+    matchOver: false,
+    /** Vainqueur une fois `matchOver` — `null` si égalité parfaite. */
+    winnerId: null,
+    /** Si conclu par abandon plutôt que par le chrono : qui a abandonné. */
+    forfeitedBy: null,
+    /** playerId -> dernier horodatage de déconnexion — sert la règle
+     *  d'abandon (quitter n'est pas pénalisé si l'adversaire est déjà parti
+     *  depuis 5+ minutes). */
+    disconnectedAt: {},
+    /** wordId -> playerId qui l'a trouvé. Un mot résolu devient visible et
+     *  verrouillé pour LES DEUX joueurs (voir intent `solveWord`). */
+    solvedWords: {},
+    /** playerId -> { cellId: lettre } — frappes en cours, PRIVÉES : jamais
+     *  révélées à l'adversaire tant que le mot correspondant n'est pas
+     *  résolu (voir `broadcastState`, qui n'envoie à chacun que les
+     *  siennes). */
+    playerLetters: {},
+    /** playerId -> true : les DEUX doivent la demander pour relancer un
+     *  duel avec le même adversaire (voir le handler `rematchRequest`). */
+    rematchRequestedBy: {},
   };
 }
 
@@ -585,6 +614,24 @@ function send(ws, message) {
 function broadcastState(code) {
   const state = rooms.get(code);
   if (!state) return;
+
+  // Duel classé : `playerLetters` porte les frappes PRIVÉES des deux joueurs
+  // (voir emptyRoom) — un envoi identique à tout le monde les rendrait
+  // visibles à l'adversaire, exactement ce que le mode est censé empêcher.
+  // Chaque destinataire ne reçoit donc que les siennes ; le reste de l'état
+  // (scores, mots résolus, chrono…) reste partagé tel quel.
+  if (state.ranked && state.playerLetters) {
+    for (const ws of peers(code)) {
+      if (ws.readyState !== ws.OPEN || !ws.player) continue;
+      const sanitized = {
+        ...state,
+        playerLetters: { [ws.player.id]: state.playerLetters[ws.player.id] ?? {} },
+      };
+      ws.send(JSON.stringify({ t: 'state', state: sanitized }));
+    }
+    return;
+  }
+
   const message = JSON.stringify({ t: 'state', state });
   for (const ws of peers(code)) {
     if (ws.readyState === ws.OPEN) ws.send(message);
@@ -632,6 +679,21 @@ const INTENTS = {
   reveal(state, { cellId, letter }, playerId) {
     if (typeof cellId !== 'string') return false;
 
+    // Duel classé : indice PRIVÉ, comme la frappe (voir `letterPrivate`) —
+    // jamais dans la carte partagée `letters`/`revealed`, qui révélerait la
+    // case à l'adversaire. Pas de monnaie ici non plus, un plafond fixe (3)
+    // comme en multijoueur classique.
+    if (state.ranked) {
+      if ((state.hints[playerId] ?? 0) >= 3) return false;
+      if (!state.playerLetters[playerId]) state.playerLetters[playerId] = {};
+      const clean = String(letter).slice(0, 1);
+      // Redemande sur une case déjà révélée par CE joueur : ne pas refacturer.
+      if (state.playerLetters[playerId][cellId] === clean) return false;
+      state.playerLetters[playerId][cellId] = clean;
+      state.hints[playerId] = (state.hints[playerId] ?? 0) + 1;
+      return true;
+    }
+
     // Le serveur ignore tout des grilles (voir l'en-tête du fichier) : il ne
     // peut pas savoir si une case était déjà correcte AVANT cette demande —
     // seul le client, qui connaît la réponse, peut décider de ne pas
@@ -674,7 +736,11 @@ const INTENTS = {
     // priverait de sa victoire l'équipier qui n'a rien trouvé — alors que
     // c'est le camp qui gagne. On réunit donc les deux sources.
     const joueurs = [...new Set([...Object.keys(state.scores), ...Object.keys(teams)])];
-    if (joueurs.length > 0) {
+    // Duel classé : la victoire se joue sur les 10 minutes du MATCH, pas
+    // grille par grille — voir `concludeRankedMatch`, appelé une seule fois
+    // à la fin (chrono ou abandon). Compter une victoire ici aussi aurait
+    // gonflé le total à chaque grille d'un même match.
+    if (joueurs.length > 0 && !state.ranked) {
       const camps = [...new Set(Object.values(teams))];
 
       /**
@@ -717,6 +783,15 @@ const INTENTS = {
     state.round += 1;
     state.letters = {};
     state.revealed = {};
+    if (state.ranked) {
+      // Une difficulté différente à chaque grille plutôt qu'une seule fixée
+      // pour tout le match — jamais 'difficile' : un duel se joue vite, la
+      // grille du dessus le réserve déjà. Progression et frappes privées
+      // remises à zéro : nouvelle grille, personne n'a encore rien trouvé.
+      state.grade = Math.random() < 0.5 ? 'facile' : 'moyen';
+      state.solvedWords = {};
+      state.playerLetters = {};
+    }
     return true;
   },
 
@@ -811,6 +886,55 @@ const INTENTS = {
     return true;
   },
 
+  /**
+   * Frappe PRIVÉE d'un duel classé — l'équivalent de `letter`, mais jamais
+   * partagée : seul son auteur la reçoit (voir `broadcastState`). Un mot
+   * entier se révèle par `solveWord`, pas ici.
+   */
+  letterPrivate(state, { cellId, letter }, playerId) {
+    if (!state.ranked || typeof cellId !== 'string') return false;
+    if (!state.playerLetters[playerId]) state.playerLetters[playerId] = {};
+    if (letter) state.playerLetters[playerId][cellId] = String(letter).slice(0, 1);
+    else delete state.playerLetters[playerId][cellId];
+    return true;
+  },
+
+  /**
+   * Un joueur vient de compléter un mot entier (vérifié côté client, qui
+   * seul connaît la réponse — même confiance que `scored` sur `letter`).
+   * Premier arrivé : le mot devient PUBLIC (visible et verrouillé pour les
+   * deux, teinté de la couleur du trouveur) et rapporte le point.
+   */
+  solveWord(state, { wordId }, playerId) {
+    if (!state.ranked || typeof wordId !== 'string' || !wordId) return false;
+    if (state.solvedWords[wordId]) return false; // déjà pris — l'autre a été plus rapide
+    state.solvedWords[wordId] = playerId;
+    state.scores[playerId] = (state.scores[playerId] ?? 0) + 1;
+    const profile = getProfile(playerId);
+    profile.points += 1;
+    profile.words += 1;
+    profile.updatedAt = Date.now();
+    return true;
+  },
+
+  /**
+   * Quitte un duel classé EN COURS. Compte comme une défaite pour qui
+   * quitte — sauf si l'adversaire est déjà déconnecté depuis 5 minutes ou
+   * plus, auquel cas c'est LUI qui a abandonné, et partir ne coûte rien.
+   */
+  leaveMatch(state, _msg, playerId) {
+    if (!state.ranked || state.matchOver) return false;
+    const opponentId = otherPlayerId(state, playerId);
+    const opponentGoneLongEnough =
+      opponentId != null &&
+      state.disconnectedAt[opponentId] != null &&
+      Date.now() - state.disconnectedAt[opponentId] >= FORFEIT_GRACE_MS;
+    concludeRankedMatch(state, {
+      forfeitedBy: opponentGoneLongEnough ? opponentId : playerId,
+    });
+    return true;
+  },
+
   rename(state, { name }, playerId) {
     const clean = String(name ?? '').trim().slice(0, 16);
     if (!clean) return false;
@@ -833,6 +957,54 @@ function randomCode(length = 6) {
 function leaveQueue(ws) {
   const i = queue.indexOf(ws);
   if (i >= 0) queue.splice(i, 1);
+}
+
+/** Un duel classé dure ce temps-là, quel que soit l'avancement de la grille
+ *  en cours au moment où il s'écoule — voir le balayage périodique plus bas. */
+const MATCH_DURATION_MS = 10 * 60 * 1000;
+/** Délai de grâce d'une déconnexion avant que PARTIR ne coûte plus rien à
+ *  l'autre joueur — voir l'intent `leaveMatch`. */
+const FORFEIT_GRACE_MS = 5 * 60 * 1000;
+
+/** Jamais 'difficile' : un duel classé se joue vite, la grille au-dessus le
+ *  réserve déjà — voir `tryMatch` et l'intent `advance`. */
+function rankedGrade() {
+  return Math.random() < 0.5 ? 'facile' : 'moyen';
+}
+
+/** Le seul autre joueur qu'on ait jamais vu dans cette salle — un duel
+ *  classé n'en a jamais plus de deux. */
+function otherPlayerId(state, playerId) {
+  return Object.keys(state.players).find((id) => id !== playerId) ?? null;
+}
+
+/**
+ * Conclut un duel classé UNE SEULE FOIS — par le chrono (`concludeRankedMatch(state)`,
+ * vainqueur = meilleur score, `null` si égalité) ou par abandon
+ * (`{ forfeitedBy }`, l'AUTRE joueur gagne). Solde alors les statistiques de
+ * profil pour tout le match — pas grille par grille, voir l'intent `advance`.
+ */
+function concludeRankedMatch(state, { forfeitedBy } = {}) {
+  if (!state.ranked || state.matchOver) return;
+  state.matchOver = true;
+  state.forfeitedBy = forfeitedBy ?? null;
+
+  if (forfeitedBy) {
+    state.winnerId = otherPlayerId(state, forfeitedBy);
+  } else {
+    const ids = Object.keys(state.players);
+    const meilleur = Math.max(0, ...ids.map((id) => state.scores[id] ?? 0));
+    const gagnants = ids.filter((id) => (state.scores[id] ?? 0) === meilleur);
+    // Égalité parfaite (y compris 0-0) : pas de vainqueur.
+    state.winnerId = gagnants.length === 1 ? gagnants[0] : null;
+  }
+
+  for (const id of Object.keys(state.players)) {
+    const profile = getProfile(id);
+    profile.games += 1;
+    if (id === state.winnerId) profile.wins += 1;
+    profile.updatedAt = Date.now();
+  }
 }
 
 function tryMatch() {
@@ -864,6 +1036,8 @@ function tryMatch() {
         // attendre ni rien à régler dans un salon.
         state.started = true;
         state.ranked = true;
+        state.matchEndsAt = Date.now() + MATCH_DURATION_MS;
+        state.grade = rankedGrade();
         rooms.set(code, state);
 
         for (const ws of [a, b]) send(ws, { t: 'matched', room: code });
@@ -874,6 +1048,20 @@ function tryMatch() {
     }
   }
 }
+
+// Le chrono d'un duel classé s'écoule même si personne n'agit sur la salle
+// entre-temps (aucune frappe, aucun `advance`) : rien d'autre ne déclenche sa
+// fin, il faut donc la vérifier activement plutôt que réactivement.
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, state] of rooms) {
+    if (state.ranked && !state.matchOver && state.matchEndsAt && now >= state.matchEndsAt) {
+      concludeRankedMatch(state);
+      markDirty();
+      broadcastState(code);
+    }
+  }
+}, 5_000);
 
 // ---------- serveur ----------
 await ensureSchema();
@@ -1290,6 +1478,9 @@ wss.on('connection', (ws) => {
       // hériter le rôle au moindre départ du créateur.
       if (state.hostId == null) state.hostId = ws.player.id;
       state.players[ws.player.id] = { name: ws.player.name, color: ws.player.color };
+      // Une reconnexion efface la trace de déconnexion — voir `leaveMatch` et
+      // la règle des 5 minutes de grâce.
+      if (state.disconnectedAt) delete state.disconnectedAt[ws.player.id];
 
       // Le profil persistant reprend le pseudo courant : sans cela, un joueur
       // qui n'a jamais ouvert l'écran de profil apparaîtrait « Joueur » au
@@ -1369,6 +1560,37 @@ wss.on('connection', (ws) => {
       return;
     }
 
+    /**
+     * Revanche après un duel classé conclu : il faut les DEUX pour repartir
+     * ensemble — géré ici plutôt que dans INTENTS pour pouvoir, dès l'accord
+     * mutuel, ouvrir directement la nouvelle salle et prévenir les deux
+     * sockets (`matched`), exactement comme `tryMatch`.
+     */
+    if (msg.t === 'rematchRequest') {
+      if (!state.ranked || !state.matchOver) return;
+      state.rematchRequestedBy[ws.player.id] = true;
+      const opponentId = otherPlayerId(state, ws.player.id);
+      const opponent = opponentId
+        ? [...peers(ws.room)].find((autre) => autre.player?.id === opponentId)
+        : null;
+
+      if (opponentId && state.rematchRequestedBy[opponentId]) {
+        const code = randomCode();
+        const nouvelle = emptyRoom();
+        nouvelle.started = true;
+        nouvelle.ranked = true;
+        nouvelle.matchEndsAt = Date.now() + MATCH_DURATION_MS;
+        nouvelle.grade = rankedGrade();
+        rooms.set(code, nouvelle);
+        send(ws, { t: 'matched', room: code });
+        if (opponent) send(opponent, { t: 'matched', room: code });
+      } else {
+        markDirty();
+        broadcastState(ws.room); // pour que l'adversaire voie "en attente de revanche"
+      }
+      return;
+    }
+
     const intent = INTENTS[msg.t];
     if (intent) {
       const changed = intent(state, msg, ws.player.id);
@@ -1381,6 +1603,13 @@ wss.on('connection', (ws) => {
     leaveQueue(ws);
     if (!ws.room) return;
     peers(ws.room).delete(ws);
+    const state = rooms.get(ws.room);
+    // Horodatage de départ — seule trace qu'un duel classé garde d'une
+    // déconnexion, pour la règle de grâce des 5 minutes (voir `leaveMatch`).
+    if (state?.ranked && ws.player) {
+      state.disconnectedAt[ws.player.id] = Date.now();
+      markDirty();
+    }
     broadcastPresence(ws.room);
   });
 });

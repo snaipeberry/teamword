@@ -12,6 +12,7 @@ import { TopBar } from './components/TopBar';
 import { Home } from './components/Home';
 import { LoginGate } from './components/LoginGate';
 import { Lobby, KickedScreen } from './components/Lobby';
+import { MatchEndScreen } from './components/MatchEndScreen';
 import { BotPlayer } from './components/BotGame';
 import { AuroraBackground } from './components/AuroraBackground';
 import { usePuzzle } from './hooks/usePuzzle';
@@ -152,7 +153,7 @@ function SessionRouter({
   bot: boolean;
   solo: boolean;
 }) {
-  const { started, isKicked } = useRound();
+  const { started, isKicked, ranked, matchOver } = useRound();
   const game = useGameState();
 
   // Grille du jour et solo se jouent directement : il n'y a personne à
@@ -162,7 +163,17 @@ function SessionRouter({
   // lancement), mais pour choisir la difficulté avant de commencer, comme
   // n'importe quelle partie à plusieurs. Voir Lobby.tsx pour ce que ça
   // change côté affichage (pas de code à partager).
-  const key = isKicked(game.myPlayerId) ? 'kicked' : !started && !daily && !solo ? 'lobby' : 'round';
+  //
+  // Un duel classé, lui, se conclut par son PROPRE chrono (10 minutes, voir
+  // server/websocket/index.js) plutôt que par l'avancement des grilles —
+  // `matchOver` prime donc sur tout le reste dès qu'il est vrai.
+  const key = ranked && matchOver
+    ? 'matchEnd'
+    : isKicked(game.myPlayerId)
+      ? 'kicked'
+      : !started && !daily && !solo
+        ? 'lobby'
+        : 'round';
 
   return (
     <AnimatePresence mode="wait">
@@ -175,7 +186,9 @@ function SessionRouter({
         transition={screenTransition}
         className={screenClassName}
       >
-        {key === 'kicked' ? (
+        {key === 'matchEnd' ? (
+          <MatchEndScreen />
+        ) : key === 'kicked' ? (
           <KickedScreen />
         ) : key === 'lobby' ? (
           <Lobby sessionId={sessionId} bot={bot} />

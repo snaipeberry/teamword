@@ -60,6 +60,31 @@ pool.on('error', (err) => {
 });
 
 /**
+ * `pool.on('error', ...)` ci-dessus ne couvre que les connexions IDLE du
+ * pool (comportement documenté de `pg`) : une connexion qui tombe pendant
+ * une requête EN COURS remonte comme un évènement 'error' sur le CLIENT
+ * concerné, hors du pool — sans auditeur dessus, Node la traite comme une
+ * exception non rattrapée et arrête tout le process. Observé en pratique :
+ * "Connection terminated unexpectedly" a fait tomber tout le serveur temps
+ * réel (parties en mémoire et connexions WebSocket actives comprises) pour
+ * un simple aléa réseau vers Postgres, totalement sans rapport avec elles.
+ * On absorbe donc spécifiquement CETTE catégorie connue et transitoire ;
+ * toute autre exception reste fatale (mieux vaut un redémarrage propre,
+ * voir run.sh, qu'un process dans un état inconnu).
+ */
+process.on('uncaughtException', (err) => {
+  const transitoire =
+    err?.message?.includes('Connection terminated') ||
+    ['ECONNRESET', 'ETIMEDOUT', 'EPIPE'].includes(err?.code);
+  if (transitoire) {
+    console.error('[db] connexion Postgres perdue en cours de requête — le serveur continue', err.message);
+    return;
+  }
+  console.error('[fatal] exception non rattrapée', err);
+  process.exit(1);
+});
+
+/**
  * Crée les tables si elles n'existent pas — pas de système de migration à
  * part entière, le schéma est encore assez simple pour vivre ici. Toutes
  * les opérations sont `IF NOT EXISTS` : sûr à rappeler à chaque démarrage.

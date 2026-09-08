@@ -516,6 +516,7 @@ export function CrosswordGrid({
                   lockDelay={lockDelayByCell.get(id) ?? 0}
                   othersHere={othersByCellId.get(id) ?? []}
                   onSelect={() => selectCell(row, col)}
+                  lockedColor={game.solvedColorFor(id)}
                 />
               );
             }),

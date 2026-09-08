@@ -29,6 +29,23 @@ export interface RoomState {
   ranked?: boolean;
   /** Grade choisi par l'hôte — répartition facile/moyen/difficile des indices. */
   grade?: string;
+
+  // ---------- duel classé (1v1 aléatoire) ----------
+  /** Horodatage de fin de match (`Date.now()` + 10 min à l'appariement). */
+  matchEndsAt?: number | null;
+  /** Le match est-il conclu (chrono écoulé ou abandon) ? */
+  matchOver?: boolean;
+  /** Vainqueur une fois `matchOver` — `null` si égalité parfaite. */
+  winnerId?: string | null;
+  /** Si conclu par abandon plutôt que par le chrono : qui a abandonné. */
+  forfeitedBy?: string | null;
+  /** wordId -> playerId qui l'a trouvé — visible et verrouillé pour tous. */
+  solvedWords?: Record<string, string>;
+  /** Frappes privées en cours — le serveur n'envoie jamais que les SIENNES à
+   *  chaque joueur (voir server/websocket/index.js, `broadcastState`). */
+  playerLetters?: Record<string, Record<string, string>>;
+  /** playerId -> true : qui a déjà demandé une revanche. */
+  rematchRequestedBy?: Record<string, boolean>;
 }
 
 export interface Medal {

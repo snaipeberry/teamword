@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { aggregateTeams, TEAM_COLORS } from '../lib/teams';
@@ -65,7 +65,7 @@ export function TopBar({
   bot?: boolean;
 }) {
   const game = useGameState();
-  const { teams, ranked } = useRound();
+  const { teams, ranked, matchEndsAt, leaveMatch } = useRound();
   const [copied, setCopied] = useState(false);
   const [reactionsOuvertes, setReactionsOuvertes] = useState(false);
   // Confirmation en deux temps (même motif que SessionMenu) : bloquer
@@ -73,6 +73,18 @@ export function TopBar({
   const [aBloquer, setABloquer] = useState<string | null>(null);
   const [bloques, setBloques] = useState<Set<string>>(new Set());
   const totals = aggregateTeams(game.scoreboard, teams);
+
+  // Chrono du duel classé (10 minutes, voir server/websocket/index.js) — un
+  // simple intervalle plutôt qu'un minuteur serveur : le SERVEUR reste seul
+  // juge de la fin réelle du match (voir `matchOver`), ceci n'est qu'un
+  // affichage qui suit `matchEndsAt`.
+  const [maintenant, setMaintenant] = useState(Date.now());
+  useEffect(() => {
+    if (!ranked || !matchEndsAt) return;
+    const tick = setInterval(() => setMaintenant(Date.now()), 1000);
+    return () => clearInterval(tick);
+  }, [ranked, matchEndsAt]);
+  const secondesRestantes = matchEndsAt ? Math.max(0, Math.round((matchEndsAt - maintenant) / 1000)) : null;
 
   const copyLink = async () => {
     // Surtout pas window.location.href : sur une preview Vercel, cette URL
@@ -103,23 +115,47 @@ export function TopBar({
           cible tactile de 44px que BackButton.tsx, malgré la barre compacte. */}
       <button
         type="button"
-        onClick={goHome}
+        onClick={() => {
+          // Quitter un duel classé EN COURS compte comme une défaite (sauf
+          // adversaire déjà parti depuis 5+ min) — le serveur doit le savoir
+          // AVANT qu'on ne coupe la connexion en changeant de page.
+          if (ranked) leaveMatch();
+          goHome();
+        }}
         aria-label="Retour vers le menu"
         className="-ml-2 flex h-11 w-9 shrink-0 items-center justify-center text-[15px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
       >
         ←
       </button>
-      <span
-        className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] ${
-          dailyLabel ? 'bg-organic-accent-200 text-organic-accent-800' : 'bg-organic-neutral-200 text-organic-text'
-        }`}
-      >
-        {dailyLabel ?? `#${round + 1}`}
-      </span>
-      {difficulty && (
-        <span className="shrink-0 rounded-full bg-organic-accent2-200 px-2 py-1 font-display text-[11px] text-organic-accent2-900">
-          {GRADE_LABELS[difficulty]}
-        </span>
+      {ranked ? (
+        // Le niveau d'un duel classé varie à chaque grille et n'a pas à être
+        // annoncé (voir la demande produit) — le chrono du match prime ici.
+        secondesRestantes !== null && (
+          <span
+            className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] tabular-nums ${
+              secondesRestantes <= 30
+                ? 'bg-organic-accent-200 text-organic-accent-800'
+                : 'bg-organic-neutral-200 text-organic-text'
+            }`}
+          >
+            {Math.floor(secondesRestantes / 60)}:{String(secondesRestantes % 60).padStart(2, '0')}
+          </span>
+        )
+      ) : (
+        <>
+          <span
+            className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] ${
+              dailyLabel ? 'bg-organic-accent-200 text-organic-accent-800' : 'bg-organic-neutral-200 text-organic-text'
+            }`}
+          >
+            {dailyLabel ?? `#${round + 1}`}
+          </span>
+          {difficulty && (
+            <span className="shrink-0 rounded-full bg-organic-accent2-200 px-2 py-1 font-display text-[11px] text-organic-accent2-900">
+              {GRADE_LABELS[difficulty]}
+            </span>
+          )}
+        </>
       )}
 
       {/* En partie par équipes, on affiche les TOTAUX de camp : c'est le score

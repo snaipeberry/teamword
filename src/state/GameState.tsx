@@ -45,6 +45,12 @@ export interface GameStateApi {
   /** Écrit la bonne lettre sans jamais accorder de point (voir revealLetter). */
   revealLetter: (cellId: string, letter: string) => void;
   isRevealed: (cellId: string) => boolean;
+  /**
+   * Duel classé uniquement : couleur du joueur qui a trouvé le mot possédant
+   * cette case (pour teinter la case trouvée à sa couleur) — `null` hors
+   * duel classé, ou tant que personne n'a trouvé le mot.
+   */
+  solvedColorFor: (cellId: string) => string | null;
   others: PlayerCursor[];
   myColor: string;
   myPlayerId: string;
@@ -134,9 +140,31 @@ export interface RoundApi {
 
   // ---- Difficulté (répartition des indices) ----
   /** Grade choisi par l'hôte dans le salon — 'moyen' par défaut (parties
-   *  sans salon : bot, duel aléatoire). Voir lib/difficulty.ts. */
+   *  sans salon : bot). En duel classé, varie facile/moyen à chaque grille
+   *  (voir server/websocket/index.js) — jamais affiché, voir TopBar. */
   grade: MultiplayerGrade;
   setGrade: (grade: MultiplayerGrade) => void;
+
+  // ---- Duel classé (1v1 aléatoire) ----
+  /** Horodatage de fin de match — `null` hors duel classé. */
+  matchEndsAt: number | null;
+  /** Le match de 10 minutes est-il conclu ? */
+  matchOver: boolean;
+  /** Vainqueur une fois `matchOver` — `null` si égalité. */
+  winnerId: string | null;
+  /** Si conclu par abandon plutôt que par le chrono : qui a abandonné. */
+  forfeitedBy: string | null;
+  /** Quitte le duel EN COURS — défaite immédiate, sauf adversaire déjà
+   *  déconnecté 5+ minutes (voir server, intent `leaveMatch`). À appeler
+   *  AVANT de naviguer hors de la partie. */
+  leaveMatch: () => void;
+  /** Demande une revanche après un match conclu — les DEUX doivent la
+   *  demander pour repartir ensemble. */
+  requestRematch: () => void;
+  /** Ce joueur a-t-il déjà demandé une revanche ? */
+  rematchRequestedByMe: boolean;
+  /** L'adversaire a-t-il déjà demandé une revanche ? */
+  rematchRequestedByOpponent: boolean;
 }
 
 const RoundContext = createContext<RoundApi | null>(null);
@@ -202,6 +230,14 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
       ranked: false,
       grade: 'moyen',
       setGrade: () => {},
+      matchEndsAt: null,
+      matchOver: false,
+      winnerId: null,
+      forfeitedBy: null,
+      leaveMatch: () => {},
+      requestRematch: () => {},
+      rematchRequestedByMe: false,
+      rematchRequestedByOpponent: false,
     }),
     [round, game],
   );
@@ -235,6 +271,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
         setRevealed((prev) => ({ ...prev, [cellId]: true }));
       },
       isRevealed: (cellId) => Boolean(revealed[cellId]),
+      solvedColorFor: () => null,
       others: [],
       myColor,
       myPlayerId: 'local',
@@ -342,6 +379,15 @@ function RemoteSessionProvider({
         onState: setState,
         onPresence: setPeers,
         onReaction: pushReaction,
+        // Revanche acceptée par les deux (voir `requestRematch` plus bas) :
+        // le serveur ouvre une salle neuve et prévient les deux joueurs EN
+        // PLEINE PARTIE, pas seulement en file d'attente (voir Matchmaking.tsx
+        // pour le cas d'un premier appariement).
+        onMatched: (room) => {
+          const url = new URL(window.location.href);
+          url.searchParams.set('session', room);
+          window.location.href = url.toString();
+        },
       },
       mode,
     );
@@ -392,8 +438,18 @@ function RemoteSessionProvider({
       ranked: state.ranked === true,
       grade: (state.grade as MultiplayerGrade) ?? 'moyen',
       setGrade: (grade) => send({ t: 'grade', grade }),
+      matchEndsAt: state.matchEndsAt ?? null,
+      matchOver: state.matchOver === true,
+      winnerId: state.winnerId ?? null,
+      forfeitedBy: state.forfeitedBy ?? null,
+      leaveMatch: () => send({ t: 'leaveMatch' }),
+      requestRematch: () => send({ t: 'rematchRequest' }),
+      rematchRequestedByMe: state.rematchRequestedBy?.[me.id] === true,
+      rematchRequestedByOpponent: Object.entries(state.rematchRequestedBy ?? {}).some(
+        ([id, asked]) => asked && id !== me.id,
+      ),
     }),
-    [state, send],
+    [state, send, me.id],
   );
 
   return (
@@ -417,6 +473,8 @@ function RemoteGameProvider({
   const { state, peers, send, me, sendReaction, reactions } = useRoom();
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
   const myName = me.name;
+  const ranked = state.ranked === true;
+  const solvedWords = state.solvedWords ?? {};
 
   /**
    * Saisie optimiste.
@@ -434,26 +492,71 @@ function RemoteGameProvider({
   const enAttente = useRef<Map<string, { letter: string; at: number }>>(new Map());
   const [versionAttente, setVersionAttente] = useState(0);
 
+  // Base confirmée par le serveur : partagée (`state.letters`) en coop/solo/
+  // bot, privée à SOI (`state.playerLetters[me.id]`) en duel classé — le
+  // serveur ne nous envoie d'ailleurs jamais celles de l'adversaire, voir
+  // server/websocket/index.js, `broadcastState`.
+  const confirmedLetters = ranked ? (state.playerLetters?.[me.id] ?? {}) : state.letters;
+
   const purger = useCallback(() => {
     const maintenant = Date.now();
     let change = false;
     for (const [cellId, p] of enAttente.current) {
-      const confirme = (state.letters[cellId] ?? '') === p.letter;
+      const confirme = (confirmedLetters[cellId] ?? '') === p.letter;
       if (confirme || maintenant - p.at > PEREMPTION_MS) {
         enAttente.current.delete(cellId);
         change = true;
       }
     }
     if (change) setVersionAttente((v) => v + 1);
-  }, [state.letters]);
+  }, [confirmedLetters]);
 
   // Chaque diffusion du serveur est une occasion de confirmer les frappes en vol.
   useEffect(purger, [purger]);
 
-  /** Lettre affichée : la frappe locale non confirmée prime sur l'état serveur. */
+  /**
+   * Duel classé uniquement : lettre d'une case déjà VERROUILLÉE — un mot que
+   * quelqu'un a trouvé, visible et intouchable pour les deux joueurs à
+   * partir de là (voir `solvedWords`, posé par l'intent serveur `solveWord`).
+   * `null` hors duel classé, ou tant que personne n'a trouvé le mot.
+   */
+  const solvedLetterFor = useCallback(
+    (cellId: string): string | null => {
+      const ids = wordIdsByCellId.get(cellId) ?? [];
+      for (const wordId of ids) {
+        if (!solvedWords[wordId]) continue;
+        const word = wordsById.get(wordId);
+        const cells = cellsByWordId.get(wordId);
+        const idx = cells?.indexOf(cellId) ?? -1;
+        if (word && idx >= 0) return word.answer[idx];
+      }
+      return null;
+    },
+    [wordIdsByCellId, solvedWords, wordsById, cellsByWordId],
+  );
+
+  const solvedColorFor = useCallback(
+    (cellId: string): string | null => {
+      if (!ranked) return null;
+      const ids = wordIdsByCellId.get(cellId) ?? [];
+      for (const wordId of ids) {
+        const solverId = solvedWords[wordId];
+        if (!solverId) continue;
+        if (solverId === me.id) return me.color;
+        // Repli neutre organic.neutral.500 : l'adversaire a pu se déconnecter
+        // entre-temps et disparaître de `peers`, le mot reste affiché.
+        return peers.find((p) => p.id === solverId)?.color ?? '#A19786';
+      }
+      return null;
+    },
+    [ranked, wordIdsByCellId, solvedWords, me, peers],
+  );
+
+  /** Lettre affichée : verrouillée (duel classé) > frappe locale non confirmée > état serveur. */
   const lettreEffective = useCallback(
-    (cellId: string) => enAttente.current.get(cellId)?.letter ?? state.letters[cellId] ?? '',
-    [state.letters],
+    (cellId: string) =>
+      solvedLetterFor(cellId) ?? enAttente.current.get(cellId)?.letter ?? confirmedLetters[cellId] ?? '',
+    [solvedLetterFor, confirmedLetters],
   );
 
   const getLetter = useCallback(
@@ -470,10 +573,36 @@ function RemoteGameProvider({
    * Liveblocks s'exécutant elles aussi côté client.
    *
    * Seul l'auteur de la frappe détecte la transition non-résolu → résolu,
-   * donc un mot ne peut pas être compté deux fois.
+   * donc un mot ne peut pas être compté deux fois — SAUF en duel classé, où
+   * le serveur lui-même refuse un `solveWord` sur un mot déjà pris (voir
+   * l'intent) : deux joueurs peuvent parfaitement compléter le même mot au
+   * même instant, seul le premier arrivé au serveur l'emporte.
    */
   const setLetter = useCallback(
     (cellId: string, letter: string) => {
+      // Case verrouillée par un mot déjà trouvé : plus éditable, ni par son
+      // propre auteur ni par l'adversaire.
+      if (solvedLetterFor(cellId) != null) return;
+
+      if (ranked) {
+        enAttente.current.set(cellId, { letter, at: Date.now() });
+        setVersionAttente((v) => v + 1);
+        send({ t: 'letterPrivate', cellId, letter });
+
+        // Une case croisée peut compléter deux mots d'une seule frappe.
+        for (const wordId of wordIdsByCellId.get(cellId) ?? []) {
+          if (solvedWords[wordId]) continue;
+          const word = wordsById.get(wordId);
+          const cells = cellsByWordId.get(wordId);
+          if (!word || !cells) continue;
+          const complete = cells.every(
+            (id, i) => (id === cellId ? letter : lettreEffective(id)) === word.answer[i],
+          );
+          if (complete) send({ t: 'solveWord', wordId });
+        }
+        return;
+      }
+
       const affected = wordIdsByCellId.get(cellId) ?? [];
       const complete = (wordId: string, override: string) => {
         const word = wordsById.get(wordId);
@@ -496,8 +625,24 @@ function RemoteGameProvider({
       setVersionAttente((v) => v + 1);
       send({ t: 'letter', cellId, letter, scored });
     },
-    [send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId],
+    [ranked, solvedLetterFor, send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId, solvedWords],
   );
+
+  // Un mot trouvé par l'ADVERSAIRE peut, via une case croisée, compléter un
+  // des NOS mots sans qu'on ait tapé quoi que ce soit : à revérifier à
+  // chaque évolution de `solvedWords`, pas seulement à chaque frappe.
+  useEffect(() => {
+    if (!ranked) return;
+    for (const word of puzzle.words) {
+      if (solvedWords[word.id]) continue;
+      const cells = cellsByWordId.get(word.id);
+      if (!cells) continue;
+      if (cells.every((id, i) => lettreEffective(id) === word.answer[i])) {
+        send({ t: 'solveWord', wordId: word.id });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ranked, solvedWords]);
 
   const revealLetter = useCallback(
     (cellId: string, letter: string) => {
@@ -558,6 +703,7 @@ function RemoteGameProvider({
       setLetter,
       revealLetter,
       isRevealed: (cellId) => state.revealed[cellId] === true,
+      solvedColorFor,
       others: peers
         .filter((p) => p.id !== me.id)
         .map((p) => ({
@@ -579,7 +725,7 @@ function RemoteGameProvider({
       reactions,
     }),
     [
-      getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard,
+      getLetter, setLetter, revealLetter, solvedColorFor, state, peers, me, send, scoreboard,
       allReadyFor, myName, reportGridDone, sendReaction, reactions,
     ],
   );
