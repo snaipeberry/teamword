@@ -47,9 +47,17 @@ if (!rawConnectionString) {
 // est désactivée.
 const connectionString = rawConnectionString.replace(/[?&]sslmode=[^&]*/, '');
 
+// Une base locale (dev, voir .env.supabase.postgres) ne parle pas TLS du
+// tout — lui imposer `ssl` planterait la connexion. Seule une base distante
+// (Supabase en prod) a besoin du contournement `rejectUnauthorized: false`
+// documenté au-dessus.
+const isLocalDb = /^postgres(?:ql)?:\/\/(?:[^@/]*@)?(?:localhost|127\.0\.0\.1)(?::|\/)/.test(
+  connectionString,
+);
+
 export const pool = new Pool({
   connectionString,
-  ssl: { rejectUnauthorized: false },
+  ssl: isLocalDb ? false : { rejectUnauthorized: false },
   max: 10,
 });
 
