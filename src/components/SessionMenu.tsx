@@ -68,7 +68,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
         onClick={() => (open ? close() : setOpen(true))}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-organic-neutral-200 text-organic-text transition active:scale-90"
       >
-        <span className="text-base leading-none" aria-hidden="true">⋯</span>
+        <span className="text-[16px] leading-none" aria-hidden="true">⋯</span>
       </button>
 
       <AnimatePresence>
@@ -86,7 +86,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
             <button
               type="button"
               onClick={goHome}
-              className="w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold text-organic-text transition active:bg-organic-neutral-200"
+              className="w-full rounded-[9px] px-3 py-2 text-left text-[12px] font-bold text-organic-text transition active:bg-organic-neutral-200"
             >
               Retour au menu
               <span className="mt-0.5 block text-[10px] font-medium text-organic-neutral-600">
@@ -97,7 +97,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
             <button
               type="button"
               onClick={() => confirm('restart')}
-              className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
+              className={`mt-1 w-full rounded-[9px] px-3 py-2 text-left text-[12px] font-bold transition ${
                 pending === 'restart'
                   ? 'bg-organic-accent-500 text-organic-bg'
                   : 'text-organic-text active:bg-organic-neutral-200'
@@ -117,7 +117,7 @@ export function SessionMenu({ multiplayer }: { multiplayer: boolean }) {
               <button
                 type="button"
                 onClick={() => confirm('new')}
-                className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition ${
+                className={`mt-1 w-full rounded-[9px] px-3 py-2 text-left text-[12px] font-bold transition ${
                   pending === 'new'
                     ? 'bg-organic-accent-500 text-organic-bg'
                     : 'text-organic-text active:bg-organic-neutral-200'

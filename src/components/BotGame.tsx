@@ -27,7 +27,9 @@ const DELAIS: Record<string, [number, number]> = {
   difficile: [2500, 5000],
 };
 
-const BOT_COULEUR = '#FF8A5B';
+// organic.accent.400 (tailwind.config.js) — même famille terre cuite que le
+// reste de l'app, pas une approximation isolée.
+const BOT_COULEUR = '#F6A06B';
 
 function motComplet(word: Puzzle['words'][number], lettres: Record<string, string>): boolean {
   return wordCellIds(word).every((id, i) => lettres[id] === word.answer[i]);

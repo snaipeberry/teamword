@@ -34,6 +34,14 @@ const MIN_PASSWORD = 8;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 /**
+ * Réactions live en partie — un ensemble fermé plutôt qu'un texte libre :
+ * pas de modération à faire sur quatre émojis fixes, contrairement à un
+ * champ de saisie ouvert.
+ */
+const REACTIONS = new Set(['👏', '😮', '💡', '🎉']);
+const REACTION_COOLDOWN_MS = 1_200;
+
+/**
  * "Se connecter avec…" : identifiants PUBLICS des applications OAuth
  * (Client ID Google, Services ID Apple) — pas des secrets, ils vont dans le
  * jeton `aud` que Google/Apple signent, exactement comme ils sont déjà
@@ -623,6 +631,15 @@ const INTENTS = {
 
   reveal(state, { cellId, letter }, playerId) {
     if (typeof cellId !== 'string') return false;
+
+    // Le serveur ignore tout des grilles (voir l'en-tête du fichier) : il ne
+    // peut pas savoir si une case était déjà correcte AVANT cette demande —
+    // seul le client, qui connaît la réponse, peut décider de ne pas
+    // demander d'indice sur une case déjà juste (voir CrosswordGrid.tsx,
+    // `hintTarget`). Il peut en revanche détecter une redemande sur une case
+    // qu'IL a déjà révélée lui-même, et ne pas facturer deux fois pour ça
+    // (retente réseau, ou double-clic).
+    if (state.revealed[cellId] === true) return false;
 
     if (state.mode === 'solo' || state.mode === 'daily') {
       // Monnaie persistante (« ampoules ») : gagnée en jouant, dépensée ici.
@@ -1325,6 +1342,30 @@ wss.on('connection', (ws) => {
     if (msg.t === 'presence') {
       ws.player.activeCell = msg.activeCell ?? null;
       broadcastPresence(ws.room);
+      return;
+    }
+
+    if (msg.t === 'reaction') {
+      // Éphémère par nature (une réaction n'a de sens que "maintenant") :
+      // jamais écrite dans `state`, donc jamais persistée ni rediffusée en
+      // `state` — un simple message relayé aux autres, comme `presence`.
+      if (!REACTIONS.has(msg.emoji)) return;
+      const now = Date.now();
+      if (now - (ws.lastReactionAt ?? 0) < REACTION_COOLDOWN_MS) return;
+      ws.lastReactionAt = now;
+
+      const message = JSON.stringify({
+        t: 'reaction',
+        playerId: ws.player.id,
+        name: ws.player.name,
+        color: ws.player.color,
+        emoji: msg.emoji,
+      });
+      // Pas à l'auteur : son propre clic s'anime déjà en local (voir
+      // GameState.tsx) — la rediffuser lui ferait voir sa réaction deux fois.
+      for (const autre of peers(ws.room)) {
+        if (autre !== ws && autre.readyState === autre.OPEN) autre.send(message);
+      }
       return;
     }
 

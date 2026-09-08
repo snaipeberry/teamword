@@ -35,7 +35,7 @@ function LoadingScreen() {
         transition={{ repeat: Infinity, duration: 1.1, ease: 'easeInOut' }}
         className="h-3 w-3 rounded-full bg-organic-accent-500"
       />
-      <p className="text-sm font-semibold text-organic-neutral-600">Chargement de la grille…</p>
+      <p className="text-[13px] font-semibold text-organic-neutral-600">Chargement de la grille…</p>
     </motion.div>
   );
 }
@@ -114,6 +114,8 @@ function Round({
         dailyLabel={daily ? dailyLabel() : null}
         partiePrivee={!daily && !bot && !solo && !ranked}
         difficulty={displayDifficulty}
+        solo={solo}
+        bot={bot}
       />
       {error && (
         <p className="mt-1 shrink-0 rounded-full bg-amber-400/20 px-3 py-0.5 text-[10px] text-amber-100">
@@ -153,9 +155,14 @@ function SessionRouter({
   const { started, isKicked } = useRound();
   const game = useGameState();
 
-  // Grille du jour, partie contre un bot et solo se jouent directement : il
-  // n'y a personne à attendre dans un salon (le solo n'a même qu'un joueur).
-  const key = isKicked(game.myPlayerId) ? 'kicked' : !started && !daily && !bot && !solo ? 'lobby' : 'round';
+  // Grille du jour et solo se jouent directement : il n'y a personne à
+  // attendre dans un salon (le solo n'a même qu'un joueur). Une partie
+  // contre un bot, elle, passe par le salon comme une partie privée — pas
+  // pour attendre quelqu'un (le bot ne s'y montre pas, il ne rejoint qu'au
+  // lancement), mais pour choisir la difficulté avant de commencer, comme
+  // n'importe quelle partie à plusieurs. Voir Lobby.tsx pour ce que ça
+  // change côté affichage (pas de code à partager).
+  const key = isKicked(game.myPlayerId) ? 'kicked' : !started && !daily && !solo ? 'lobby' : 'round';
 
   return (
     <AnimatePresence mode="wait">
@@ -171,7 +178,7 @@ function SessionRouter({
         {key === 'kicked' ? (
           <KickedScreen />
         ) : key === 'lobby' ? (
-          <Lobby sessionId={sessionId} />
+          <Lobby sessionId={sessionId} bot={bot} />
         ) : (
           <Round sessionId={sessionId} daily={daily} bot={bot} solo={solo} />
         )}

@@ -18,7 +18,11 @@ export function BackButton({
       type="button"
       onClick={onClick}
       aria-label={`Retour vers ${label}`}
-      className="-ml-1 self-start px-1 py-1 text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
+      // `min-h-11` (44px) : la cible tactile réelle, invisible, dépasse
+      // largement le texte — avant, ~20px de haut sur un geste utilisé sur
+      // CHAQUE écran. Le `-ml-2`/`pl-2` compense le padding ajouté pour que
+      // le texte reste exactement au même endroit visuellement.
+      className="-ml-2 flex min-h-11 shrink-0 items-center self-start pl-2 pr-3 text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
     >
       ← {label}
     </button>

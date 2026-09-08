@@ -61,12 +61,33 @@ interface ClueCellProps {
  * doit loger deux blocs ET un séparateur, donc à nombre de caractères égal
  * il lui faut une police plus petite.
  */
+/**
+ * Paliers recalibrés par MESURE RÉELLE plutôt que par estimation : un
+ * squelette hors-écran est rendu avec la police candidate, puis comparé
+ * (`scrollHeight`/`scrollWidth` vs `clientHeight`/`clientWidth`) pour
+ * détecter un dépassement — sur 17 textes réalistes (mot seul jusqu'à deux
+ * définitions de ~50 caractères chacune, le pire cas mesuré côté
+ * générateur) et 5 tailles de case (32 à 46 px), zéro dépassement avec ces
+ * seuils. Les anciens paliers (0.225/0.19/0.175/0.155) débordaient déjà à
+ * partir d'un simple « Symbole chimique du bore » (24 caractères, un seul
+ * indice) — exactement le style d'indice « facile » explicatif introduit
+ * par le dataset v24 (voir HINT_MAX_CHARS côté générateur), donc un cas
+ * courant, pas un cas limite.
+ */
 function fontRatioFor(totalChars: number, clueCount: number): number {
   const budget = totalChars + (clueCount > 1 ? 12 : 0);
-  if (budget > 32) return 0.155;
-  if (budget > 24) return 0.175;
-  if (budget > 14) return 0.19;
-  return 0.225;
+  if (budget <= 6) return 0.24;
+  if (budget <= 10) return 0.22;
+  if (budget <= 16) return 0.19;
+  if (budget <= 22) return 0.165;
+  if (budget <= 26) return 0.15;
+  if (budget <= 32) return 0.14;
+  if (budget <= 40) return 0.13;
+  if (budget <= 50) return 0.115;
+  if (budget <= 65) return 0.1;
+  // Au-delà du plus long cas mesuré, continuer à réduire plutôt que
+  // plafonner : mieux vaut une police plus petite qu'un texte qui déborde.
+  return Math.max(0.08, 0.095 - (budget - 65) * 0.0006);
 }
 
 export function ClueCell({

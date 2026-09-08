@@ -70,7 +70,7 @@ export function AuthScreen({
   }, []);
 
   const champ =
-    'w-full rounded-full border border-organic-divider bg-organic-neutral-100 px-4 py-2.5 text-center font-display text-[15px] text-organic-text placeholder:font-medium placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500';
+    'w-full rounded-full border border-organic-divider bg-organic-neutral-100 px-5 py-2.5 text-left font-display text-[15px] text-organic-text placeholder:font-medium placeholder:text-organic-neutral-500 focus:outline-none focus:ring-2 focus:ring-organic-accent-500';
 
   return (
     <div className={screenShell}>

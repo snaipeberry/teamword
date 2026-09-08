@@ -100,7 +100,7 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
             transition={{ repeat: Infinity, duration: 1.1, ease: 'easeInOut' }}
             className="h-3 w-3 rounded-full bg-organic-accent-500"
           />
-          <p className="text-sm font-semibold text-organic-neutral-600">Chargement du profil…</p>
+          <p className="text-[13px] font-semibold text-organic-neutral-600">Chargement du profil…</p>
         </div>
       ) : (
         <>
@@ -146,7 +146,7 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
                   className="active:scale-90"
                 >
                   <span
-                    className="flex h-11 w-11 items-center justify-center rounded-full text-xl"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-[20px]"
                     style={{ backgroundColor: p.color }}
                   >
                     {p.emoji}

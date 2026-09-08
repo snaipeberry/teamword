@@ -114,6 +114,9 @@ export interface RoomHandlers {
   onStatus?: (connected: boolean) => void;
   /** Adversaire trouvé en 1v1 aléatoire : code de la partie à rejoindre. */
   onMatched?: (room: string) => void;
+  /** Réaction live REÇUE d'un autre joueur — jamais la sienne propre, voir
+   *  server/websocket/index.js (l'auteur n'est pas dans la diffusion). */
+  onReaction?: (r: { playerId: string; name: string; color: string; emoji: string }) => void;
 }
 
 export interface RoomConnection {
@@ -180,6 +183,9 @@ export function connectRoom(
       if (msg.t === 'state') handlers.onState(msg.state as RoomState);
       else if (msg.t === 'presence') handlers.onPresence(msg.players as RoomPeer[]);
       else if (msg.t === 'matched') handlers.onMatched?.(msg.room as string);
+      else if (msg.t === 'reaction') {
+        handlers.onReaction?.(msg as unknown as { playerId: string; name: string; color: string; emoji: string });
+      }
     };
 
     ws.onclose = () => {

@@ -65,7 +65,7 @@ export function ActiveClueBar({
           type="button"
           onClick={onPrev}
           aria-label="Définition précédente"
-          className="w-6 shrink-0 font-bold text-organic-accent-700 active:text-organic-accent-500"
+          className="w-8 shrink-0 font-bold text-organic-accent-700 active:text-organic-accent-500"
         >
           ‹
         </button>
@@ -86,7 +86,7 @@ export function ActiveClueBar({
           type="button"
           onClick={onNext}
           aria-label="Définition suivante"
-          className="w-6 shrink-0 font-bold text-organic-accent-700 active:text-organic-accent-500"
+          className="w-8 shrink-0 font-bold text-organic-accent-700 active:text-organic-accent-500"
         >
           ›
         </button>
@@ -118,7 +118,7 @@ export function ActiveClueBar({
                 {slots.map((s, i) => (
                   <span
                     key={i}
-                    className={`flex h-11 w-9 items-center justify-center rounded-lg text-[20px] font-bold ${
+                    className={`flex h-11 w-9 items-center justify-center rounded-[9px] text-[20px] font-bold ${
                       s.locked
                         ? 'bg-organic-accent2-200 text-organic-accent2-900'
                         : 'border border-organic-neutral-300 bg-organic-neutral-100 text-organic-text'

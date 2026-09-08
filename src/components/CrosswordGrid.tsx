@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { Puzzle } from '../types/puzzle';
 import { cellId, wordCellIds } from '../lib/gridGeometry';
 import { useGameState, useRound, type PlayerCursor } from '../state/GameState';
+import { Avatar } from './Avatar';
 import { ClueCell } from './ClueCell';
 import { LetterCell } from './LetterCell';
 import { CompletionCelebration } from './CompletionCelebration';
@@ -213,34 +214,28 @@ export function CrosswordGrid({
     advanceRound(round);
   }, [advanceRound, round]);
 
+  const isCellWrong = useCallback(
+    (id: string) => game.getLetter(id) !== answerByCellId.get(id),
+    [game, answerByCellId],
+  );
+
+  // Le joueur choisit LUI-MÊME la case à deviner (sélection = `activeCellId`
+  // avant de taper une lettre) : plus de repli automatique vers le mot en
+  // cours ou une case au hasard ailleurs dans la grille — ça révélait une
+  // case que le joueur n'avait pas demandée, en lui prenant un indice pour
+  // rien. Une case déjà juste, ou aucune sélection, ne fait plus rien.
+  const hintTarget = activeCellId && isCellWrong(activeCellId) ? activeCellId : null;
+
   const revealActiveCell = useCallback(() => {
-    unlockAudio();
-
-    // Repli en cascade, pour que le bouton fasse toujours quelque chose :
-    // la case sélectionnée, sinon la première case encore fausse du mot en
-    // cours, sinon n'importe quelle case fausse de la grille (sans ce
-    // dernier niveau, le bouton devenait inerte dès que le mot courant
-    // était complet).
-    const isWrong = (id: string) => game.getLetter(id) !== answerByCellId.get(id);
-
-    let target: string | null = null;
-    if (activeCellId && isWrong(activeCellId)) {
-      target = activeCellId;
-    } else if (activeWordId) {
-      target = (cellsByWordId.get(activeWordId) ?? []).find(isWrong) ?? null;
-    }
-    if (!target) {
-      target = allLetterCells.map((c) => c.id).find(isWrong) ?? null;
-    }
-    if (!target) return;
-
-    const answer = answerByCellId.get(target);
+    if (!hintTarget) return;
+    const answer = answerByCellId.get(hintTarget);
     if (!answer) return;
 
-    game.revealLetter(target, answer);
+    unlockAudio();
+    game.revealLetter(hintTarget, answer);
     playCorrectSound();
     hapticTick();
-  }, [activeCellId, activeWordId, cellsByWordId, allLetterCells, answerByCellId, game]);
+  }, [hintTarget, answerByCellId, game]);
 
   const activeWordCellIds = activeWordId ? (cellsByWordId.get(activeWordId) ?? []) : [];
 
@@ -438,6 +433,28 @@ export function CrosswordGrid({
     // comprimer sous sa taille de contenu, et la grille pousserait le clavier
     // hors de l'écran au lieu de se réduire.
     <div className="flex w-full min-h-0 flex-1 flex-col items-center gap-2 px-2 sm:px-4">
+      {/* Réactions live des autres joueurs — jamais la sienne propre (voir
+          GameState.tsx, `sendReaction`) : celle-ci s'anime déjà en local dès
+          l'envoi. `pointer-events-none` : purement décoratif, ne doit rien
+          intercepter sous les cases de la grille. */}
+      <div className="pointer-events-none fixed left-1/2 top-[calc(env(safe-area-inset-top)+52px)] z-40 flex -translate-x-1/2 flex-col items-center gap-1.5">
+        <AnimatePresence>
+          {game.reactions.map((r) => (
+            <motion.div
+              key={r.id}
+              initial={{ opacity: 0, y: -8, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex items-center gap-1.5 rounded-full bg-organic-neutral-900/85 py-1 pl-1 pr-3 shadow-md"
+            >
+              <Avatar name={r.name} color={r.color} size={22} />
+              <span className="text-[12px] font-bold text-organic-bg">{r.name}</span>
+              <span className="text-[15px]">{r.emoji}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
       {/*
         Conteneur centreur : c'est LUI qui absorbe la hauteur restante. La
         carte, elle, ne doit surtout pas être en `flex-1` — cela l'étirerait
@@ -449,7 +466,7 @@ export function CrosswordGrid({
         <motion.div
           animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
-          className="overflow-hidden rounded-lg shadow-sm"
+          className="overflow-hidden rounded-[9px] shadow-sm"
           style={{
             aspectRatio: `${puzzle.cols} / ${puzzle.rows}`,
             // Avant la première mesure on retombe sur la largeur pleine, pour
@@ -511,12 +528,18 @@ export function CrosswordGrid({
         <motion.button
           type="button"
           onClick={revealActiveCell}
-          disabled={hintsExhausted}
-          whileTap={hintsExhausted ? undefined : { scale: 0.94 }}
-          aria-label="Révéler une lettre"
-          title={hintsExhausted ? 'Plus d’indice disponible' : 'Révéler une lettre'}
-          className={`shrink-0 rounded-full border border-organic-neutral-400 px-3 py-1.5 font-display text-[12px] text-organic-text transition ${
-            hintsExhausted ? 'opacity-40' : 'active:bg-organic-neutral-200'
+          disabled={hintsExhausted || !hintTarget}
+          whileTap={hintsExhausted || !hintTarget ? undefined : { scale: 0.94 }}
+          aria-label="Révéler la case sélectionnée"
+          title={
+            hintsExhausted
+              ? 'Plus d’indice disponible'
+              : hintTarget
+                ? 'Révéler la case sélectionnée'
+                : 'Sélectionnez d’abord une case à deviner'
+          }
+          className={`shrink-0 rounded-full border border-organic-neutral-400 px-3.5 py-2.5 font-display text-[12px] text-organic-text transition ${
+            hintsExhausted || !hintTarget ? 'opacity-40' : 'active:bg-organic-neutral-200'
           }`}
         >
           Indice · {hintBudget}

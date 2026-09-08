@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { generateSessionCode } from '../lib/sessionCode';
+import { consumeReturnScreen, generateSessionCode, rememberReturnScreen } from '../lib/sessionCode';
 import { activePlayerId, activePlayerName, currentSession } from '../lib/auth';
 import { dailyLabel } from '../lib/puzzleApi';
 import { Matchmaking } from './Matchmaking';
@@ -18,11 +18,30 @@ import { screenClassName, screenShell, screenTransition, screenVariants } from '
  */
 type Ecran = 'accueil' | 'multijoueur' | 'matchmaking' | 'profil' | 'classement';
 
+const ECRANS_VALIDES: Ecran[] = ['accueil', 'multijoueur', 'matchmaking', 'profil', 'classement'];
+
+// Consommé une seule fois PAR CHARGEMENT DE PAGE (portée module, pas
+// composant) : `consumeReturnScreen` efface l'entrée en la lisant, donc un
+// appel direct dans l'initialiseur paresseux de `useState` se ferait piéger
+// par le double-appel de React 18 StrictMode (exprès, pour détecter ce genre
+// d'impureté) — le second appel trouverait le stockage déjà vidé par le
+// premier et retomberait toujours sur 'accueil'. Ici, en dehors de tout
+// rendu, ce module n'est évalué qu'une fois par page.
+const ecranRestaure = (() => {
+  const restored = consumeReturnScreen();
+  return (ECRANS_VALIDES as string[]).includes(restored ?? '') ? (restored as Ecran) : 'accueil';
+})();
+
 export function Home() {
   const name = activePlayerName();
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
-  const [ecran, setEcran] = useState<Ecran>('accueil');
+  // Rejoindre une partie force un rechargement complet (voir `go`), qui
+  // efface cet état — sans quoi le bouton retour d'un salon ou d'une grille
+  // renverrait toujours à l'accueil pur, même quand on venait de
+  // « Multijoueur ». On restaure donc l'écran mémorisé juste avant ce
+  // rechargement, au lieu de systématiquement redémarrer à 'accueil'.
+  const [ecran, setEcran] = useState<Ecran>(ecranRestaure);
   // Solo et grille du jour n'ont de sens qu'avec une progression qui
   // survit : inutile de les proposer à un invité dont l'identité disparaît
   // au prochain rechargement — ça ne ferait que promettre une "progression
@@ -30,6 +49,9 @@ export function Home() {
   const estInvite = !currentSession();
 
   const go = (session: string, opts: { daily?: boolean; bot?: boolean; solo?: boolean } = {}) => {
+    // Voir la déclaration de `ecran` ci-dessus : mémorisé pour que le retour
+    // depuis la partie qu'on rejoint ici nous ramène ICI, pas à l'accueil.
+    rememberReturnScreen(ecran);
     const url = new URL(window.location.href);
     url.searchParams.set('session', session);
     for (const [param, actif] of [
@@ -217,7 +239,7 @@ export function Home() {
         onClick={jouerSolo}
         title={estInvite ? 'Créez un compte pour jouer en solo' : undefined}
         className={`relative w-full overflow-hidden rounded-[28px] bg-organic-accent2-300 py-4 text-left text-organic-accent2-900 ${
-          estInvite ? 'opacity-50' : ''
+          estInvite ? 'opacity-40' : ''
         }`}
       >
         <span className="pointer-events-none absolute -bottom-7 -right-5 h-[88px] w-[88px] rounded-full bg-white/35" />
@@ -237,7 +259,7 @@ export function Home() {
         onClick={() => go(generateSessionCode(), { daily: true })}
         title={estInvite ? 'Créez un compte pour jouer la grille du jour' : undefined}
         className={`w-full rounded-[28px] border border-organic-divider bg-organic-neutral-100 px-5 py-4 text-left text-organic-text active:bg-organic-neutral-200 ${
-          estInvite ? 'opacity-50' : ''
+          estInvite ? 'opacity-40' : ''
         }`}
       >
         <span className="flex items-baseline justify-between gap-2">

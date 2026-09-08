@@ -50,6 +50,13 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
             Personne n’a encore marqué. Soyez le premier !
           </p>
         )}
+        {rows === null && !erreur && (
+          <div className="flex flex-col gap-1.5" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={i} className="h-[52px] animate-pulse rounded-[20px] bg-organic-neutral-100" />
+            ))}
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
           {rows?.map((r, i) => (
             <motion.div
@@ -83,7 +90,6 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
           ))}
         </div>
       </div>
-
     </div>
   );
 }

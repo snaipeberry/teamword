@@ -77,3 +77,28 @@ export function goHome(): void {
   for (const param of ['session', 'daily', 'bot', 'solo']) url.searchParams.delete(param);
   window.location.href = url.toString();
 }
+
+const RETURN_SCREEN_KEY = 'mf_return_screen';
+
+/**
+ * Mémorise, juste avant de quitter l'accueil pour une partie (rechargement
+ * complet obligé, voir `Home.go`), l'écran local d'où l'on partait — pour que
+ * « retour » depuis le salon/la grille y ramène, plutôt que de toujours
+ * retomber sur l'accueil pur comme si on n'était jamais passé par
+ * « Multijoueur ». Portée session (comme le choix invité) : un nouvel onglet
+ * ou un lien direct ne doit rien restaurer.
+ */
+export function rememberReturnScreen(screen: string): void {
+  sessionStorage.setItem(RETURN_SCREEN_KEY, screen);
+}
+
+/**
+ * Lit puis efface l'écran mémorisé — consommé une seule fois, au montage de
+ * l'accueil, pour qu'une visite ultérieure normale (nouvelle session, lien
+ * direct) reparte bien de zéro plutôt que de rejouer un retour périmé.
+ */
+export function consumeReturnScreen(): string | null {
+  const v = sessionStorage.getItem(RETURN_SCREEN_KEY);
+  sessionStorage.removeItem(RETURN_SCREEN_KEY);
+  return v;
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { connectRoom, type RoomConnection } from '../lib/roomClient';
 import { activePlayerId, activePlayerName, activePlayerToken } from '../lib/auth';
+import { rememberReturnScreen } from '../lib/sessionCode';
 
 /**
  * File d'attente du 1v1 aléatoire.
@@ -16,7 +17,9 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
   const connection = useRef<RoomConnection | null>(null);
 
   useEffect(() => {
-    const moi = { id: activePlayerId(), name: activePlayerName(), color: '#8E7CFF', token: activePlayerToken() };
+    // organic.accent2.500 (tailwind.config.js) — le violet précédent était un
+    // reliquat de l'ancien thème "Aurora", jamais mis à jour au reskin.
+    const moi = { id: activePlayerId(), name: activePlayerName(), color: '#8FA073', token: activePlayerToken() };
     const conn = connectRoom(
       null,
       moi,
@@ -32,6 +35,9 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
         },
         onMatched: (room) => {
           // Partie déjà démarrée côté serveur : on saute le salon.
+          // Mémorisé pour que le retour depuis la partie ramène ici à
+          // « Multijoueur » (d'où le duel a été lancé), pas à l'accueil pur.
+          rememberReturnScreen('multijoueur');
           const url = new URL(window.location.href);
           url.searchParams.set('session', room);
           url.searchParams.delete('daily');
@@ -62,7 +68,7 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
           </div>
         </div>
       </motion.div>
-      <h1 className="mt-6 font-display text-2xl leading-tight text-organic-text">Recherche d’un adversaire</h1>
+      <h1 className="mt-6 font-display text-[24px] leading-tight text-organic-text">Recherche d’un adversaire</h1>
       <p className="mt-2 text-[13.5px] text-organic-neutral-700">
         Vous serez placé dans une partie dès qu’un joueur est disponible.
       </p>

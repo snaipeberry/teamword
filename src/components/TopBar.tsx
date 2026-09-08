@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { aggregateTeams, TEAM_COLORS } from '../lib/teams';
 import { Avatar } from './Avatar';
@@ -9,6 +9,16 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { blockPlayer } from '../lib/roomClient';
 import { GRADE_LABELS, type MultiplayerGrade } from '../lib/difficulty';
+
+/** Même ensemble que REACTIONS côté serveur — un émoji d'ici qu'il ne
+ *  reconnaît pas serait silencieusement ignoré (voir index.js, intent
+ *  `reaction`), donc les deux listes doivent rester identiques. */
+const REACTION_CHOICES: { emoji: string; label: string }[] = [
+  { emoji: '👏', label: 'Bravo' },
+  { emoji: '😮', label: 'Waouh' },
+  { emoji: '💡', label: 'Un indice ?' },
+  { emoji: '🎉', label: 'Bien joué !' },
+];
 
 /**
  * Bandeau unique regroupant numéro de grille, scores et actions.
@@ -25,6 +35,8 @@ export function TopBar({
   dailyLabel = null,
   partiePrivee = false,
   difficulty,
+  solo = false,
+  bot = false,
 }: {
   sessionId: string;
   round: number;
@@ -40,10 +52,22 @@ export function TopBar({
   /** Niveau de la grille en cours (rotation solo, grade multijoueur, ou
    *  « difficile » fixe en quotidien) — affiché à côté du numéro de grille. */
   difficulty?: MultiplayerGrade;
+  /**
+   * Le solo passe par une connexion temps réel comme le reste (`solo-<id>`),
+   * donc `game.multiplayer` y vaut quand même `true` — mais le serveur
+   * refuse qu'un autre joueur rejoigne cette salle précise (voir `join`
+   * côté serveur). Partager un lien qui ne mène jamais nulle part n'a pas de
+   * sens : le bouton « Lien » ne doit pas y apparaître.
+   */
+  solo?: boolean;
+  /** Contre un bot, comme en solo, il n'y a personne pour recevoir une
+   *  réaction — le déclencheur ne sert à rien, autant l'omettre. */
+  bot?: boolean;
 }) {
   const game = useGameState();
   const { teams, ranked } = useRound();
   const [copied, setCopied] = useState(false);
+  const [reactionsOuvertes, setReactionsOuvertes] = useState(false);
   // Confirmation en deux temps (même motif que SessionMenu) : bloquer
   // quelqu'un n'a rien de bénin, un tap accidentel ne doit pas suffire.
   const [aBloquer, setABloquer] = useState<string | null>(null);
@@ -75,12 +99,13 @@ export function TopBar({
     // La zone sûre du haut est désormais gérée par le conteneur racine
     // (App.tsx) — un second padding ici la doublerait.
     <div className="relative z-50 flex w-full max-w-[560px] shrink-0 items-center gap-1.5 px-2">
-      {/* Même geste de retour que partout ailleurs, au même endroit. */}
+      {/* Même geste de retour que partout ailleurs, au même endroit — même
+          cible tactile de 44px que BackButton.tsx, malgré la barre compacte. */}
       <button
         type="button"
         onClick={goHome}
         aria-label="Retour vers le menu"
-        className="-ml-1 shrink-0 px-1.5 py-1 text-[15px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
+        className="-ml-2 flex h-11 w-9 shrink-0 items-center justify-center text-[15px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
       >
         ←
       </button>
@@ -105,7 +130,7 @@ export function TopBar({
             <span
               key={t.team}
               className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold text-organic-text"
-              style={{ backgroundColor: `${TEAM_COLORS[t.team] ?? '#888'}33` }}
+              style={{ backgroundColor: `${TEAM_COLORS[t.team] ?? '#A19786'}33` }}
               title={t.members.map((m) => (m.isMe ? 'Vous' : m.name)).join(', ')}
             >
               <span style={{ color: TEAM_COLORS[t.team] }}>{t.team}</span>
@@ -163,7 +188,7 @@ export function TopBar({
       </div>
       )}
 
-      {game.multiplayer && (
+      {game.multiplayer && !solo && (
         <button
           type="button"
           onClick={copyLink}
@@ -172,6 +197,50 @@ export function TopBar({
         >
           {copied ? 'Copié' : 'Lien'}
         </button>
+      )}
+
+      {/* Réactions live : personne à qui les envoyer en solo ou contre un
+          bot (voir la doc du prop `bot`) — le déclencheur y est donc omis. */}
+      {game.multiplayer && !solo && !bot && (
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setReactionsOuvertes((v) => !v)}
+            aria-label="Envoyer une réaction"
+            aria-expanded={reactionsOuvertes}
+            className={`flex h-9 w-9 items-center justify-center rounded-full text-[16px] transition ${
+              reactionsOuvertes ? 'bg-organic-accent-200' : 'active:bg-organic-neutral-200'
+            }`}
+          >
+            😀
+          </button>
+          <AnimatePresence>
+            {reactionsOuvertes && (
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute right-0 top-11 z-50 flex gap-1 rounded-full bg-organic-bg p-1.5 shadow-lg ring-1 ring-organic-divider"
+              >
+                {REACTION_CHOICES.map((r) => (
+                  <button
+                    key={r.emoji}
+                    type="button"
+                    onClick={() => {
+                      game.sendReaction(r.emoji);
+                      setReactionsOuvertes(false);
+                    }}
+                    aria-label={r.label}
+                    title={r.label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-[19px] active:scale-90 active:bg-organic-neutral-200"
+                  >
+                    {r.emoji}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
       <SoundToggle />
       {partiePrivee && <SessionMenu multiplayer={game.multiplayer} />}

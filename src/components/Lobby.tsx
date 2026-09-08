@@ -5,6 +5,7 @@ import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { Avatar } from './Avatar';
 import { GRADE_LABELS, MULTIPLAYER_GRADES } from '../lib/difficulty';
 import { screenShell } from '../lib/motion';
+import { BackButton } from './BackButton';
 
 /**
  * Salon d'attente : code à partager, liste des joueurs, départ.
@@ -12,7 +13,7 @@ import { screenShell } from '../lib/motion';
  * L'exclusion n'est proposée qu'à l'hôte — mais le contrôle réel est dans la
  * mutation `kickPlayer`, masquer le bouton ne protégeant de rien.
  */
-export function Lobby({ sessionId }: { sessionId: string }) {
+export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boolean }) {
   const game = useGameState();
   const { hostId, startGame, kickPlayer, isKicked, teams, setTeam, grade, setGrade } = useRound();
   const [copied, setCopied] = useState<'code' | 'lien' | null>(null);
@@ -37,38 +38,40 @@ export function Lobby({ sessionId }: { sessionId: string }) {
 
   return (
     <div className={`${screenShell} overflow-y-auto`}>
-      <button
-        type="button"
-        onClick={goHome}
-        className="self-start py-1 text-[13px] font-bold text-organic-neutral-700 active:text-organic-accent-700"
-      >
-        ← Menu
-      </button>
-      <h1 className="mt-1.5 font-display text-[30px] leading-none text-organic-text">Salon</h1>
+      <BackButton onClick={goHome} />
+      <h1 className="mt-1.5 font-display text-[30px] leading-none text-organic-text">
+        {bot ? 'Contre un bot' : 'Salon'}
+      </h1>
 
-      {/* Code de la partie */}
-      <div className="mt-4 w-full rounded-[28px] bg-organic-surface p-4 text-center">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">Code de la partie</p>
-        <p className="my-1.5 font-display text-3xl tracking-[0.22em] text-organic-text">{sessionId}</p>
-        <div className="flex justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => copier('code')}
-            className="rounded-full border border-organic-neutral-400 px-4 py-2 font-display text-[12.5px] text-organic-text active:bg-organic-neutral-200"
-          >
-            {copied === 'code' ? 'Copié' : 'Copier le code'}
-          </button>
-          <button
-            type="button"
-            onClick={() => copier('lien')}
-            className="rounded-full bg-organic-accent-500 px-4 py-2 font-display text-[12.5px] text-organic-bg active:bg-organic-accent-600"
-          >
-            {copied === 'lien' ? 'Copié' : 'Partager le lien'}
-          </button>
+      {/* Code de la partie : absent contre un bot — cette salle n'attend
+          personne d'autre, partager son code n'aurait aucun sens (le
+          "match" est déjà complet : vous + le bot au lancement). */}
+      {!bot && (
+        <div className="mt-4 w-full rounded-[28px] bg-organic-surface p-4 text-center">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">Code de la partie</p>
+          <p className="my-1.5 font-display text-[28px] tracking-[0.22em] text-organic-text">{sessionId}</p>
+          <div className="flex justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => copier('code')}
+              className="rounded-full border border-organic-neutral-400 px-4 py-2 font-display text-[12.5px] text-organic-text active:bg-organic-neutral-200"
+            >
+              {copied === 'code' ? 'Copié' : 'Copier le code'}
+            </button>
+            <button
+              type="button"
+              onClick={() => copier('lien')}
+              className="rounded-full bg-organic-accent-500 px-4 py-2 font-display text-[12.5px] text-organic-bg active:bg-organic-accent-600"
+            >
+              {copied === 'lien' ? 'Copié' : 'Partager le lien'}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Joueurs */}
+      {/* Joueurs, équipes et format : sans objet contre un bot — vous seul
+          êtes dans ce salon, personne à lister ni à mettre en équipe. */}
+      {!bot && (
       <div className="mt-5 w-full">
         <p className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
           {presents.length} joueur{presents.length > 1 ? 's' : ''}
@@ -130,8 +133,9 @@ export function Lobby({ sessionId }: { sessionId: string }) {
           </AnimatePresence>
         </div>
       </div>
+      )}
 
-      {(() => {
+      {!bot && (() => {
         const a = presents.filter((p) => teams[p.playerId] === 'A').length;
         const b = presents.filter((p) => teams[p.playerId] === 'B').length;
         if (a === 0 && b === 0) return null;
@@ -197,7 +201,7 @@ export function Lobby({ sessionId }: { sessionId: string }) {
 export function KickedScreen() {
   return (
     <div className="flex min-h-0 w-full max-w-[340px] flex-1 flex-col items-center justify-center gap-4 px-5 text-center">
-      <h1 className="font-display text-xl text-organic-text">Vous avez quitté la partie</h1>
+      <h1 className="font-display text-[20px] text-organic-text">Vous avez quitté la partie</h1>
       <p className="text-[13px] text-organic-neutral-700">L’hôte vous a retiré du salon.</p>
       <button
         type="button"

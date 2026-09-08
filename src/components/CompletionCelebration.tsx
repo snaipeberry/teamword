@@ -21,7 +21,7 @@ export function CompletionCelebration({ onDone }: { onDone: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-organic-neutral-900/40 backdrop-blur-sm"
     >
       {confetti.map((i) => {
         const angle = randomBetween(0, Math.PI * 2);
@@ -51,8 +51,8 @@ export function CompletionCelebration({ onDone }: { onDone: () => void }) {
         transition={{ duration: 0.55, ease: [0.34, 1.56, 0.64, 1] }}
         className="rounded-[28px] bg-organic-accent-500 px-9 py-6 text-center text-organic-bg shadow-lg"
       >
-        <p className="font-display text-3xl tracking-wide">Bravo !</p>
-        <p className="mt-1 text-sm font-medium text-organic-bg/85">Grille terminée</p>
+        <p className="font-display text-[28px] tracking-wide">Bravo !</p>
+        <p className="mt-1 text-[13px] font-medium text-organic-bg/85">Grille terminée</p>
       </motion.div>
     </motion.div>
   );

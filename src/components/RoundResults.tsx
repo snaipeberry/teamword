@@ -4,6 +4,7 @@ import { useGameState, useRound } from '../state/GameState';
 import { aggregateTeams, winningTeam, TEAM_COLORS } from '../lib/teams';
 import { Avatar } from './Avatar';
 import { AnimatedNumber } from './AnimatedNumber';
+import { ResultModal } from './ResultModal';
 
 function initials(name: string): string {
   return name.slice(0, 2).toUpperCase();
@@ -51,19 +52,8 @@ export function RoundResults({
     : [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-center justify-center bg-organic-neutral-900/50 p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-        className="w-full max-w-[340px] rounded-[28px] bg-organic-bg p-5 shadow-lg"
-      >
-        <h2 className="text-center font-display text-xl text-organic-text">
+    <ResultModal>
+        <h2 className="text-center font-display text-[20px] text-organic-text">
           {daily ? 'Grille du jour terminée !' : `Grille ${round + 1} terminée !`}
         </h2>
 
@@ -87,15 +77,15 @@ export function RoundResults({
                 <div className="flex items-center gap-2">
                   <span
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-display text-[12px] text-white"
-                    style={{ backgroundColor: TEAM_COLORS[t.team] ?? '#888' }}
+                    style={{ backgroundColor: TEAM_COLORS[t.team] ?? '#A19786' }}
                   >
                     {t.team}
                   </span>
-                  <span className="flex-1 text-sm font-bold text-organic-text">
+                  <span className="flex-1 text-[14px] font-bold text-organic-text">
                     Équipe {t.team}
                     {vainqueur === t.team && <span className="ml-1 text-organic-accent2-800">· gagne</span>}
                   </span>
-                  <span className="font-display text-lg tabular-nums text-organic-text">{t.score}</span>
+                  <span className="font-display text-[18px] tabular-nums text-organic-text">{t.score}</span>
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5 pl-9">
                   {t.members.map((m) => (
@@ -132,14 +122,14 @@ export function RoundResults({
                   >
                     {initials(p.isMe ? 'Vous' : p.name)}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-bold text-organic-text">
+                  <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-organic-text">
                     {p.isMe ? 'Vous' : p.name}
                     {!p.online && <span className="ml-1 text-[10px] font-medium text-organic-neutral-500">hors ligne</span>}
                   </span>
                   {p.hints > 0 && (
                     <span className="shrink-0 text-[10px] font-medium text-organic-neutral-500">{p.hints} ind.</span>
                   )}
-                  <span className="shrink-0 font-display text-sm tabular-nums text-organic-text">
+                  <span className="shrink-0 font-display text-[14px] tabular-nums text-organic-text">
                     <AnimatedNumber value={p.score} />
                   </span>
                   {p.online && (
@@ -169,7 +159,7 @@ export function RoundResults({
             game.multiplayer ? game.setReady(round) : onAdvance();
           }}
           disabled={!daily && iAmReady}
-          className={`mt-5 w-full rounded-full py-3 font-display text-sm shadow-md transition active:scale-95 ${
+          className={`mt-5 w-full rounded-full py-3 font-display text-[14px] shadow-md transition active:scale-95 ${
             iAmReady
               ? 'cursor-default bg-organic-neutral-200 text-organic-neutral-500'
               : 'bg-organic-accent-500 text-organic-bg active:bg-organic-accent-600'
@@ -185,7 +175,6 @@ export function RoundResults({
                 : 'Chargement…'
               : 'Je suis prêt'}
         </button>
-      </motion.div>
-    </motion.div>
+    </ResultModal>
   );
 }

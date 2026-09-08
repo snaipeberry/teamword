@@ -69,7 +69,7 @@ export function LetterCell({
             animate={{ scale: 1.8, opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="pointer-events-none absolute inset-0 rounded-sm bg-organic-accent2-400"
+            className="pointer-events-none absolute inset-0 bg-organic-accent2-400"
           />
         )}
       </AnimatePresence>

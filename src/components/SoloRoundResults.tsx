@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { Profile } from '../lib/roomClient';
 import { AnimatedNumber } from './AnimatedNumber';
+import { ResultModal } from './ResultModal';
 
 /**
  * Écran de fin de grille en mode solo : pas d'attente, pas de tableau de
@@ -31,36 +32,25 @@ export function SoloRoundResults({
       : 100;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-center justify-center bg-organic-neutral-900/50 p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-        className="w-full max-w-[340px] rounded-[28px] bg-organic-bg p-5 shadow-lg"
-      >
-        <h2 className="text-center font-display text-xl text-organic-text">
+    <ResultModal>
+        <h2 className="text-center font-display text-[20px] text-organic-text">
           Grille {round + 1} terminée !
         </h2>
 
-        <div className="mt-4 flex items-center justify-center gap-1.5 font-display text-2xl text-organic-accent-700">
+        <div className="mt-4 flex items-center justify-center gap-1.5 font-display text-[24px] text-organic-accent-700">
           <span>+</span>
           <AnimatedNumber value={pointsEarned} />
-          <span className="text-sm font-bold text-organic-neutral-500">points solo</span>
+          <span className="text-[13px] font-bold text-organic-neutral-500">points solo</span>
         </div>
 
         {profile && (
           <div className="mt-4 rounded-[20px] bg-organic-neutral-100 p-3">
             <div className="flex items-center gap-2">
-              <span className="text-xl" aria-hidden="true">
+              <span className="text-[20px]" aria-hidden="true">
                 {profile.tier.icon}
               </span>
-              <span className="flex-1 text-sm font-bold text-organic-text">{profile.tier.label}</span>
-              <span className="font-display text-sm tabular-nums text-organic-text">
+              <span className="flex-1 text-[14px] font-bold text-organic-text">{profile.tier.label}</span>
+              <span className="font-display text-[14px] tabular-nums text-organic-text">
                 {profile.soloPoints}
               </span>
             </div>
@@ -90,11 +80,10 @@ export function SoloRoundResults({
         <button
           type="button"
           onClick={onAdvance}
-          className="mt-5 w-full rounded-full bg-organic-accent-500 py-3 font-display text-sm text-organic-bg shadow-md transition active:scale-95 active:bg-organic-accent-600"
+          className="mt-5 w-full rounded-full bg-organic-accent-500 py-3 font-display text-[14px] text-organic-bg shadow-md transition active:scale-95 active:bg-organic-accent-600"
         >
           Grille suivante →
         </button>
-      </motion.div>
-    </motion.div>
+    </ResultModal>
   );
 }

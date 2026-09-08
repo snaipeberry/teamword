@@ -7,8 +7,12 @@ export interface TeamTotal {
   members: PlayerScore[];
 }
 
-/** Couleurs des camps, réutilisées partout pour rester lisible d'un écran à l'autre. */
-export const TEAM_COLORS: Record<string, string> = { A: '#4DE8EF', B: '#FF6B6B' };
+/** Couleurs des camps, réutilisées partout pour rester lisible d'un écran à
+ *  l'autre — organic.accent2.500 / organic.accent.500 (tailwind.config.js),
+ *  même répartition sauge/terre cuite que Lobby.tsx (`styleEquipe`) pour
+ *  l'équipe A/B, plutôt qu'un cyan/rouge criards issus de l'ancien thème
+ *  "Aurora". */
+export const TEAM_COLORS: Record<string, string> = { A: '#8FA073', B: '#D67F48' };
 
 /**
  * Regroupe les scores par camp.

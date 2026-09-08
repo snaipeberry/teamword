@@ -68,6 +68,22 @@ export interface GameStateApi {
    * `profile.soloPoints` côté serveur.
    */
   reportGridDone: (points: number, daily: boolean) => void;
+
+  /** Réactions live (👏 😮 💡 🎉) — éphémères, jamais persistées ni comptées
+   *  dans `state` : voir server/websocket/index.js, intent `reaction`. */
+  sendReaction: (emoji: string) => void;
+  /** Réactions REÇUES des autres, encore affichées (auto-expirées après
+   *  quelques secondes) — jamais la sienne propre, animée en local dès
+   *  l'envoi plutôt que d'attendre l'aller-retour serveur. */
+  reactions: LiveReaction[];
+}
+
+export interface LiveReaction {
+  id: number;
+  playerId: string;
+  name: string;
+  color: string;
+  emoji: string;
 }
 
 const GameStateContext = createContext<GameStateApi | null>(null);
@@ -229,6 +245,8 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       isReadyFor: () => true,
       myName: localName,
       reportGridDone: () => {},
+      sendReaction: () => {},
+      reactions: [],
     }),
     [letters, revealed, setLetters, setRevealed, myColor, localName],
   );
@@ -270,6 +288,8 @@ interface RoomBridge {
   peers: RoomPeer[];
   send: (message: Record<string, unknown>) => void;
   me: { id: string; name: string; color: string };
+  sendReaction: (emoji: string) => void;
+  reactions: LiveReaction[];
 }
 
 const RoomContext = createContext<RoomBridge | null>(null);
@@ -301,7 +321,18 @@ function RemoteSessionProvider({
 
   const [state, setState] = useState<RoomState>(EMPTY_STATE);
   const [peers, setPeers] = useState<RoomPeer[]>([]);
+  const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const connection = useRef<RoomConnection | null>(null);
+  const nextReactionId = useRef(0);
+
+  // Auto-expiration : une réaction affichée trop longtemps perdrait son sens
+  // ("maintenant, quelqu'un vient de..."), sans compter que la liste
+  // grossirait indéfiniment sur une longue partie si rien ne la vidait.
+  const pushReaction = useCallback((r: Omit<LiveReaction, 'id'>) => {
+    const id = nextReactionId.current++;
+    setReactions((prev) => [...prev, { ...r, id }]);
+    setTimeout(() => setReactions((prev) => prev.filter((x) => x.id !== id)), 2600);
+  }, []);
 
   useEffect(() => {
     const conn = connectRoom(
@@ -310,6 +341,7 @@ function RemoteSessionProvider({
       {
         onState: setState,
         onPresence: setPeers,
+        onReaction: pushReaction,
       },
       mode,
     );
@@ -318,15 +350,28 @@ function RemoteSessionProvider({
       conn.close();
       connection.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, me, mode]);
 
   const send = useCallback((message: Record<string, unknown>) => {
     connection.current?.send(message);
   }, []);
 
+  // Sa propre réaction s'anime tout de suite en local plutôt que d'attendre
+  // l'aller-retour serveur (qui, de toute façon, ne la lui renvoie pas — voir
+  // le commentaire de l'intent côté serveur) : même geste, même latence
+  // perçue que taper une lettre.
+  const sendReaction = useCallback(
+    (emoji: string) => {
+      send({ t: 'reaction', emoji });
+      pushReaction({ playerId: me.id, name: me.name, color: me.color, emoji });
+    },
+    [send, pushReaction, me],
+  );
+
   const bridge = useMemo<RoomBridge>(
-    () => ({ state, peers, send, me }),
-    [state, peers, send, me],
+    () => ({ state, peers, send, me, sendReaction, reactions }),
+    [state, peers, send, me, sendReaction, reactions],
   );
 
   const roundApi = useMemo<RoundApi>(
@@ -369,7 +414,7 @@ function RemoteGameProvider({
   puzzle: Puzzle;
   children: React.ReactNode;
 }) {
-  const { state, peers, send, me } = useRoom();
+  const { state, peers, send, me, sendReaction, reactions } = useRoom();
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
   const myName = me.name;
 
@@ -482,7 +527,10 @@ function RemoteGameProvider({
         return {
           playerId: id,
           name: isMe ? myName : (live?.name ?? stored?.name ?? 'Joueur'),
-          color: live?.color ?? stored?.color ?? '#9CA3AF',
+          // organic.neutral.500 — dernier repli si ni l'état live ni la
+          // salle sauvegardée n'ont de couleur ; un gris froid jurait avec
+          // les tons chauds de la palette partout ailleurs.
+          color: live?.color ?? stored?.color ?? '#A19786',
           score: state.scores[id] ?? 0,
           hints: state.hints[id] ?? 0,
           online: online.has(id),
@@ -527,8 +575,13 @@ function RemoteGameProvider({
       isReadyFor: (playerId, round) => state.ready[playerId] === round,
       myName,
       reportGridDone,
+      sendReaction,
+      reactions,
     }),
-    [getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard, allReadyFor, myName, reportGridDone],
+    [
+      getLetter, setLetter, revealLetter, state, peers, me, send, scoreboard,
+      allReadyFor, myName, reportGridDone, sendReaction, reactions,
+    ],
   );
 
   return <GameStateContext.Provider value={api}>{children}</GameStateContext.Provider>;
