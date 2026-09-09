@@ -4,6 +4,7 @@ import App from './App';
 import { hideSplashScreen } from './lib/native';
 import { preloadGoogleAuth } from './lib/oauthProviders';
 import { startPresence } from './lib/presence';
+import { startAppUpdates } from './lib/pwa';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -21,6 +22,11 @@ preloadGoogleAuth();
 // Ici et pas dans un écran : on reste « en ligne » pour ses amis quel que
 // soit l'endroit de l'application où l'on se trouve, partie comprise.
 startPresence();
+
+// Surveille les déploiements et recharge l'onglet quand une nouvelle version
+// prend le contrôle — sans quoi le cache du service worker continuerait de
+// servir l'ancienne (voir lib/pwa.ts).
+startAppUpdates();
 
 // Une frame après le rendu initial : le premier contenu est peint, l'écran
 // de démarrage natif peut céder la place sans flash de blanc entre les deux.

@@ -470,11 +470,20 @@ export function Home() {
           <button
             type="button"
             onClick={() => setEcran('profil')}
-            className="mb-3.5 mt-auto shrink-0 pt-3 text-left text-[11px] font-bold text-organic-neutral-600 underline underline-offset-2"
+            className="mt-auto shrink-0 pt-3 text-left text-[11px] font-bold text-organic-neutral-600 underline underline-offset-2"
           >
             Vous jouez en invité — créer un compte pour tout débloquer
           </button>
         )}
+
+        {/* Identifiant du build, minuscule et en pied de page : c'est le seul
+            moyen de dire d'un coup d'œil QUELLE version tourne réellement —
+            un déploiement qui traîne, un cache de service worker périmé (voir
+            lib/pwa.ts). Rien à comprendre pour un joueur, tout pour un
+            rapport de bug. */}
+        <p className={`${estInvite ? 'mt-2' : 'mt-auto pt-3'} mb-2 shrink-0 text-[9px] font-medium text-organic-neutral-500`}>
+          {__APP_VERSION__}
+        </p>
       </div>
     );
   }

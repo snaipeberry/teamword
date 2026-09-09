@@ -29,6 +29,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // L'enregistrement automatique injecté dans index.html se contente
+      // d'appeler `register()` : il ne recharge jamais la page quand une
+      // nouvelle version prend le contrôle. On l'enregistre donc nous-mêmes,
+      // voir src/lib/pwa.ts.
+      injectRegister: null,
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Mots Fléchés',
