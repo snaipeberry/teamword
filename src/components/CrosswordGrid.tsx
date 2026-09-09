@@ -11,7 +11,7 @@ import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
 import { SoloRoundResults } from './SoloRoundResults';
 import { ActiveClueBar } from './ActiveClueBar';
-import { PlayerGauges } from './PlayerGauges';
+import { ProgressRail, RAIL_TOTAL_PX, useCamps } from './ProgressRails';
 import type { UseSoloProfileResult } from '../hooks/useSoloProfile';
 import {
   hapticTick,
@@ -68,6 +68,13 @@ export function CrosswordGrid({
   const fitRef = useRef<HTMLDivElement>(null);
   const [gridWidth, setGridWidth] = useState<number | null>(null);
 
+  // Avancement des deux camps, rendu en rails de chaque côté de la grille.
+  // `null` en solo, en quotidien et en coopération — il n'y a alors personne
+  // à qui se comparer. Déclaré ici parce que la mesure ci-dessous doit savoir
+  // si les rails occupent, ou non, une part de la largeur.
+  const camps = useCamps(puzzle.words.length);
+  const reserve = camps ? 2 * RAIL_TOTAL_PX : 0;
+
   useEffect(() => {
     const el = fitRef.current;
     if (!el) return;
@@ -75,7 +82,10 @@ export function CrosswordGrid({
     const measure = () => {
       const { width, height } = el.getBoundingClientRect();
       if (width > 0 && height > 0) {
-        setGridWidth(Math.floor(Math.min(width, 480, height * ratio)));
+        // `reserve` : les rails latéraux et leurs gouttières sont DANS la zone
+        // mesurée. Sans cette déduction la grille se croirait plus large
+        // qu'elle ne peut l'être et déborderait de l'écran.
+        setGridWidth(Math.floor(Math.min(width - reserve, 480, height * ratio)));
       }
     };
     // Mesure SYNCHRONE dans le callback : ResizeObserver se déclenche déjà
@@ -91,12 +101,13 @@ export function CrosswordGrid({
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [puzzle.cols, puzzle.rows]);
+  }, [puzzle.cols, puzzle.rows, reserve]);
 
   // Côté d'une case, dérivé de la mesure du conteneur : c'est lui qui
   // dimensionne le texte des définitions (voir ClueCell). Repli sur une
   // valeur plausible tant que la première mesure n'a pas eu lieu.
   const cellSize = (gridWidth ?? 360) / puzzle.cols;
+
 
   const cellsByWordId = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -420,6 +431,7 @@ export function CrosswordGrid({
   const hintBudget = soloScored ? (soloProfile.profile?.hintBalance ?? 0) : Math.max(0, 3 - monHintCount);
   const hintsExhausted = soloScored ? (soloProfile.profile?.hintBalance ?? 0) <= 0 : monHintCount >= 3;
 
+
   const othersByCellId = useMemo(() => {
     const map = new Map<string, PlayerCursor[]>();
     game.others.forEach((o) => {
@@ -456,16 +468,22 @@ export function CrosswordGrid({
         </AnimatePresence>
       </div>
 
-      <PlayerGauges totalMots={puzzle.words.length} />
-
       {/*
         Conteneur centreur : c'est LUI qui absorbe la hauteur restante. La
         carte, elle, ne doit surtout pas être en `flex-1` — cela l'étirerait
         verticalement et écraserait son ratio (cases mesurées 46x59 au lieu
         de carrées). Elle se dimensionne donc uniquement par son aspect-ratio,
         borné par la hauteur ET la largeur disponibles.
+
+        Les rails encadrent la carte au lieu de la surplomber. Ils vivent DANS
+        la zone mesurée, d'où la `reserve` déduite plus haut : la grille se
+        recalcule à la largeur qui reste, et pas une case n'est rognée.
       */}
       <div ref={fitRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
+        {/* Rangée en `items-stretch` : la carte est le seul élément à hauteur
+            propre, les rails s'alignent donc exactement sur elle. */}
+        <div className="flex min-w-0 max-w-full items-stretch justify-center gap-2">
+        {camps && <ProgressRail camp={camps.mien} />}
         <motion.div
           animate={mounted ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
@@ -527,6 +545,8 @@ export function CrosswordGrid({
           )}
           </div>
         </motion.div>
+        {camps && <ProgressRail camp={camps.adverse} />}
+        </div>
       </div>
 
       <div className="flex w-full shrink-0 items-center justify-center gap-1.5 px-1">
@@ -549,13 +569,6 @@ export function CrosswordGrid({
         >
           Indice · {hintBudget}
         </motion.button>
-
-        {/* Compteur de la maquette V2 : combien de mots la grille a déjà
-            livrés, tous joueurs confondus. Il donne à la partie une fin
-            visible, ce que les jauges seules ne montrent pas. */}
-        <span className="shrink-0 text-[11px] font-bold text-organic-neutral-600">
-          {solvedWordIds.size} / {puzzle.words.length} mots
-        </span>
 
         {/*
           Raccourci de DÉVELOPPEMENT — remplit la grille pour atteindre

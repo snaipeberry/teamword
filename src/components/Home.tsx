@@ -4,6 +4,7 @@ import { clearReturnScreen, generateSessionCode, peekReturnScreen, rememberRetur
 import { activePlayerId, activePlayerName, currentSession } from '../lib/auth';
 import { dailyLabel } from '../lib/puzzleApi';
 import { fetchFriends, fetchProfile, type FriendState, type Profile } from '../lib/roomClient';
+import { PRESENCE_PING_MS } from '../lib/presence';
 import { Matchmaking } from './Matchmaking';
 import { ProfileScreen } from './Profile';
 import { LeaderboardScreen } from './Leaderboard';
@@ -94,7 +95,29 @@ export function Home() {
   useEffect(() => {
     if (estInvite) return;
     fetchProfile(activePlayerId()).then(setProfile).catch(() => {});
-    fetchFriends(activePlayerId()).then(setAmis).catch(() => {});
+  }, [estInvite]);
+
+  // La liste d'amis, elle, se relit en boucle : « en ligne » change sans
+  // qu'on touche à rien, et une pastille qui n'est juste qu'au chargement de
+  // la page ne vaut pas mieux que pas de pastille du tout. Même cadence que
+  // le battement de présence, à l'arrêt quand l'onglet n'est pas à l'écran.
+  useEffect(() => {
+    if (estInvite) return;
+    const charger = () => void fetchFriends(activePlayerId()).then(setAmis).catch(() => {});
+    // Le premier chargement n'est PAS conditionné à la visibilité : une page
+    // ouverte en arrière-plan (onglet restauré, application relancée) doit
+    // avoir ses données prêtes quand on y arrive, pas commencer à les
+    // chercher à ce moment-là. Seules les relectures suivantes s'économisent.
+    charger();
+    const relire = () => {
+      if (document.visibilityState === 'visible') charger();
+    };
+    const minuteur = window.setInterval(relire, PRESENCE_PING_MS);
+    document.addEventListener('visibilitychange', relire);
+    return () => {
+      window.clearInterval(minuteur);
+      document.removeEventListener('visibilitychange', relire);
+    };
   }, [estInvite]);
 
   const go = (session: string, opts: { daily?: boolean; bot?: boolean; solo?: boolean } = {}) => {

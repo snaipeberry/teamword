@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
-import { fetchProfile, type Profile } from '../lib/roomClient';
+import { blockPlayer, fetchProfile, type Profile } from '../lib/roomClient';
 import { activePlayerId } from '../lib/auth';
 import { goHome, rememberReturnScreen } from '../lib/sessionCode';
 import { screenShell } from '../lib/motion';
@@ -23,6 +23,23 @@ export function MatchEndScreen() {
   } = useRound();
   const myId = activePlayerId();
   const [profile, setProfile] = useState<Profile | null>(null);
+  // Bloquer se décidait auparavant depuis la carte de scores qui coiffait la
+  // grille ; celle-ci a cédé la place aux rails latéraux. C'est de toute
+  // façon ici que la question se pose vraiment — en pleine partie on a la
+  // tête dans la grille, pas dans la modération. Confirmation en deux temps :
+  // écarter quelqu'un de tous ses futurs duels n'a rien d'un tap anodin.
+  const [aBloquer, setABloquer] = useState<string | null>(null);
+  const [bloques, setBloques] = useState<Set<string>>(new Set());
+
+  const bloquer = async (playerId: string) => {
+    if (aBloquer !== playerId) {
+      setABloquer(playerId);
+      return;
+    }
+    setABloquer(null);
+    await blockPlayer(myId, playerId).catch(() => {});
+    setBloques((prev) => new Set(prev).add(playerId));
+  };
 
   useEffect(() => {
     // Le classement/niveau affiché doit refléter CE match : le serveur a
@@ -102,6 +119,26 @@ export function MatchEndScreen() {
               {p.isMe ? 'Vous' : p.name}
             </span>
             <span className="font-display text-[19px] tabular-nums text-organic-text">{p.score}</span>
+            {/* Réservé au duel ALÉATOIRE : on n'a pas choisi cet adversaire.
+                Quelqu'un qu'on a soi-même invité en partie privée, on cesse
+                simplement de l'inviter. */}
+            {ranked && !p.isMe && (
+              <button
+                type="button"
+                onClick={() => void bloquer(p.playerId)}
+                disabled={bloques.has(p.playerId)}
+                aria-label={aBloquer === p.playerId ? 'Confirmer le blocage' : `Bloquer ${p.name}`}
+                className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wide ${
+                  bloques.has(p.playerId)
+                    ? 'text-organic-neutral-500'
+                    : aBloquer === p.playerId
+                      ? 'bg-organic-accent-500 text-organic-bg'
+                      : 'text-organic-neutral-600 active:bg-organic-neutral-300'
+                }`}
+              >
+                {bloques.has(p.playerId) ? 'bloqué' : aBloquer === p.playerId ? 'confirmer' : 'bloquer'}
+              </button>
+            )}
           </div>
         ))}
       </motion.div>

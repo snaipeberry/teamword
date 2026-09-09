@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { fetchFriends, friendAction, type FriendState, type FriendView } from '../lib/roomClient';
+import { PRESENCE_PING_MS } from '../lib/presence';
 import { activePlayerId, currentSession } from '../lib/auth';
 import { generateSessionCode } from '../lib/sessionCode';
 import { screenShell } from '../lib/motion';
@@ -42,6 +43,10 @@ export function FriendsScreen({ onClose }: { onClose: () => void }) {
   const [pseudo, setPseudo] = useState('');
   const [message, setMessage] = useState<{ texte: string; erreur: boolean } | null>(null);
   const [enCours, setEnCours] = useState(false);
+  // Des refs et non des états : la relecture périodique doit lire la valeur
+  // du moment sans reconstruire son minuteur à chaque clic.
+  const enCoursRef = useRef(false);
+  const versionRef = useRef(0);
 
   useEffect(() => {
     if (estInvite) return;
@@ -51,12 +56,36 @@ export function FriendsScreen({ onClose }: { onClose: () => void }) {
       .finally(() => setChargement(false));
   }, [moi, estInvite]);
 
+  // Relecture périodique : les statuts « en ligne » et les demandes reçues
+  // bougent pendant qu'on regarde l'écran. Le compteur d'actions empêche une
+  // réponse partie AVANT un accept/refus d'écraser le résultat de celui-ci.
+  useEffect(() => {
+    if (estInvite) return;
+    const relire = () => {
+      if (document.visibilityState !== 'visible' || enCoursRef.current) return;
+      const attendu = ++versionRef.current;
+      fetchFriends(moi)
+        .then((suivant) => {
+          if (versionRef.current === attendu) setEtat(suivant);
+        })
+        .catch(() => {});
+    };
+    const minuteur = window.setInterval(relire, PRESENCE_PING_MS);
+    document.addEventListener('visibilitychange', relire);
+    return () => {
+      window.clearInterval(minuteur);
+      document.removeEventListener('visibilitychange', relire);
+    };
+  }, [moi, estInvite]);
+
   /** Chaque action renvoie l'état complet : rien à recharger derrière. */
   const agir = async (
     action: 'request' | 'accept' | 'decline' | 'cancel' | 'remove',
     cible: { username?: string; playerId?: string },
     succes?: string,
   ) => {
+    enCoursRef.current = true;
+    versionRef.current++;
     setEnCours(true);
     try {
       const suivant = await friendAction(moi, action, cible);
@@ -66,6 +95,7 @@ export function FriendsScreen({ onClose }: { onClose: () => void }) {
     } catch {
       setMessage({ texte: 'Action impossible pour le moment', erreur: true });
     } finally {
+      enCoursRef.current = false;
       setEnCours(false);
     }
   };

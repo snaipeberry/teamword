@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
-import { aggregateTeams, TEAM_COLORS } from '../lib/teams';
 import { SoundToggle } from './SoundToggle';
 import { SessionMenu } from './SessionMenu';
-import { AnimatedNumber } from './AnimatedNumber';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { GRADE_LABELS, type MultiplayerGrade } from '../lib/difficulty';
 
@@ -26,10 +24,10 @@ const REACTION_CHOICES: { emoji: string; label: string }[] = [
  * et le tableau des scores occupaient auparavant trois blocs empilés, soit une
  * hauteur qui croissait avec le nombre de joueurs et mangeait la grille.
  *
- * L'avancement joueur par joueur n'est plus ici : il est passé aux jauges
- * placées juste sous cette barre (voir PlayerGauges, maquette V2), qui disent
- * en plus À QUELLE DISTANCE de la fin chacun se trouve. Seuls les totaux par
- * ÉQUIPE restent affichés ici, faute d'équivalent dans les jauges.
+ * Aucun score n'y figure plus, ni par joueur ni par équipe : l'avancement est
+ * passé aux rails verticaux qui bordent la grille (voir ProgressRails), qui
+ * disent À QUELLE DISTANCE de la fin chaque camp se trouve — ce qu'un nombre
+ * ne dira jamais — sans coûter une ligne de hauteur.
  */
 export function TopBar({
   sessionId,
@@ -67,10 +65,9 @@ export function TopBar({
   bot?: boolean;
 }) {
   const game = useGameState();
-  const { teams, ranked, matchEndsAt, leaveMatch } = useRound();
+  const { ranked, matchEndsAt, leaveMatch } = useRound();
   const [copied, setCopied] = useState(false);
   const [reactionsOuvertes, setReactionsOuvertes] = useState(false);
-  const totals = aggregateTeams(game.scoreboard, teams);
 
   // Chrono du duel classé (10 minutes, voir server/websocket/index.js) — un
   // simple intervalle plutôt qu'un minuteur serveur : le SERVEUR reste seul
@@ -146,26 +143,11 @@ export function TopBar({
         </>
       )}
 
-      {/* En partie par équipes, on affiche les TOTAUX de camp : c'est le score
-          qui compte, celui de chacun n'étant qu'un détail. Le détail joueur
-          par joueur, lui, est passé aux jauges sous la barre (PlayerGauges,
-          maquette V2) — le répéter ici ne ferait que doubler l'information. */}
-      {totals.length > 0 && (
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
-          {totals.map((t) => (
-            <span
-              key={t.team}
-              className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold text-organic-text"
-              style={{ backgroundColor: `${TEAM_COLORS[t.team] ?? '#A19786'}33` }}
-              title={t.members.map((m) => (m.isMe ? 'Vous' : m.name)).join(', ')}
-            >
-              <span style={{ color: TEAM_COLORS[t.team] }}>{t.team}</span>
-              <AnimatedNumber value={t.score} />
-            </span>
-          ))}
-        </div>
-      )}
-      {totals.length === 0 && <span className="min-w-0 flex-1" />}
+      {/* Plus aucun score ici : les totaux de camp sont passés aux rails
+          verticaux qui bordent la grille (voir ProgressRails). Un chiffre dans
+          cette barre disait « combien », jamais « à quelle distance de la
+          fin » — et il coûtait de la place à l'unique chose qu'on regarde. */}
+      <span className="min-w-0 flex-1" />
 
       {game.multiplayer && !solo && (
         <button

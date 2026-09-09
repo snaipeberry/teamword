@@ -17,7 +17,7 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
   const game = useGameState();
   const {
     hostId, startGame, kickPlayer, isKicked, teams, setTeam, grade, setGrade,
-    format, setFormat, timeLimitMin, setTimeLimit,
+    format, setFormat, timeLimitMin, setTimeLimit, hideLetters, setHideLetters,
   } = useRound();
   const [copied, setCopied] = useState<'code' | 'lien' | null>(null);
 
@@ -121,6 +121,45 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
                 ? 'Deux équipes sur la même grille. Le score d’une équipe est celui de ses mots complets.'
                 : 'Deux joueurs, camps attribués d’office. Le plus de mots trouvés prend la manche.'}
           </p>
+
+          {/* Voir les autres écrire, ou non. Sans objet en coop — on y remplit
+              la même grille, la question ne se pose pas. Réglable avant le
+              départ seulement (le serveur refuse après) : basculer en cours de
+              partie ferait surgir d'un coup tout ce que les autres ont écrit,
+              ou effacerait des lettres sur lesquelles on s'appuyait. */}
+          {format !== 'coop' && (
+            <>
+              <p className="mb-2 mt-5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+                Grilles
+              </p>
+              <div className="flex gap-1.5 rounded-full bg-organic-surface p-1">
+                {([
+                  [false, 'Amical'],
+                  [true, 'Vrai match'],
+                ] as const).map(([valeur, label]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    disabled={!jeSuisHote}
+                    onClick={() => setHideLetters(valeur)}
+                    aria-pressed={hideLetters === valeur}
+                    className={`flex-1 rounded-full py-2 font-display text-[12.5px] transition ${
+                      hideLetters === valeur
+                        ? 'bg-organic-bg text-organic-text shadow-sm'
+                        : 'text-organic-neutral-600'
+                    } ${jeSuisHote ? 'active:scale-95' : 'cursor-default'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[12px] leading-[1.45] text-organic-neutral-700">
+                {hideLetters
+                  ? 'Chacun sa grille : on ne voit pas ce que les autres écrivent. Un mot n’apparaît qu’une fois trouvé, et il est alors pris pour tout le monde.'
+                  : 'À découvert : tout le monde voit les lettres des autres au fur et à mesure. Plus bavard, plus facile.'}
+              </p>
+            </>
+          )}
 
           <p className="mb-2 mt-4 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
             Limite de temps

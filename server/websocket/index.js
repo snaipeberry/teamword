@@ -187,6 +187,15 @@ function emptyRoom() {
      * création du salon : voir l'intent `start`.
      */
     timeLimitMin: null,
+    /**
+     * Les frappes sont-elles cachées aux adversaires ?
+     *
+     * Toujours le cas en duel classé, où c'est la règle du mode. En partie
+     * privée non coopérative, c'est un choix de l'hôte (intent `visibility`) :
+     * à découvert on joue en s'observant, chacun sa grille on joue un vrai
+     * match. Sans objet en coop, où tout le monde écrit dans la même grille.
+     */
+    hideLetters: false,
 
     // ---------- duel classé (1v1 aléatoire) ----------
     // Rien de tout ceci n'est utilisé hors ranked — laissé à sa valeur par
@@ -603,8 +612,32 @@ function markOffline(playerId) {
   if (p) p.lastSeenAt = Date.now();
 }
 
+/**
+ * Fenêtre pendant laquelle un battement de présence vaut « encore là ».
+ *
+ * Plus longue que deux battements client (30 s, voir `PRESENCE_PING_MS`) :
+ * un ping perdu ou une seconde de latence ne doit pas faire clignoter la
+ * pastille de quelqu'un qui n'a pas bougé.
+ */
+const PRESENCE_TTL_MS = 75_000;
+
+/**
+ * Un battement du client : il a l'application à l'écran, maintenant.
+ *
+ * Indispensable parce que le socket temps réel ne s'ouvre QUE dans une
+ * partie (voir `GameState.tsx`) : sans ce signal, un ami en train de
+ * parcourir l'accueil, son profil ou le classement était compté hors ligne —
+ * précisément le moment où on aimerait l'inviter.
+ */
+function touchPresence(playerId) {
+  const p = profiles.get(playerId);
+  if (p) p.lastSeenAt = Date.now();
+}
+
 function isOnline(playerId) {
-  return (onlineCounts.get(playerId) ?? 0) > 0;
+  if ((onlineCounts.get(playerId) ?? 0) > 0) return true;
+  const vu = profiles.get(playerId)?.lastSeenAt ?? 0;
+  return vu > 0 && Date.now() - vu < PRESENCE_TTL_MS;
 }
 
 /** Retrouve un joueur par son PSEUDO DE COMPTE — c'est ce que l'autre tape
@@ -1004,16 +1037,30 @@ function send(ws, message) {
   if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(message));
 }
 
+/**
+ * Cette salle cache-t-elle les frappes aux adversaires ?
+ *
+ * Un seul prédicat pour toute la question : la diffusion d'état, les intents
+ * de frappe et la remise à zéro d'une grille doivent impérativement s'accorder
+ * — un seul endroit qui répondrait autrement révélerait les lettres qu'un
+ * autre s'efforce de cacher. Toujours vrai en duel classé, où c'est la règle
+ * du mode ; sinon c'est le choix de l'hôte (`hideLetters`, intent
+ * `visibility`).
+ */
+function lettresPrivees(state) {
+  return state.ranked === true || state.hideLetters === true;
+}
+
 function broadcastState(code) {
   const state = rooms.get(code);
   if (!state) return;
 
-  // Duel classé : `playerLetters` porte les frappes PRIVÉES des deux joueurs
+  // Grilles séparées : `playerLetters` porte les frappes PRIVÉES de chacun
   // (voir emptyRoom) — un envoi identique à tout le monde les rendrait
-  // visibles à l'adversaire, exactement ce que le mode est censé empêcher.
+  // visibles aux adversaires, exactement ce que le mode est censé empêcher.
   // Chaque destinataire ne reçoit donc que les siennes ; le reste de l'état
   // (scores, mots résolus, chrono…) reste partagé tel quel.
-  if (state.ranked && state.playerLetters) {
+  if (lettresPrivees(state) && state.playerLetters) {
     for (const ws of peers(code)) {
       if (ws.readyState !== ws.OPEN || !ws.player) continue;
       const sanitized = {
@@ -1187,12 +1234,15 @@ const INTENTS = {
     // Nouvelle grille : la chronologie repart de zéro, et son horloge aussi.
     state.timeline = [];
     state.roundStartedAt = Date.now();
-    if (state.ranked) {
-      // Une difficulté différente à chaque grille plutôt qu'une seule fixée
-      // pour tout le match — jamais 'difficile' : un duel se joue vite, la
-      // grille du dessus le réserve déjà. Progression et frappes privées
-      // remises à zéro : nouvelle grille, personne n'a encore rien trouvé.
-      state.grade = Math.random() < 0.5 ? 'facile' : 'moyen';
+    // Une difficulté différente à chaque grille plutôt qu'une seule fixée
+    // pour tout le match — jamais 'difficile' : un duel se joue vite, la
+    // grille du dessus le réserve déjà.
+    if (state.ranked) state.grade = Math.random() < 0.5 ? 'facile' : 'moyen';
+    // Nouvelle grille : personne n'a encore rien trouvé. Vaut pour TOUTE
+    // salle à grilles séparées, pas seulement le duel classé — sans quoi une
+    // partie privée en vrai match repartirait avec les mots de la précédente
+    // déjà verrouillés.
+    if (lettresPrivees(state)) {
       state.solvedWords = {};
       state.playerLetters = {};
     }
@@ -1211,6 +1261,8 @@ const INTENTS = {
     state.ready = {};
     state.timeline = [];
     state.roundStartedAt = Date.now();
+    state.solvedWords = {};
+    state.playerLetters = {};
     return true;
   },
 
@@ -1239,6 +1291,9 @@ const INTENTS = {
     state.format = format;
     if (format === 'coop') {
       state.teams = {};
+      // Une coop se joue par définition dans la même grille : garder des
+      // frappes cachées d'un réglage précédent la viderait de son sens.
+      state.hideLetters = false;
     } else if (format === '1v1') {
       // Camps attribués d'office : en 1v1 il n'y a rien à choisir, et laisser
       // deux joueurs atterrir dans le même camp n'aurait aucun sens.
@@ -1246,6 +1301,21 @@ const INTENTS = {
       state.teams = {};
       ids.slice(0, 2).forEach((id, i) => { state.teams[id] = i === 0 ? 'A' : 'B'; });
     }
+    return true;
+  },
+
+  /**
+   * Joue-t-on à découvert, ou chacun sa grille ?
+   *
+   * Réglé avant le départ, pas pendant : basculer en cours de partie ferait
+   * apparaître d'un coup tout ce que les autres ont écrit depuis le début, ou
+   * effacerait de l'écran des lettres sur lesquelles on s'appuyait. Sans objet
+   * en coop, où la grille est commune par construction.
+   */
+  visibility(state, { hidden }, playerId) {
+    if (state.hostId !== playerId) return false;
+    if (state.started || state.format === 'coop') return false;
+    state.hideLetters = hidden === true;
     return true;
   },
 
@@ -1351,7 +1421,7 @@ const INTENTS = {
    * entier se révèle par `solveWord`, pas ici.
    */
   letterPrivate(state, { cellId, letter }, playerId) {
-    if (!state.ranked || typeof cellId !== 'string') return false;
+    if (!lettresPrivees(state) || typeof cellId !== 'string') return false;
     if (!state.playerLetters[playerId]) state.playerLetters[playerId] = {};
     if (letter) state.playerLetters[playerId][cellId] = String(letter).slice(0, 1);
     else delete state.playerLetters[playerId][cellId];
@@ -1365,7 +1435,7 @@ const INTENTS = {
    * deux, teinté de la couleur du trouveur) et rapporte le point.
    */
   solveWord(state, { wordId, answer, clue }, playerId) {
-    if (!state.ranked || typeof wordId !== 'string' || !wordId) return false;
+    if (!lettresPrivees(state) || typeof wordId !== 'string' || !wordId) return false;
     if (state.solvedWords[wordId]) return false; // déjà pris — l'autre a été plus rapide
     state.solvedWords[wordId] = playerId;
     recordTimeline(state, [{ id: wordId, answer, clue }], playerId);
@@ -1879,6 +1949,41 @@ const http = createServer((req, res) => {
       incoming: (p?.reqIn ?? []).map(vueAmi),
       outgoing: (p?.reqOut ?? []).map(vueAmi),
     });
+  }
+
+  /**
+   * Battement de présence : « je suis devant l'application ».
+   *
+   * Authentifié comme le reste : sans jeton, n'importe qui pourrait maintenir
+   * la pastille verte d'un autre joueur allumée en boucle, et la liste d'amis
+   * mentirait sur qui est réellement joignable.
+   */
+  if (req.method === 'POST' && url.pathname === '/presence') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 1_000) req.destroy();
+    });
+    req.on('end', () => {
+      try {
+        const { id: claimedId, token } = JSON.parse(body);
+        const id = verifiedId(claimedId, token);
+        // Réservé aux comptes : un invité n'apparaît dans la liste de
+        // personne, et lui créer un profil à chaque battement ne ferait
+        // qu'engraisser la base pour rien.
+        if (!id || !id.startsWith('acc_')) {
+          res.writeHead(403);
+          return res.end();
+        }
+        touchPresence(id);
+        res.writeHead(204);
+        res.end();
+      } catch {
+        res.writeHead(400);
+        res.end();
+      }
+    });
+    return;
   }
 
   /**

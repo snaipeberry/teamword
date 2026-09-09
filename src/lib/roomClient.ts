@@ -36,6 +36,9 @@ export interface RoomState {
   timeline?: { wordId: string; playerId: string; at: number }[];
   /** Limite de temps du salon en minutes — `null` = illimité. */
   timeLimitMin?: number | null;
+  /** Chacun sa grille : les frappes des autres restent invisibles jusqu'à ce
+   *  qu'un mot entier tombe. Toujours vrai en duel classé (voir `ranked`). */
+  hideLetters?: boolean;
 
   // ---------- duel classé (1v1 aléatoire) ----------
   /** Horodatage de fin de match (`Date.now()` + 10 min à l'appariement). */
@@ -381,6 +384,21 @@ export async function fetchFriends(id: string): Promise<FriendState> {
   const res = await fetch(`${httpBase()}/friends?id=${encodeURIComponent(id)}`);
   if (!res.ok) throw new Error(`amis: ${res.status}`);
   return (await res.json()) as FriendState;
+}
+
+/**
+ * Signale au serveur qu'on a l'application à l'écran (voir `presence.ts`).
+ *
+ * Silencieux à dessein : un battement perdu se rattrape au suivant, il n'y a
+ * rien à annoncer à l'utilisateur — surtout pas une erreur pour une info
+ * aussi secondaire qu'une pastille de statut.
+ */
+export async function pingPresence(id: string): Promise<void> {
+  await fetch(`${httpBase()}/presence`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, token: activePlayerToken() }),
+  }).catch(() => {});
 }
 
 /**

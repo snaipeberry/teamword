@@ -46,9 +46,10 @@ export interface GameStateApi {
   revealLetter: (cellId: string, letter: string) => void;
   isRevealed: (cellId: string) => boolean;
   /**
-   * Duel classé uniquement : couleur du joueur qui a trouvé le mot possédant
-   * cette case (pour teinter la case trouvée à sa couleur) — `null` hors
-   * duel classé, ou tant que personne n'a trouvé le mot.
+   * Parties à grilles séparées uniquement : couleur du joueur qui a trouvé le
+   * mot possédant cette case (pour la teindre à sa couleur) — `null` quand
+   * tout le monde écrit dans la même grille, ou tant que personne n'a trouvé
+   * le mot.
    */
   solvedColorFor: (cellId: string) => string | null;
   others: PlayerCursor[];
@@ -157,6 +158,15 @@ export interface RoundApi {
   /** 'coop' (aucune équipe) | 'equipes' (chacun choisit) | '1v1' (imposé). */
   format: RoomFormat;
   setFormat: (format: RoomFormat) => void;
+  /**
+   * Chacun sa grille : on ne voit pas ce que les adversaires écrivent, un mot
+   * n'apparaît qu'une fois trouvé (et il est alors verrouillé pour tous).
+   *
+   * Toujours vrai en duel classé, où c'est la règle du mode. Ailleurs c'est le
+   * choix de l'hôte dans le salon, entre partie amicale et vrai match.
+   */
+  hideLetters: boolean;
+  setHideLetters: (hidden: boolean) => void;
   /** Limite de temps en minutes — `null` = illimité. Le chrono ne part qu'au
    *  lancement de la partie (voir l'intent `start` côté serveur). */
   timeLimitMin: number | null;
@@ -249,6 +259,8 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
       setGrade: () => {},
       format: 'coop',
       setFormat: () => {},
+      hideLetters: false,
+      setHideLetters: () => {},
       timeLimitMin: null,
       setTimeLimit: () => {},
       matchEndsAt: null,
@@ -462,6 +474,10 @@ function RemoteSessionProvider({
       setGrade: (grade) => send({ t: 'grade', grade }),
       format: (state.format as RoomFormat) ?? 'coop',
       setFormat: (format) => send({ t: 'format', format }),
+      // `ranked` l'emporte : le duel classé se joue à grilles séparées par
+      // définition, quoi qu'il y ait dans le champ de la salle.
+      hideLetters: state.ranked === true || state.hideLetters === true,
+      setHideLetters: (hidden) => send({ t: 'visibility', hidden }),
       timeLimitMin: state.timeLimitMin ?? null,
       setTimeLimit: (minutes) => send({ t: 'timeLimit', minutes }),
       matchEndsAt: state.matchEndsAt ?? null,
@@ -499,7 +515,11 @@ function RemoteGameProvider({
   const { state, peers, send, me, sendReaction, reactions } = useRoom();
   const { wordsById, cellsByWordId, wordIdsByCellId } = usePuzzleIndex(puzzle);
   const myName = me.name;
-  const ranked = state.ranked === true;
+  // Grilles séparées : duel classé (toujours) ou choix de l'hôte en partie
+  // privée. C'est ce prédicat, et non `ranked`, qui décide de TOUT le
+  // fonctionnement de la saisie — quelles lettres on lit, où on les envoie,
+  // et quand un mot devient public.
+  const grillesSeparees = state.ranked === true || state.hideLetters === true;
   const solvedWords = state.solvedWords ?? {};
 
   /**
@@ -518,11 +538,11 @@ function RemoteGameProvider({
   const enAttente = useRef<Map<string, { letter: string; at: number }>>(new Map());
   const [versionAttente, setVersionAttente] = useState(0);
 
-  // Base confirmée par le serveur : partagée (`state.letters`) en coop/solo/
-  // bot, privée à SOI (`state.playerLetters[me.id]`) en duel classé — le
-  // serveur ne nous envoie d'ailleurs jamais celles de l'adversaire, voir
-  // server/websocket/index.js, `broadcastState`.
-  const confirmedLetters = ranked ? (state.playerLetters?.[me.id] ?? {}) : state.letters;
+  // Base confirmée par le serveur : partagée (`state.letters`) quand on joue
+  // à découvert, privée à SOI (`state.playerLetters[me.id]`) à grilles
+  // séparées — le serveur ne nous envoie d'ailleurs jamais celles des autres,
+  // voir server/websocket/index.js, `broadcastState`.
+  const confirmedLetters = grillesSeparees ? (state.playerLetters?.[me.id] ?? {}) : state.letters;
 
   const purger = useCallback(() => {
     const maintenant = Date.now();
@@ -541,10 +561,10 @@ function RemoteGameProvider({
   useEffect(purger, [purger]);
 
   /**
-   * Duel classé uniquement : lettre d'une case déjà VERROUILLÉE — un mot que
-   * quelqu'un a trouvé, visible et intouchable pour les deux joueurs à
-   * partir de là (voir `solvedWords`, posé par l'intent serveur `solveWord`).
-   * `null` hors duel classé, ou tant que personne n'a trouvé le mot.
+   * Grilles séparées uniquement : lettre d'une case déjà VERROUILLÉE — un mot
+   * que quelqu'un a trouvé, visible et intouchable pour tous à partir de là
+   * (voir `solvedWords`, posé par l'intent serveur `solveWord`). `null` quand
+   * la grille est commune, ou tant que personne n'a trouvé le mot.
    */
   const solvedLetterFor = useCallback(
     (cellId: string): string | null => {
@@ -563,7 +583,7 @@ function RemoteGameProvider({
 
   const solvedColorFor = useCallback(
     (cellId: string): string | null => {
-      if (!ranked) return null;
+      if (!grillesSeparees) return null;
       const ids = wordIdsByCellId.get(cellId) ?? [];
       for (const wordId of ids) {
         const solverId = solvedWords[wordId];
@@ -575,10 +595,10 @@ function RemoteGameProvider({
       }
       return null;
     },
-    [ranked, wordIdsByCellId, solvedWords, me, peers],
+    [grillesSeparees, wordIdsByCellId, solvedWords, me, peers],
   );
 
-  /** Lettre affichée : verrouillée (duel classé) > frappe locale non confirmée > état serveur. */
+  /** Lettre affichée : verrouillée (grille séparée) > frappe locale non confirmée > état serveur. */
   const lettreEffective = useCallback(
     (cellId: string) =>
       solvedLetterFor(cellId) ?? enAttente.current.get(cellId)?.letter ?? confirmedLetters[cellId] ?? '',
@@ -599,8 +619,8 @@ function RemoteGameProvider({
    * Liveblocks s'exécutant elles aussi côté client.
    *
    * Seul l'auteur de la frappe détecte la transition non-résolu → résolu,
-   * donc un mot ne peut pas être compté deux fois — SAUF en duel classé, où
-   * le serveur lui-même refuse un `solveWord` sur un mot déjà pris (voir
+   * donc un mot ne peut pas être compté deux fois — SAUF à grilles séparées,
+   * où le serveur lui-même refuse un `solveWord` sur un mot déjà pris (voir
    * l'intent) : deux joueurs peuvent parfaitement compléter le même mot au
    * même instant, seul le premier arrivé au serveur l'emporte.
    */
@@ -610,7 +630,7 @@ function RemoteGameProvider({
       // propre auteur ni par l'adversaire.
       if (solvedLetterFor(cellId) != null) return;
 
-      if (ranked) {
+      if (grillesSeparees) {
         enAttente.current.set(cellId, { letter, at: Date.now() });
         setVersionAttente((v) => v + 1);
         send({ t: 'letterPrivate', cellId, letter });
@@ -665,14 +685,14 @@ function RemoteGameProvider({
         })),
       });
     },
-    [ranked, solvedLetterFor, send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId, solvedWords],
+    [grillesSeparees, solvedLetterFor, send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId, solvedWords],
   );
 
-  // Un mot trouvé par l'ADVERSAIRE peut, via une case croisée, compléter un
+  // Un mot trouvé par un ADVERSAIRE peut, via une case croisée, compléter un
   // des NOS mots sans qu'on ait tapé quoi que ce soit : à revérifier à
   // chaque évolution de `solvedWords`, pas seulement à chaque frappe.
   useEffect(() => {
-    if (!ranked) return;
+    if (!grillesSeparees) return;
     for (const word of puzzle.words) {
       if (solvedWords[word.id]) continue;
       const cells = cellsByWordId.get(word.id);
@@ -682,7 +702,7 @@ function RemoteGameProvider({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ranked, solvedWords]);
+  }, [grillesSeparees, solvedWords]);
 
   const revealLetter = useCallback(
     (cellId: string, letter: string) => {
