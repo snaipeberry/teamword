@@ -322,46 +322,67 @@ export function Home() {
 
         {/* « En ligne » : savoir qui est là maintenant, pour inviter au bon
             moment. La pastille du lien Amis compte les demandes reçues —
-            c'est le seul endroit où elles se signalent. */}
-        {amis && (amis.friends.length > 0 || amis.incoming.length > 0) && (
+            c'est le seul endroit où elles se signalent.
+            L'en-tête s'affiche pour TOUT compte, même sans un seul ami : c'est
+            le seul chemin vers l'écran Amis, le cacher tant qu'on n'a personne
+            rendrait la fonctionnalité introuvable pour qui en a le plus besoin.
+            Un invité en est exclu — son identité ne survit pas à la visite. */}
+        {!estInvite && (
           <>
             <div className="mt-3.5 flex shrink-0 items-baseline justify-between">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">En ligne</p>
+              <p className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+                {amis && amis.friends.length > 0 ? 'En ligne' : 'Amis'}
+              </p>
               <button
                 type="button"
                 onClick={() => setEcran('amis')}
                 className="flex items-center gap-1.5 text-[11.5px] font-bold text-organic-accent-700 active:text-organic-accent-500"
               >
-                Amis
-                {amis.incoming.length > 0 && (
+                {amis && amis.friends.length > 0 ? 'Amis' : 'Ajouter'}
+                {!!amis?.incoming.length && (
                   <span className="flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-organic-accent-500 px-1.5 text-[10px] font-bold text-white">
                     {amis.incoming.length}
                   </span>
                 )}
               </button>
             </div>
-            <div className="mt-2 flex shrink-0 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {amis.friends.slice(0, 6).map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setEcran('amis')}
-                  className="relative shrink-0 text-center"
-                >
-                  <span className={a.online ? '' : 'opacity-40'}>
-                    <Avatar name={a.name} color="#A19786" src={a.avatar} size={44} square />
-                  </span>
-                  <span className="mt-1 block max-w-[46px] truncate text-[9.5px] font-bold text-organic-neutral-700">
-                    {a.name}
-                  </span>
-                  <span
-                    className={`absolute -right-0.5 -top-0.5 h-[11px] w-[11px] rounded-full ring-[2.5px] ring-organic-bg ${
-                      a.online ? 'bg-organic-accent2-600' : 'bg-organic-neutral-400'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
+            {amis && amis.friends.length > 0 ? (
+              <div className="mt-2 flex shrink-0 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {amis.friends.slice(0, 6).map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setEcran('amis')}
+                    className="relative shrink-0 text-center"
+                  >
+                    <span className={a.online ? '' : 'opacity-40'}>
+                      <Avatar name={a.name} color="#A19786" src={a.avatar} size={44} square />
+                    </span>
+                    <span className="mt-1 block max-w-[46px] truncate text-[9.5px] font-bold text-organic-neutral-700">
+                      {a.name}
+                    </span>
+                    <span
+                      className={`absolute -right-0.5 -top-0.5 h-[11px] w-[11px] rounded-full ring-[2.5px] ring-organic-bg ${
+                        a.online ? 'bg-organic-accent2-600' : 'bg-organic-neutral-400'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              // Tant que la liste charge (`amis === null`), on affiche déjà
+              // l'invitation : elle occupe la même place que la rangée
+              // d'avatars, donc rien ne saute quand la réponse arrive.
+              <button
+                type="button"
+                onClick={() => setEcran('amis')}
+                className="mt-2 shrink-0 rounded-[20px] border border-dashed border-organic-neutral-400 px-3.5 py-3 text-left text-[11.5px] font-semibold leading-[1.45] text-organic-neutral-700 active:bg-organic-neutral-100"
+              >
+                {amis?.incoming.length
+                  ? 'Quelqu’un veut vous ajouter. Répondez à la demande.'
+                  : 'Ajoutez un ami par son pseudo pour l’inviter en partie.'}
+              </button>
+            )}
           </>
         )}
 
