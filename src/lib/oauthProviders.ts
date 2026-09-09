@@ -52,6 +52,31 @@ function loadScript(src: string, isReady: () => boolean): Promise<void> {
   });
 }
 
+// Mémorisée : sans ce cache, un `preloadGoogleAuth()` précoce PUIS le
+// `renderGoogleButton` de l'écran de connexion injecteraient chacun leur
+// propre <script>, en double — un seul chargement, partagé par tous les
+// appelants.
+let googleScript: Promise<void> | null = null;
+function ensureGoogleScript(): Promise<void> {
+  if (!googleScript) {
+    googleScript = loadScript('https://accounts.google.com/gsi/client', () => Boolean(window.google?.accounts?.id));
+  }
+  return googleScript;
+}
+
+/**
+ * Démarre le chargement du SDK Google DE LOIN à l'avance (voir l'appel dans
+ * main.tsx) — sans ça, le bouton ne commençait à se charger qu'à l'ouverture
+ * de l'écran de connexion, d'où un « pop-in » visible une fois la page déjà
+ * affichée. Volontairement sans awaited ni valeur de retour : un échec (pas
+ * de clé configurée, réseau injoignable) ne doit strictement rien changer à
+ * l'affichage tant que personne n'a encore ouvert cet écran.
+ */
+export function preloadGoogleAuth(): void {
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()) return;
+  ensureGoogleScript().catch(() => {});
+}
+
 /**
  * Affiche le bouton Google officiel dans `container` et appelle
  * `onCredential` avec le jeton d'identité (JWT) dès qu'un utilisateur
@@ -65,7 +90,7 @@ export async function renderGoogleButton(
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
   if (!clientId) throw new Error('Connexion Google indisponible pour le moment');
 
-  await loadScript('https://accounts.google.com/gsi/client', () => Boolean(window.google?.accounts?.id));
+  await ensureGoogleScript();
 
   window.google!.accounts.id.initialize({
     client_id: clientId,

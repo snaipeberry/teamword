@@ -11,6 +11,7 @@ import { Keyboard } from './Keyboard';
 import { RoundResults } from './RoundResults';
 import { SoloRoundResults } from './SoloRoundResults';
 import { ActiveClueBar } from './ActiveClueBar';
+import { PlayerGauges } from './PlayerGauges';
 import type { UseSoloProfileResult } from '../hooks/useSoloProfile';
 import {
   hapticTick,
@@ -455,6 +456,8 @@ export function CrosswordGrid({
         </AnimatePresence>
       </div>
 
+      <PlayerGauges totalMots={puzzle.words.length} />
+
       {/*
         Conteneur centreur : c'est LUI qui absorbe la hauteur restante. La
         carte, elle, ne doit surtout pas être en `flex-1` — cela l'étirerait
@@ -517,6 +520,7 @@ export function CrosswordGrid({
                   othersHere={othersByCellId.get(id) ?? []}
                   onSelect={() => selectCell(row, col)}
                   lockedColor={game.solvedColorFor(id)}
+                  labelBelow={row === 0}
                 />
               );
             }),
@@ -546,6 +550,45 @@ export function CrosswordGrid({
           Indice · {hintBudget}
         </motion.button>
 
+        {/* Compteur de la maquette V2 : combien de mots la grille a déjà
+            livrés, tous joueurs confondus. Il donne à la partie une fin
+            visible, ce que les jauges seules ne montrent pas. */}
+        <span className="shrink-0 text-[11px] font-bold text-organic-neutral-600">
+          {solvedWordIds.size} / {puzzle.words.length} mots
+        </span>
+
+        {/*
+          Raccourci de DÉVELOPPEMENT — remplit la grille pour atteindre
+          l'écran de fin sans jouer trente mots à la main.
+
+          `import.meta.env.DEV` est remplacé par `false` à la compilation :
+          tout ce bloc disparaît du bundle de production, il n'y a donc aucun
+          moyen de l'atteindre depuis l'app déployée.
+
+          Il passe par la frappe NORMALE (`setLetter`), pas par une écriture
+          directe : les points, la chronologie et les mots trouvés sont donc
+          exactement ceux d'une vraie partie — c'est bien le but, tester
+          l'écran de résultats avec des données réalistes.
+        */}
+        {import.meta.env.DEV && (
+          <button
+            type="button"
+            onClick={() => {
+              allLetterCells.forEach(({ id, answer }, i) => {
+                // Léger décalage : chaque mot obtient un temps distinct dans
+                // la chronologie, au lieu de tous tomber au même instant.
+                setTimeout(() => {
+                  if (game.getLetter(id) !== answer) game.setLetter(id, answer);
+                }, i * 25);
+              });
+            }}
+            title="Développement uniquement — absent du bundle de production"
+            className="shrink-0 rounded-full border border-dashed border-organic-accent-400 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-organic-accent-700"
+          >
+            dev · remplir
+          </button>
+        )}
+
         <ActiveClueBar
           word={activeWord}
           arrow={activeArrow}
@@ -573,6 +616,7 @@ export function CrosswordGrid({
             round={round}
             daily={daily}
             soloPointsEarned={daily ? soloPointsEarned : undefined}
+            words={puzzle.words}
             onAdvance={goToNextRound}
           />
         )}

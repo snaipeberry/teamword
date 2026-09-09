@@ -14,6 +14,9 @@ interface LetterCellProps {
    *  case verrouillée se teinte à SA couleur plutôt que le sauge générique,
    *  pour distinguer d'un coup d'œil qui a trouvé quoi. */
   lockedColor?: string | null;
+  /** Première rangée : l'étiquette de présence passe SOUS la case, sinon elle
+   *  serait rognée par le `overflow-hidden` de la carte de grille. */
+  labelBelow?: boolean;
 }
 
 export function LetterCell({
@@ -25,6 +28,7 @@ export function LetterCell({
   othersHere,
   onSelect,
   lockedColor,
+  labelBelow = false,
 }: LetterCellProps) {
   const [showLockFlash, setShowLockFlash] = useState(false);
 
@@ -105,14 +109,21 @@ export function LetterCell({
         {value}
       </motion.span>
 
-      {othersHere.map((p) => (
+      {/* Curseur NOMMÉ plutôt qu'une pastille de couleur (maquette V2) : on
+          voit non seulement qu'il y a quelqu'un, mais QUI — la pastille
+          obligeait à retenir quelle couleur allait à quel joueur. Un seul
+          nom affiché : deux étiquettes sur une case de 40px seraient
+          illisibles, le compteur prend le relais au-delà. */}
+      {othersHere.length > 0 && (
         <span
-          key={p.connectionId}
-          className="absolute bottom-0.5 right-0.5 z-10 h-2 w-2 rounded-full ring-1 ring-white"
-          style={{ backgroundColor: p.color }}
-          title={p.name}
-        />
-      ))}
+          className={`pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full px-[5px] py-px text-[8px] font-bold tracking-[0.04em] text-white ${
+            labelBelow ? '-bottom-[7px]' : '-top-[7px]'
+          }`}
+          style={{ backgroundColor: othersHere[0].color }}
+        >
+          {othersHere.length > 1 ? `${othersHere.length} joueurs` : othersHere[0].name}
+        </span>
+      )}
     </motion.button>
   );
 }

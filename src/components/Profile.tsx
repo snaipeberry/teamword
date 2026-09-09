@@ -115,7 +115,9 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
               aria-label="Changer de photo"
               className="relative shrink-0 active:scale-95"
             >
-              <Avatar name={name} color="#D67F48" src={profile.avatar} size={66} />
+              {/* Vignette CARRÉE à coins doux : « la case comme brique » du
+                  V2 — le même motif que les avatars de l'accueil et du salon. */}
+              <Avatar name={name} color="#728157" src={profile.avatar} size={60} square />
               <span className="absolute -bottom-1 -right-1 rounded-full bg-organic-bg px-1.5 py-0.5 text-[10px] font-bold text-organic-accent-700 shadow-sm">
                 ✎
               </span>
@@ -123,9 +125,11 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
             <div className="min-w-0">
               {/* Nom fixe (pseudo du compte, ou nom généré pour l'invité) :
                   plus aucune UI ne permet de le changer, voir auth.ts. */}
-              <h1 className="truncate font-display text-[26px] leading-[1.05] text-organic-text">{name}</h1>
-              <p className="mt-0.5 text-[12px] font-bold uppercase tracking-[0.06em] text-organic-accent-700">
-                {profile.title} · {profile.tier.icon} {profile.tier.label}
+              <h1 className="truncate font-display text-[25px] leading-[1.02] text-organic-text">{name}</h1>
+              {/* Palier + total tous modes : le rang est le même quel que soit
+                  le mode où les points ont été gagnés (voir `totalPointsOf`). */}
+              <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.06em] text-organic-accent-700">
+                {profile.tier.icon} {profile.tier.label} · {profile.totalPoints} pts
               </p>
             </div>
           </div>
@@ -157,18 +161,22 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
           )}
 
           {/* 2 colonnes plutôt que 4 : les nombres et leurs libellés tiennent
-              sans être tronqués ni réduits à 9 px. Points/Rang (classement
-              multijoueur) et Palier (progression solo) rejoignent les trois
-              compteurs bruts — auparavant seuls ces trois-là étaient visibles
-              ici, points et palier n'apparaissaient nulle part. */}
+              sans être tronqués ni réduits à 9 px. Points, rang et palier
+              portent tous sur le TOTAL tous modes (voir `totalPointsOf` côté
+              serveur) — il n'y a plus de compteur séparé solo/multijoueur. */}
           <div className="mt-[18px] grid w-full grid-cols-2 gap-2">
             {[
-              ['Points', profile.points],
+              ['Points', profile.totalPoints],
               ['Rang', profile.rank ? `#${profile.rank}` : '—'],
               ['Palier', `${profile.tier.icon} ${profile.tier.label}`],
               ['Grilles', profile.games],
               ['Mots trouvés', profile.words],
               ['Victoires', profile.wins],
+              // La statistique que seul ce jeu peut donner (maquette V2).
+              // `—` tant qu'aucun mot n'a été chronométré : mieux qu'un
+              // « 0 s » qui se lirait comme une performance.
+              ['Par mot', profile.avgWordMs ? `${Math.round(profile.avgWordMs / 1000)} s` : '—'],
+              ['Série', `${profile.streak} j`],
             ].map(([label, value]) => (
               <div key={label} className="rounded-[20px] bg-organic-surface px-4 py-3.5">
                 <p className="font-display text-[23px] tabular-nums text-organic-text">{value}</p>
@@ -178,6 +186,68 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
               </div>
             ))}
           </div>
+
+          {/* Trente jours en trente cases (maquette V2) : l'intensité suit
+              les points gagnés ce jour-là, tous modes confondus. Les seuils
+              sont relatifs au meilleur jour de la période — un joueur
+              occasionnel voit sa propre échelle, pas celle d'un gros
+              joueur. */}
+          <p className="mb-2 mt-5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+            Trente derniers jours
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {(() => {
+              const max = Math.max(1, ...profile.activity);
+              return profile.activity.map((pts, i) => {
+                const part = pts / max;
+                const fond =
+                  pts === 0
+                    ? 'bg-organic-neutral-200'
+                    : part < 0.34
+                      ? 'bg-organic-accent2-200'
+                      : part < 0.67
+                        ? 'bg-organic-accent2-400'
+                        : 'bg-organic-accent2-600';
+                return (
+                  <span
+                    key={i}
+                    className={`block h-[18px] w-[26px] rounded-[5px] ${fond}`}
+                    title={pts > 0 ? `${pts} points` : 'aucun point'}
+                  />
+                );
+              });
+            })()}
+          </div>
+
+          {/* Les mots trouvés le plus vite. Le temps est celui écoulé depuis
+              la trouvaille PRÉCÉDENTE du joueur — une mesure de rythme, la
+              seule que la chronologie permette : on ne sait pas quand il a
+              commencé à réfléchir à ce mot-là (voir `recordTimeline`). */}
+          {profile.bestWords.length > 0 && (
+            <>
+              <p className="mb-2 mt-5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+                Vos meilleurs mots
+              </p>
+              <div className="flex flex-col gap-[5px]">
+                {profile.bestWords.map((m) => (
+                  <div
+                    key={m.answer}
+                    className="flex items-center gap-2.5 rounded-[14px] bg-organic-neutral-100 px-3 py-[7px]"
+                  >
+                    <span className="min-w-0 shrink-0 text-[12.5px] font-bold tracking-[0.04em] text-organic-text">
+                      {m.answer}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-organic-neutral-600">
+                      {m.clue}
+                    </span>
+                    <span className="w-[36px] shrink-0 text-right text-[11.5px] font-bold tabular-nums text-organic-accent2-800">
+                      {Math.max(1, Math.round(m.ms / 1000))} s
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
             Médailles ({profile.medals.length}/{profile.allMedals.length})

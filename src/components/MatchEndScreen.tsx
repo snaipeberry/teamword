@@ -18,7 +18,9 @@ import { Avatar } from './Avatar';
  */
 export function MatchEndScreen() {
   const game = useGameState();
-  const { winnerId, forfeitedBy, requestRematch, rematchRequestedByMe, rematchRequestedByOpponent } = useRound();
+  const {
+    ranked, format, winnerId, forfeitedBy, requestRematch, rematchRequestedByMe, rematchRequestedByOpponent,
+  } = useRound();
   const myId = activePlayerId();
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -29,17 +31,25 @@ export function MatchEndScreen() {
     fetchProfile(myId).then(setProfile).catch(() => {});
   }, [myId]);
 
-  const gagne = winnerId === myId;
-  const perdu = winnerId !== null && winnerId !== myId;
+  // En coopération, personne ne « gagne » contre personne : l'écran annonce
+  // un résultat collectif plutôt qu'un vainqueur, sans quoi une partie entre
+  // amis se terminerait par « Défaite » à celui qui a trouvé le moins de
+  // mots — exactement le contraire de ce que le mode raconte.
+  const cooperatif = !ranked && format === 'coop';
+  const gagne = !cooperatif && winnerId === myId;
+  const perdu = !cooperatif && winnerId !== null && winnerId !== myId;
   const adversaireAAbandonne = forfeitedBy !== null && forfeitedBy !== myId;
   const jaiAbandonne = forfeitedBy === myId;
+  const motsTrouves = game.scoreboard.reduce((n, p) => n + p.score, 0);
 
-  const titre = gagne ? 'Victoire !' : perdu ? 'Défaite' : 'Égalité';
+  const titre = cooperatif ? 'Temps écoulé' : gagne ? 'Victoire !' : perdu ? 'Défaite' : 'Égalité';
   const sousTitre = jaiAbandonne
     ? 'Vous avez quitté la partie'
     : adversaireAAbandonne
       ? "L'adversaire a quitté la partie"
-      : 'Le temps est écoulé';
+      : cooperatif
+        ? `${motsTrouves} mot${motsTrouves === 1 ? '' : 's'} trouvé${motsTrouves === 1 ? '' : 's'} ensemble`
+        : 'Le temps est écoulé';
 
   const nouvellePartie = () => {
     // Repart direct sur la recherche d'un nouvel adversaire au lieu du menu
@@ -60,7 +70,7 @@ export function MatchEndScreen() {
           gagne ? 'text-organic-accent2-700' : perdu ? 'text-organic-accent-700' : 'text-organic-neutral-600'
         }`}
       >
-        Duel terminé
+        {ranked ? 'Duel terminé' : 'Partie terminée'}
       </motion.p>
       <motion.h1
         initial={{ opacity: 0, y: -8 }}
@@ -105,36 +115,43 @@ export function MatchEndScreen() {
         >
           <span aria-hidden="true">{profile.tier.icon}</span>
           <span>
-            {profile.points} pts · {profile.rank ? `#${profile.rank} au classement` : 'non classé'}
+            {profile.totalPoints} pts · {profile.rank ? `#${profile.rank} au classement` : 'non classé'}
           </span>
         </motion.div>
       )}
 
       <div className="mt-8 flex w-full max-w-[320px] flex-col gap-2.5">
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.96 }}
-          onClick={requestRematch}
-          disabled={enAttenteRevanche}
-          className={`w-full rounded-full py-3.5 font-display text-[15px] shadow-md transition ${
-            enAttenteRevanche
-              ? 'cursor-default bg-organic-neutral-200 text-organic-neutral-500'
-              : 'bg-organic-accent-500 text-organic-bg active:bg-organic-accent-600'
-          }`}
-        >
-          {enAttenteRevanche
-            ? 'En attente de l’adversaire…'
-            : rematchRequestedByOpponent
-              ? "L'adversaire propose une revanche →"
-              : 'Demander une revanche'}
-        </motion.button>
-        <button
-          type="button"
-          onClick={nouvellePartie}
-          className="w-full rounded-full border border-organic-divider bg-organic-neutral-100 py-3 font-display text-[14px] text-organic-text active:bg-organic-neutral-200"
-        >
-          Nouvelle partie
-        </button>
+        {/* Revanche et remise en file d'attente ne concernent que le duel
+            classé : une partie privée limitée par le temps n'a pas
+            d'adversaire attitré à qui la proposer, ni de file où retourner. */}
+        {ranked && (
+          <>
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.96 }}
+              onClick={requestRematch}
+              disabled={enAttenteRevanche}
+              className={`w-full rounded-full py-3.5 font-display text-[15px] shadow-md transition ${
+                enAttenteRevanche
+                  ? 'cursor-default bg-organic-neutral-200 text-organic-neutral-500'
+                  : 'bg-organic-accent-500 text-organic-bg active:bg-organic-accent-600'
+              }`}
+            >
+              {enAttenteRevanche
+                ? 'En attente de l’adversaire…'
+                : rematchRequestedByOpponent
+                  ? "L'adversaire propose une revanche →"
+                  : 'Demander une revanche'}
+            </motion.button>
+            <button
+              type="button"
+              onClick={nouvellePartie}
+              className="w-full rounded-full border border-organic-divider bg-organic-neutral-100 py-3 font-display text-[14px] text-organic-text active:bg-organic-neutral-200"
+            >
+              Nouvelle partie
+            </button>
+          </>
+        )}
         <button
           type="button"
           onClick={goHome}

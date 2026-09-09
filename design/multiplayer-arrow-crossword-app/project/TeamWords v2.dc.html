@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="_ds/organic-df646400-5242-4e7b-858a-ce5f483d3dee/styles.css"><script src="_ds/organic-df646400-5242-4e7b-858a-ce5f483d3dee/_ds_bundle.js"></script><style>body{margin:0;background:var(--color-bg);font-family:var(--font-body)}a{color:var(--color-accent-700);text-decoration:none}a:hover{color:var(--color-accent)}</style></helmet>
+
+<div style="display:flex;align-items:flex-start;gap:48px;padding:52px 56px;min-height:100vh;background:var(--color-bg)">
+
+  <div style="width:330px;flex:none;display:flex;flex-direction:column;gap:20px">
+    <div>
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Version 2 · proposition</p>
+      <h1 style="margin:0;font-family:var(--font-heading);font-size:36px;line-height:1.05;color:var(--color-text)">La grille est<br>l'interface</h1>
+      <p style="margin:10px 0 0;font-size:14px;line-height:1.5;color:var(--color-neutral-700)">Le V1 était propre mais générique : des cartes empilées, deux barres de progression, des chiffres sans histoire. Le V2 prend le vocabulaire des mots fléchés — la case, la flèche, la petite définition — et s'en sert comme matériau de mise en page partout.</p>
+    </div>
+
+    <div style="padding:18px 20px;border-radius:var(--radius-lg);background:var(--color-surface)">
+      <p style="margin:0 0 12px;font-family:var(--font-heading);font-size:16px">Les six moves</p>
+      <ol style="margin:0;padding-left:19px;display:flex;flex-direction:column;gap:9px;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">
+        <li><strong>La carte de territoire.</strong> Les deux barres deviennent une mini-grille de 42 cases : d'un coup d'œil on voit <em>où</em> l'autre avance, pas seulement combien. C'est la donnée la plus lisible du jeu et elle réapparaît aux résultats.</li>
+        <li><strong>La case comme brique.</strong> Avatars, code de salon, série de jours, scores : tout est posé dans des cases carrées à coins doux. Le code <strong>RAVIE</strong> se lit comme une réponse, flèche comprise.</li>
+        <li><strong>Un accueil qui joue.</strong> La grille du jour est un vrai bout de grille qui déborde du bord droit, jouable au doigt. En dessous, une mosaïque asymétrique — Duel en grand — au lieu de trois boutons alignés.</li>
+        <li><strong>La présence, pas le score.</strong> Léa a un curseur nommé sur sa case, ses mots se colorent en terre cuite, et les amis en ligne apparaissent en haut de l'accueil.</li>
+        <li><strong>Des résultats qui racontent.</strong> Une chronologie mot par mot : qui a pris quoi, en combien de secondes. On relit la manche au lieu de lire un total.</li>
+        <li><strong>Le profil comme grille.</strong> Trente jours en trente cases, et vos quatre types de flèches classés par vitesse — la statistique que seul ce jeu peut donner.</li>
+      </ol>
+    </div>
+
+    <div style="padding:18px 20px;border-radius:var(--radius-lg);border:1px solid var(--color-divider)">
+      <p style="margin:0 0 10px;font-family:var(--font-heading);font-size:16px">Règles tenues</p>
+      <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">
+        <li>Deux voix de couleur : sauge = vous, terre cuite = l'autre et les actions. Le reste est crème.</li>
+        <li>Arrondi généreux sur les cartes et les pilules, 6px sur les cases : la grille doit rester une grille.</li>
+        <li>Aucun compte à rebours agressif, aucun émoji, aucune ligne de séparation.</li>
+      </ul>
+    </div>
+
+    <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--color-neutral-600)">Trois tweaks en haut à droite : cases de l'adversaire, adversaire en direct, et définition ancrée ou en carte.<br><br>Si la direction vous va, la suite logique : la célébration de fin de grille, l'état « joueur déconnecté », et le passage aux grilles 10×10 — la taille du texte des définitions devra alors se recalculer.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="width:390px;height:844px;border-radius:48px;background:var(--color-neutral-900);padding:10px;box-shadow:var(--shadow-lg)">
+      <div style="position:relative;width:370px;height:824px;border-radius:38px;overflow:hidden;background:var(--color-bg);display:flex;flex-direction:column">
+
+        <div style="height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:12px;font-weight:700;color:var(--color-neutral-800)">
+          <span>9:41</span>
+          <div style="display:flex;gap:5px;align-items:center">
+            <span style="width:16px;height:8px;border-radius:2px;background:var(--color-neutral-800)"></span>
+            <span style="width:22px;height:9px;border-radius:3px;border:1px solid var(--color-neutral-800)"></span>
+          </div>
+        </div>
+
+        <sc-if value="{{ isAccueil }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden">
+
+            <div style="flex:none;padding:0 20px;display:flex;align-items:center;gap:10px">
+              <span style="width:30px;height:30px;flex:none;border-radius:8px;background:var(--color-accent-2-600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">C</span>
+              <div style="flex:1;min-width:0">
+                <p style="margin:0;font-size:13.5px;font-weight:700;line-height:1.1">Camille</p>
+                <p style="margin:1px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--color-accent-700)">Fine lame · 1 480</p>
+              </div>
+              <button type="button" onClick="{{ goProfil }}" aria-label="Profil" style="width:32px;height:32px;flex:none;cursor:pointer;border:1px solid var(--color-neutral-300);border-radius:999px;background:transparent;font-size:14px;font-weight:700;color:var(--color-neutral-700)" style-hover="background:var(--color-neutral-200)">›</button>
+            </div>
+
+            <div style="flex:none;margin:14px 20px 0;position:relative;border-radius:var(--radius-lg);background:var(--color-accent-2-200);overflow:hidden">
+              <span style="position:absolute;left:-30px;bottom:-40px;width:110px;height:110px;border-radius:999px;background:rgba(255,255,255,.32)"></span>
+              <div style="position:relative;display:flex;align-items:stretch">
+                <div style="flex:1;min-width:0;padding:16px 0 16px 18px">
+                  <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-2-800)">Mardi 8 septembre</p>
+                  <p style="margin:3px 0 0;font-family:var(--font-heading);font-size:26px;line-height:1.05;color:var(--color-accent-2-900)">Grille<br>du jour</p>
+                  <p style="margin:8px 0 0;font-size:11.5px;font-weight:700;color:var(--color-accent-2-800)">8 mots · 4 190 joueurs</p>
+                  <button type="button" onClick="{{ goGrille }}" style="margin-top:12px;cursor:pointer;border:0;border-radius:999px;background:var(--color-accent-2-800);color:#fff;padding:9px 18px;font-family:var(--font-heading);font-size:13px" style-hover="background:var(--color-accent-2-900)">Reprendre</button>
+                </div>
+                <div style="width:132px;flex:none;overflow:hidden;display:flex;align-items:center">
+                  <div style="display:flex;flex-direction:column;border-radius:6px;overflow:hidden;margin-left:6px">
+                    <sc-for list="{{ heroRows }}" as="row" hint-placeholder-count="7">
+                      <div style="display:flex">
+                        <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                          <span style="{{ c.style }}">{{ c.ch }}</span>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:none;margin:10px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:9px">
+              <button type="button" onClick="{{ goRecherche }}" style="grid-row:span 2;position:relative;overflow:hidden;cursor:pointer;text-align:left;border:0;border-radius:var(--radius-lg);background:var(--color-accent-500);color:#fff;padding:16px;box-shadow:var(--shadow-md)" style-hover="background:var(--color-accent-600)">
+                <span style="position:absolute;right:-24px;top:-24px;width:88px;height:88px;border-radius:999px;background:rgba(255,255,255,.16)"></span>
+                <span style="position:relative;display:block;font-family:var(--font-heading);font-size:22px;line-height:1">Duel</span>
+                <span style="position:relative;display:block;margin-top:4px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.35">Course sur la<br>même grille</span>
+                <span style="position:relative;display:flex;gap:3px;margin-top:14px">
+                  <sc-for list="{{ duelPips }}" as="p" hint-placeholder-count="5">
+                    <span style="{{ p.style }}"></span>
+                  </sc-for>
+                </span>
+                <span style="position:relative;display:block;margin-top:6px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.8)">4 victoires · 1 défaite</span>
+              </button>
+
+              <button type="button" onClick="{{ goSalon }}" style="cursor:pointer;text-align:left;border:0;border-radius:var(--radius-lg);background:var(--color-accent-200);color:var(--color-accent-900);padding:13px 14px" style-hover="background:var(--color-accent-300)">
+                <span style="display:block;font-family:var(--font-heading);font-size:16px;line-height:1.05">Entre amis</span>
+                <span style="display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--color-accent-800)">Coop ou équipes</span>
+              </button>
+
+              <button type="button" onClick="{{ ouvrirRejoindre }}" style="cursor:pointer;text-align:left;border:1px solid var(--color-neutral-300);border-radius:var(--radius-lg);background:var(--color-neutral-100);color:var(--color-text);padding:13px 14px" style-hover="background:var(--color-neutral-200)">
+                <span style="display:block;font-family:var(--font-heading);font-size:16px;line-height:1.05">Rejoindre</span>
+                <span style="display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--color-neutral-700)">Avec un code</span>
+              </button>
+            </div>
+
+            <div style="flex:none;margin:14px 0 0;padding:0 20px;display:flex;align-items:baseline;justify-content:space-between">
+              <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">En ligne</p>
+              <button type="button" onClick="{{ goClassement }}" style="cursor:pointer;border:0;background:transparent;padding:0;font-size:11.5px;font-weight:700;color:var(--color-accent-700)" style-hover="color:var(--color-accent)">Classement</button>
+            </div>
+            <div style="flex:none;margin-top:8px;padding:0 20px;display:flex;gap:8px">
+              <sc-for list="{{ amis }}" as="a" hint-placeholder-count="5">
+                <button type="button" onClick="{{ a.onPress }}" style="{{ a.wrapStyle }}">
+                  <span style="{{ a.tileStyle }}">{{ a.ini }}</span>
+                  <span style="display:block;margin-top:4px;font-size:9.5px;font-weight:700;color:var(--color-neutral-700)">{{ a.nom }}</span>
+                  <span style="{{ a.dotStyle }}"></span>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="flex:none;margin:14px 20px 0;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:20px;background:var(--color-accent-100);border:1px solid var(--color-accent-200)">
+              <div style="flex:none;display:flex;flex-direction:column">
+                <sc-for list="{{ territoireAccueil }}" as="row" hint-placeholder-count="7">
+                  <div style="display:flex">
+                    <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                      <span style="{{ c.style }}"></span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="flex:1;min-width:0">
+                <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Partie entre amis</p>
+                <p style="margin:2px 0 0;font-family:var(--font-heading);font-size:16px;line-height:1.1;color:var(--color-text)">Avec Léa et Basile</p>
+                <p style="margin:3px 0 0;font-size:11.5px;font-weight:700;color:var(--color-neutral-700)">Sans limite de temps · 5 mots sur 8</p>
+              </div>
+              <button type="button" onClick="{{ goGrille }}" aria-label="Reprendre le duel" style="width:36px;height:36px;flex:none;cursor:pointer;border:0;border-radius:999px;background:var(--color-accent-500);color:#fff;font-size:15px;font-weight:700" style-hover="background:var(--color-accent-600)">›</button>
+            </div>
+
+            <div style="flex:none;margin-top:14px;padding:0 20px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Grille du jour · votre rang</p>
+                <p style="margin:0;font-family:var(--font-heading);font-size:14px;color:var(--color-accent-2-800)">412<span style="font-size:10px"> e</span></p>
+              </div>
+              <div style="margin-top:7px;position:relative;height:10px;border-radius:999px;background:var(--color-neutral-200)">
+                <span style="position:absolute;left:0;top:0;bottom:0;width:9.8%;border-radius:999px;background:var(--color-accent-2-500)"></span>
+                <span style="position:absolute;left:9.8%;top:-3px;width:4px;height:16px;border-radius:999px;background:var(--color-accent-2-800)"></span>
+              </div>
+              <p style="margin:6px 0 0;font-size:11px;font-weight:700;color:var(--color-neutral-700)">Devant 3 778 joueurs sur 4 190 · Léa est 388<span style="font-size:9px"> e</span></p>
+            </div>
+
+            <div style="flex:none;margin-top:16px;padding:0 20px 18px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Série</p>
+                <p style="margin:0;font-family:var(--font-heading);font-size:14px;color:var(--color-accent-2-800)">12 jours</p>
+              </div>
+              <div style="margin-top:7px;display:flex;gap:3px">
+                <sc-for list="{{ serie }}" as="d" hint-placeholder-count="21">
+                  <span style="{{ d.style }}"></span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ rejoindreOuvert }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(32,30,29,.5);display:flex;align-items:flex-end;z-index:10">
+            <div style="width:100%;padding:22px 20px 16px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;background:var(--color-bg);box-shadow:var(--shadow-lg)">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <p style="margin:0;font-family:var(--font-heading);font-size:22px;line-height:1">Rejoindre un salon</p>
+                <button type="button" onClick="{{ fermerRejoindre }}" style="cursor:pointer;border:0;background:transparent;padding:0;font-size:13px;font-weight:700;color:var(--color-neutral-600)" style-hover="color:var(--color-text)">Fermer</button>
+              </div>
+              <p style="margin:5px 0 0;font-size:12.5px;line-height:1.45;color:var(--color-neutral-700)">Saisissez les cinq lettres données par l'hôte.</p>
+
+              <div style="margin-top:16px;display:flex;gap:7px;justify-content:center">
+                <sc-for list="{{ joinTiles }}" as="t" hint-placeholder-count="5">
+                  <span style="{{ t.style }}">{{ t.ch }}</span>
+                </sc-for>
+              </div>
+              <p style="{{ joinMsgStyle }}">{{ joinMsg }}</p>
+
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:5px">
+                <sc-for list="{{ joinClavier }}" as="row" hint-placeholder-count="3">
+                  <div style="display:flex;justify-content:center;gap:4px">
+                    <sc-for list="{{ row.keys }}" as="k" hint-placeholder-count="10">
+                      <button type="button" onClick="{{ k.onPress }}" style="flex:1;min-width:0;height:40px;cursor:pointer;border:1px solid var(--color-neutral-300);border-radius:9px;background:var(--color-neutral-100);font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--color-text)" style-hover="background:#fff" style-active="background:var(--color-accent-200)">{{ k.label }}</button>
+                    </sc-for>
+                    <sc-if value="{{ row.hasDelete }}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{ joinEffacer }}" aria-label="Effacer" style="flex:1.7;height:40px;cursor:pointer;border:0;border-radius:9px;background:var(--color-surface);font-size:15px;font-weight:700;color:var(--color-neutral-800)" style-hover="background:var(--color-neutral-300)">⌫</button>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+
+              <button type="button" onClick="{{ validerCode }}" style="{{ joinBtnStyle }}">Rejoindre</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isRecherche }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 24px 0">
+            <button type="button" onClick="{{ goAccueil }}" style="align-self:flex-start;cursor:pointer;border:0;background:transparent;padding:4px 0;font-size:13px;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)">← Menu</button>
+
+            <div style="margin-top:22px;align-self:center;position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center">
+              <span style="position:absolute;inset:0;border-radius:999px;background:var(--color-accent-100)"></span>
+              <span style="position:absolute;inset:26px;border-radius:999px;background:var(--color-accent-200)"></span>
+              <div style="position:relative;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm)">
+                <sc-for list="{{ waitRows }}" as="row" hint-placeholder-count="3">
+                  <div style="display:flex">
+                    <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="3">
+                      <span style="{{ c.style }}">{{ c.ch }}</span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <h3 style="margin:24px 0 0;font-family:var(--font-heading);font-size:26px;line-height:1.1;text-align:center">Recherche d'un<br>adversaire</h3>
+            <p style="margin:8px 0 0;font-size:13px;line-height:1.5;text-align:center;color:var(--color-neutral-700)">Niveau 1 400 à 1 560 · le temps d'attente moyen est de 14 secondes.</p>
+
+            <div style="margin-top:20px;padding:14px 16px;border-radius:20px;background:var(--color-surface)">
+              <p style="margin:0 0 10px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Vos derniers adversaires</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ historique }}" as="h" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="{{ h.tileStyle }}">{{ h.ini }}</span>
+                    <span style="flex:1;min-width:0;font-size:13px;font-weight:700">{{ h.nom }}</span>
+                    <span style="{{ h.badgeStyle }}">{{ h.bilan }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="margin-top:auto;padding-bottom:16px;display:flex;flex-direction:column;gap:9px">
+              <button type="button" onClick="{{ goGrille }}" style="width:100%;cursor:pointer;border:0;background:var(--color-accent-500);color:#fff;border-radius:999px;padding:15px 0;font-family:var(--font-heading);font-size:16px;box-shadow:var(--shadow-md)" style-hover="background:var(--color-accent-600)">Trouvé · entrer dans la grille</button>
+              <button type="button" onClick="{{ goAccueil }}" style="width:100%;cursor:pointer;border:1px solid var(--color-neutral-300);background:transparent;border-radius:999px;padding:12px 0;font-family:var(--font-heading);font-size:13.5px;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">Annuler</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSalon }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 22px 0;overflow:hidden">
+            <button type="button" onClick="{{ goAccueil }}" style="align-self:flex-start;cursor:pointer;border:0;background:transparent;padding:4px 0;font-size:13px;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)">← Menu</button>
+            <h2 style="margin:6px 0 0;font-family:var(--font-heading);font-size:30px;line-height:1">Salon</h2>
+
+            <p style="margin:16px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Code de la partie</p>
+            <div style="display:flex;align-items:center;gap:6px">
+              <sc-for list="{{ codeTiles }}" as="t" hint-placeholder-count="5">
+                <span style="{{ t.style }}">{{ t.ch }}</span>
+              </sc-for>
+              <span style="margin-left:2px;font-size:15px;color:var(--color-accent-600)">▶</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button type="button" onClick="{{ copier }}" style="cursor:pointer;border:1px solid var(--color-neutral-400);background:transparent;border-radius:999px;padding:8px 16px;font-family:var(--font-heading);font-size:12.5px;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">{{ copyLabel }}</button>
+              <button type="button" onClick="{{ copier }}" style="cursor:pointer;border:0;background:var(--color-accent-500);color:#fff;border-radius:999px;padding:8px 16px;font-family:var(--font-heading);font-size:12.5px" style-hover="background:var(--color-accent-600)">Partager le lien</button>
+            </div>
+
+            <p style="margin:20px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Format</p>
+            <div style="display:flex;gap:5px;padding:4px;border-radius:999px;background:var(--color-surface)">
+              <sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
+                <button type="button" onClick="{{ f.onSelect }}" style="{{ f.style }}">{{ f.label }}</button>
+              </sc-for>
+            </div>
+            <p style="margin:9px 0 0;font-size:12px;line-height:1.45;color:var(--color-neutral-700)">{{ formatNote }}</p>
+
+            <p style="margin:16px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Limite de temps</p>
+            <div style="display:flex;gap:5px">
+              <sc-for list="{{ limites }}" as="l" hint-placeholder-count="5">
+                <button type="button" onClick="{{ l.onSelect }}" style="{{ l.style }}">{{ l.label }}</button>
+              </sc-for>
+            </div>
+            <p style="margin:8px 0 0;font-size:12px;line-height:1.45;color:var(--color-neutral-700)">{{ limiteNote }}</p>
+
+            <p style="margin:18px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">3 joueurs · appuyez sur l'étiquette pour changer d'équipe</p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ salonJoueurs }}" as="j" hint-placeholder-count="3">
+                <div style="{{ j.rowStyle }}">
+                  <span style="{{ j.tileStyle }}">{{ j.ini }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:13.5px;font-weight:700">{{ j.nom }}</span>
+                    <span style="display:block;font-size:10.5px;color:var(--color-neutral-600)">{{ j.detail }}</span>
+                  </span>
+                  <sc-if value="{{ j.hote }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-600)">hôte</span>
+                  </sc-if>
+                  <button type="button" onClick="{{ j.onTeam }}" style="{{ j.teamStyle }}">{{ j.teamLabel }}</button>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:auto;padding-bottom:16px">
+              <button type="button" onClick="{{ goGrille }}" style="width:100%;cursor:pointer;border:0;background:var(--color-accent-500);color:#fff;border-radius:999px;padding:15px 0;font-family:var(--font-heading);font-size:16px;box-shadow:var(--shadow-md)" style-hover="background:var(--color-accent-600)">Commencer</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isGrille }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+
+            <div style="flex:none;display:flex;align-items:center;gap:10px;padding:0 18px 4px">
+              <button type="button" onClick="{{ goAccueil }}" style="cursor:pointer;border:0;background:transparent;padding:4px 2px;font-size:15px;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)">←</button>
+              <span style="font-family:var(--font-heading);font-size:14px">Duel · manche 2</span>
+              <span style="display:flex;gap:3px;margin-left:2px">
+                <sc-for list="{{ manchePips }}" as="p" hint-placeholder-count="3">
+                  <span style="{{ p.style }}"></span>
+                </sc-for>
+              </span>
+              <span style="margin-left:auto;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">02:14</span>
+            </div>
+
+            <div style="flex:none;margin:0 18px 7px;padding:9px 11px;border-radius:20px;background:var(--color-surface);display:flex;align-items:center;gap:11px">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ duel }}" as="p" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="{{ p.tileStyle }}">{{ p.ini }}</span>
+                    <span style="flex:1;min-width:0">
+                      <span style="display:flex;align-items:baseline;gap:6px">
+                        <span style="flex:1;min-width:0;font-size:12px;font-weight:700;line-height:1.1">{{ p.nom }}</span>
+                        <span style="{{ p.pctStyle }}">{{ p.pct }}</span>
+                      </span>
+                      <span style="display:block;margin-top:4px;height:7px;border-radius:999px;background:var(--color-neutral-300);overflow:hidden">
+                        <span style="{{ p.barStyle }}"></span>
+                      </span>
+                      <span style="display:block;margin-top:3px;font-size:10px;font-weight:700;color:var(--color-neutral-600)">{{ p.detail }}</span>
+                    </span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ montrerCarte }}" hint-placeholder-val="{{ true }}">
+                <div style="flex:none;display:flex;flex-direction:column;gap:2px;align-items:center">
+                  <div style="display:flex;flex-direction:column;border-radius:4px;overflow:hidden">
+                    <sc-for list="{{ territoire }}" as="row" hint-placeholder-count="7">
+                      <div style="display:flex">
+                        <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                          <span style="{{ c.style }}"></span>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <span style="font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-600)">territoire</span>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="flex:none;display:flex;justify-content:center">
+              <div style="display:flex;flex-direction:column;border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm)">
+                <sc-for list="{{ gridRows }}" as="row" hint-placeholder-count="7">
+                  <div style="display:flex">
+                    <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="6">
+                      <div style="{{ cell.boxStyle }}">
+                        <sc-if value="{{ cell.isClue }}" hint-placeholder-val="{{ false }}">
+                          <div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:2px">
+                            <sc-for list="{{ cell.clues }}" as="cl" hint-placeholder-count="1">
+                              <button type="button" onClick="{{ cl.onSelect }}" lang="fr" style="{{ cl.style }}">{{ cl.text }}<span style="margin-left:2px;font-size:9px;color:var(--color-accent-600)">{{ cl.arrow }}</span></button>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ cell.isLetter }}" hint-placeholder-val="{{ true }}">
+                          <button type="button" onClick="{{ cell.onSelect }}" style="width:100%;height:100%;cursor:pointer;border:0;background:transparent;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:22px;font-weight:700;color:inherit">{{ cell.letter }}</button>
+                        </sc-if>
+                        <sc-if value="{{ cell.leaHere }}" hint-placeholder-val="{{ false }}">
+                          <span style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);padding:1px 5px;border-radius:999px;background:var(--color-accent-600);color:#fff;font-size:8px;font-weight:700;letter-spacing:.04em;white-space:nowrap;z-index:2">Léa</span>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="flex:none;display:flex;align-items:center;gap:7px;padding:8px 18px 5px">
+              <button type="button" onClick="{{ indice }}" style="cursor:pointer;border:1px solid var(--color-neutral-400);background:transparent;border-radius:999px;padding:6px 13px;font-family:var(--font-heading);font-size:12px;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">Indice · {{ hints }}</button>
+              <button type="button" onClick="{{ verifier }}" style="cursor:pointer;border:1px solid var(--color-neutral-400);background:transparent;border-radius:999px;padding:6px 13px;font-family:var(--font-heading);font-size:12px;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">Vérifier</button>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--color-neutral-600)">{{ trouves }} / 8 mots</span>
+            </div>
+
+            <div style="flex:none;margin:0 18px 7px;display:flex;align-items:stretch;gap:6px;padding:9px 10px;border-radius:20px;background:var(--color-accent-100);border:1px solid var(--color-accent-200)">
+              <button type="button" onClick="{{ motPrec }}" aria-label="Définition précédente" style="width:26px;flex:none;cursor:pointer;border:0;background:transparent;font-size:15px;font-weight:700;color:var(--color-accent-700)" style-hover="color:var(--color-accent)">‹</button>
+              <button type="button" onClick="{{ ouvrirCarte }}" style="flex:1;min-width:0;cursor:pointer;border:0;background:transparent;text-align:left;padding:0">
+                <span style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ motArrow }} {{ motMeta }}</span>
+                <span style="display:block;margin-top:1px;font-family:var(--font-heading);font-size:16px;line-height:1.15;color:var(--color-text)">{{ motClue }}</span>
+              </button>
+              <button type="button" onClick="{{ motSuiv }}" aria-label="Définition suivante" style="width:26px;flex:none;cursor:pointer;border:0;background:transparent;font-size:15px;font-weight:700;color:var(--color-accent-700)" style-hover="color:var(--color-accent)">›</button>
+            </div>
+
+            <div style="flex:none;padding:0 8px 4px;display:flex;flex-direction:column;gap:5px">
+              <sc-for list="{{ clavier }}" as="row" hint-placeholder-count="3">
+                <div style="display:flex;justify-content:center;gap:4px">
+                  <sc-for list="{{ row.keys }}" as="k" hint-placeholder-count="10">
+                    <button type="button" onClick="{{ k.onPress }}" style="flex:1;min-width:0;height:42px;cursor:pointer;border:1px solid var(--color-neutral-300);border-radius:9px;background:var(--color-neutral-100);font-family:var(--font-body);font-size:16px;font-weight:700;color:var(--color-text)" style-hover="background:#fff" style-active="background:var(--color-accent-200)">{{ k.label }}</button>
+                  </sc-for>
+                  <sc-if value="{{ row.hasDelete }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{ effacer }}" aria-label="Effacer" style="flex:1.7;height:42px;cursor:pointer;border:0;border-radius:9px;background:var(--color-surface);font-size:15px;font-weight:700;color:var(--color-neutral-800)" style-hover="background:var(--color-neutral-300)">⌫</button>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ carteOuverte }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;background:rgba(32,30,29,.5);display:flex;align-items:flex-end;padding:20px;z-index:5">
+                <div style="width:100%;padding:24px;border-radius:var(--radius-lg);background:var(--color-bg);box-shadow:var(--shadow-lg)">
+                  <p style="margin:0;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ motArrow }} {{ motMeta }}</p>
+                  <p style="margin:8px 0 0;font-family:var(--font-heading);font-size:27px;line-height:1.1;color:var(--color-text)">{{ motClue }}</p>
+                  <div style="margin-top:18px;display:flex;gap:6px">
+                    <sc-for list="{{ motSlots }}" as="s" hint-placeholder-count="5">
+                      <span style="{{ s.style }}">{{ s.ch }}</span>
+                    </sc-for>
+                  </div>
+                  <button type="button" onClick="{{ fermerCarte }}" style="margin-top:22px;width:100%;cursor:pointer;border:0;background:var(--color-accent-500);color:#fff;border-radius:999px;padding:13px 0;font-family:var(--font-heading);font-size:15px" style-hover="background:var(--color-accent-600)">Continuer</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isResultats }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 22px 0;overflow:hidden">
+            <p style="margin:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Duel · manche 2 sur 3</p>
+            <div style="margin-top:4px;display:flex;align-items:flex-end;gap:12px">
+              <h2 style="margin:0;flex:1;min-width:0;font-family:var(--font-heading);font-size:30px;line-height:1.02">Vous prenez<br>la grille</h2>
+              <div style="flex:none;display:flex;flex-direction:column;border-radius:5px;overflow:hidden">
+                <sc-for list="{{ territoireLarge }}" as="row" hint-placeholder-count="7">
+                  <div style="display:flex">
+                    <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                      <span style="{{ c.style }}"></span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <sc-for list="{{ resJoueurs }}" as="p" hint-placeholder-count="2">
+                <div style="{{ p.cardStyle }}">
+                  <span style="{{ p.tileStyle }}">{{ p.ini }}</span>
+                  <p style="margin:8px 0 0;font-size:12.5px;font-weight:700">{{ p.nom }}</p>
+                  <p style="{{ p.scoreStyle }}">{{ p.points }}</p>
+                  <p style="margin:3px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--color-neutral-600)">{{ p.detail }}</p>
+                </div>
+              </sc-for>
+            </div>
+
+            <p style="margin:16px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Mot par mot</p>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <sc-for list="{{ chronologie }}" as="m" hint-placeholder-count="8">
+                <div style="{{ m.rowStyle }}">
+                  <span style="{{ m.pipStyle }}"></span>
+                  <span style="flex:1;min-width:0;font-size:12.5px;font-weight:700;letter-spacing:.03em">{{ m.mot }}</span>
+                  <span style="font-size:11px;font-weight:600;color:var(--color-neutral-600)">{{ m.par }}</span>
+                  <span style="width:38px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ m.temps }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:auto;padding-bottom:16px;display:flex;gap:9px">
+              <button type="button" onClick="{{ goClassement }}" style="flex:1;cursor:pointer;border:1px solid var(--color-neutral-300);background:transparent;border-radius:999px;padding:13px 0;font-family:var(--font-heading);font-size:13.5px;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">Classement</button>
+              <button type="button" onClick="{{ goGrille }}" style="flex:1.4;cursor:pointer;border:0;background:var(--color-accent-500);color:#fff;border-radius:999px;padding:13px 0;font-family:var(--font-heading);font-size:14.5px;box-shadow:var(--shadow-md)" style-hover="background:var(--color-accent-600)">Manche 3</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isClassement }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 22px 0;overflow:hidden">
+            <button type="button" onClick="{{ goAccueil }}" style="align-self:flex-start;cursor:pointer;border:0;background:transparent;padding:4px 0;font-size:13px;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)">← Menu</button>
+            <h2 style="margin:6px 0 0;font-family:var(--font-heading);font-size:30px;line-height:1">Classement</h2>
+
+            <div style="margin-top:12px;display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--color-surface)">
+              <sc-for list="{{ lbOnglets }}" as="o" hint-placeholder-count="3">
+                <button type="button" onClick="{{ o.onSelect }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:16px;display:flex;align-items:flex-end;justify-content:center;gap:10px">
+              <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <span style="{{ p.avatarStyle }}">{{ p.ini }}</span>
+                  <span style="font-size:11.5px;font-weight:700;text-align:center">{{ p.nom }}</span>
+                  <span style="{{ p.socleStyle }}">{{ p.rang }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+              <sc-for list="{{ lbRows }}" as="r" hint-placeholder-count="5">
+                <div style="{{ r.rowStyle }}">
+                  <span style="width:18px;flex:none;text-align:center;font-family:var(--font-heading);font-size:13px;color:var(--color-neutral-700)">{{ r.rang }}</span>
+                  <span style="{{ r.tileStyle }}">{{ r.ini }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:13px;font-weight:700">{{ r.nom }}</span>
+                    <span style="display:block;font-size:10.5px;color:var(--color-neutral-600)">{{ r.titre }}</span>
+                  </span>
+                  <span style="font-family:var(--font-heading);font-size:15px;font-variant-numeric:tabular-nums">{{ r.points }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isProfil }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 22px 0;overflow:hidden">
+            <button type="button" onClick="{{ goAccueil }}" style="align-self:flex-start;cursor:pointer;border:0;background:transparent;padding:4px 0;font-size:13px;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)">← Menu</button>
+
+            <div style="margin-top:8px;display:flex;align-items:center;gap:13px">
+              <span style="width:60px;height:60px;flex:none;border-radius:14px;background:var(--color-accent-2-600);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:26px">C</span>
+              <div style="min-width:0">
+                <h2 style="margin:0;font-family:var(--font-heading);font-size:25px;line-height:1.02">Camille</h2>
+                <p style="margin:3px 0 0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-accent-700)">Fine lame · 1 480 pts</p>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <sc-for list="{{ profilStats }}" as="s" hint-placeholder-count="4">
+                <div style="padding:12px 14px;border-radius:18px;background:var(--color-surface)">
+                  <p style="margin:0;font-family:var(--font-heading);font-size:21px;line-height:1;font-variant-numeric:tabular-nums">{{ s.valeur }}</p>
+                  <p style="margin:3px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--color-neutral-600)">{{ s.libelle }}</p>
+                </div>
+              </sc-for>
+            </div>
+
+            <p style="margin:18px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Trente derniers jours</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <sc-for list="{{ heat }}" as="d" hint-placeholder-count="30">
+                <span style="{{ d.style }}"></span>
+              </sc-for>
+            </div>
+
+            <p style="margin:18px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Vos flèches, du plus rapide au plus lent</p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ fleches }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="width:22px;flex:none;text-align:center;font-size:14px;color:var(--color-accent-600)">{{ f.glyphe }}</span>
+                  <span style="width:76px;flex:none;font-size:11.5px;font-weight:700;color:var(--color-neutral-800)">{{ f.nom }}</span>
+                  <span style="flex:1;height:8px;border-radius:999px;background:var(--color-neutral-200);display:block;overflow:hidden">
+                    <span style="{{ f.barStyle }}"></span>
+                  </span>
+                  <span style="width:34px;text-align:right;flex:none;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ f.temps }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <p style="margin:18px 0 8px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Vos meilleurs mots</p>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <sc-for list="{{ meilleursMots }}" as="m" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:14px;background:var(--color-neutral-100)">
+                  <span style="flex:1;min-width:0;font-size:12.5px;font-weight:700;letter-spacing:.04em">{{ m.mot }}</span>
+                  <span style="font-size:11px;font-weight:600;color:var(--color-neutral-600)">{{ m.def }}</span>
+                  <span style="width:34px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-accent-2-800)">{{ m.temps }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:auto;padding-bottom:16px;display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ medailles }}" as="m" hint-placeholder-count="4">
+                <span style="{{ m.style }}">{{ m.nom }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="flex:none;height:20px;display:flex;align-items:center;justify-content:center">
+          <span style="width:120px;height:5px;border-radius:999px;background:var(--color-neutral-400)"></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:7px;width:390px;justify-content:center">
+      <sc-for list="{{ rail }}" as="r" hint-placeholder-count="7">
+        <button type="button" onClick="{{ r.onSelect }}" style="{{ r.style }}">{{ r.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1120,&quot;height&quot;:1000},&quot;casesOpposant&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Multijoueur&quot;},&quot;opposantEnDirect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Multijoueur&quot;},&quot;carteTerritoire&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Multijoueur&quot;},&quot;modeDefinition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ancrée&quot;,&quot;carte&quot;],&quot;default&quot;:&quot;ancrée&quot;,&quot;tsType&quot;:&quot;'ancrée' | 'carte'&quot;,&quot;section&quot;:&quot;Grille&quot;}}">
+const WORDS = [
+  { id: 'cafe',   dir: 'right', r: 1, c: 1, answer: 'CAFE',   clue: 'Boisson du matin' },
+  { id: 'eau',    dir: 'down',  r: 2, c: 0, answer: 'EAU',    clue: 'H₂O' },
+  { id: 'chien',  dir: 'down',  r: 1, c: 1, answer: 'CHIEN',  clue: 'Fidèle compagnon' },
+  { id: 'amour',  dir: 'down',  r: 1, c: 2, answer: 'AMOUR',  clue: 'Sentiment fort' },
+  { id: 'fleur',  dir: 'down',  r: 1, c: 3, answer: 'FLEUR',  clue: 'Éclôt au printemps' },
+  { id: 'etoile', dir: 'down',  r: 1, c: 4, answer: 'ETOILE', clue: 'Brille la nuit' },
+  { id: 'nuit',   dir: 'down',  r: 1, c: 5, answer: 'NUIT',   clue: 'Tombe le soir' },
+  { id: 'lune',   dir: 'right', r: 6, c: 1, answer: 'LUNE',   clue: 'Satellite terrestre' }
+];
+
+const CLUE_CELLS = {
+  '0-1': [{ w: 'chien', arrow: 'down' }],
+  '0-2': [{ w: 'amour', arrow: 'down' }],
+  '0-3': [{ w: 'fleur', arrow: 'down' }],
+  '0-4': [{ w: 'etoile', arrow: 'down' }],
+  '0-5': [{ w: 'nuit', arrow: 'down' }],
+  '1-0': [{ w: 'cafe', arrow: 'right' }, { w: 'eau', arrow: 'down' }],
+  '6-0': [{ w: 'lune', arrow: 'right' }]
+};
+
+const BLANKS = ['0-0', '5-0', '5-5', '6-5'];
+const ROWS = 7, COLS = 6;
+const ARROW_GLYPH = { right: '▶', down: '▼', down_right: '↳', right_down: '↴' };
+const AZERTY = [
+  ['A','Z','E','R','T','Y','U','I','O','P'],
+  ['Q','S','D','F','G','H','J','K','L','M'],
+  ['W','X','C','V','B','N']
+];
+
+const SAGE = 'var(--color-accent-2-600)';
+const TERRE = 'var(--color-accent-500)';
+
+const S = {
+  cell: { position: 'relative', width: 52, height: 52, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  clueBtn: { cursor: 'pointer', border: 0, background: 'transparent', padding: 1, borderRadius: 4, fontFamily: 'var(--font-body)', fontSize: 9, fontWeight: 700, lineHeight: 1.08, textAlign: 'center', hyphens: 'auto', overflowWrap: 'anywhere' },
+  slot: { width: 38, height: 44, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700 },
+  tile: (n, fs) => ({ width: n, height: n, flex: 'none', borderRadius: n > 34 ? 10 : 8, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: fs, fontWeight: 700 }),
+  hero: { width: 22, height: 22, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, borderRight: '1px solid rgba(32,30,29,.10)', borderBottom: '1px solid rgba(32,30,29,.10)' },
+  wait: { width: 34, height: 34, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, borderRight: '1px solid rgba(32,30,29,.10)', borderBottom: '1px solid rgba(32,30,29,.10)' },
+  code: { width: 44, height: 50, flex: 'none', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontSize: 24, background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-300)', color: 'var(--color-text)' },
+  team: { cursor: 'pointer', border: 0, borderRadius: 999, padding: '5px 11px', fontSize: 10.5, fontWeight: 700 },
+  salonRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 11px', borderRadius: 18, background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-300)' },
+  seg: { flex: 1, cursor: 'pointer', border: 0, borderRadius: 999, padding: '8px 0', fontFamily: 'var(--font-heading)', fontSize: 12.5 },
+  limite: { flex: 1, cursor: 'pointer', borderRadius: 12, padding: '9px 0', fontFamily: 'var(--font-heading)', fontSize: 12.5, textAlign: 'center' },
+  tab: { flex: 1, cursor: 'pointer', border: 0, borderRadius: 999, padding: '9px 0', fontFamily: 'var(--font-heading)', fontSize: 12.5 },
+  lbRow: { display: 'flex', alignItems: 'center', gap: 9, padding: '8px 11px', borderRadius: 16 },
+  medal: { padding: '7px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700 },
+  rail: { cursor: 'pointer', borderRadius: 999, padding: '7px 13px', fontFamily: 'var(--font-heading)', fontSize: 12 },
+  pip: { width: 12, height: 5, borderRadius: 999, display: 'block' },
+  heat: { width: 26, height: 18, borderRadius: 5, display: 'block' },
+  serie: { flex: 1, height: 16, borderRadius: 4, display: 'block' },
+  amiWrap: { position: 'relative', cursor: 'pointer', border: 0, background: 'transparent', padding: 0, textAlign: 'center' },
+  resCard: { flex: 1, padding: '14px 14px 12px', borderRadius: 20 },
+  scoreSm: { fontFamily: 'var(--font-heading)', fontSize: 19, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
+  jauge: { display: 'block', height: '100%', borderRadius: 999, transition: 'width .35s ease' },
+  pct: { flex: 'none', fontSize: 10, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
+  scoreLg: { margin: '1px 0 0', fontFamily: 'var(--font-heading)', fontSize: 28, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
+  chronoRow: { display: 'flex', alignItems: 'center', gap: 9, padding: '6px 10px', borderRadius: 14 }
+};
+const mix = (a, b) => Object.assign({}, a, b);
+
+class Component extends DCLogic {
+  state = {
+    screen: 'grille',
+    letters: Component.start(),
+    active: '2-3',
+    activeWord: 'fleur',
+    carte: false,
+    wrong: {},
+    hints: 3,
+    leaStep: 0,
+    copied: false,
+    lbMode: 'semaine',
+    equipe: 'A',
+    format: '1v1',
+    limite: '10',
+    rejoindre: false,
+    joinCode: '',
+    joinErr: false
+  };
+
+  tapeCode = (ch) => this.setState((s) => (s.joinCode.length >= 5 ? null : { joinCode: s.joinCode + ch, joinErr: false }));
+  effaceCode = () => this.setState((s) => ({ joinCode: s.joinCode.slice(0, -1), joinErr: false }));
+  validerCode = () => {
+    if (this.state.joinCode.length < 5) return;
+    if (this.state.joinCode === 'RAVIE') this.setState({ rejoindre: false, screen: 'salon' });
+    else this.setState({ joinErr: true });
+  };
+
+  static cellsOf(w) {
+    const out = [];
+    for (let i = 0; i < w.answer.length; i++) out.push(w.dir === 'right' ? `${w.r}-${w.c + i}` : `${w.r + i}-${w.c}`);
+    return out;
+  }
+
+  static start() {
+    const L = {};
+    Component.cellsOf(WORDS[0]).forEach((id, i) => { L[id] = { ch: 'CAFE'[i], by: 'me' }; });
+    Component.cellsOf(WORDS[6]).forEach((id, i) => { L[id] = { ch: 'NUIT'[i], by: 'lea' }; });
+    return L;
+  }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      this.setState((s) => {
+        if (s.screen !== 'grille' || !this.live() || s.leaStep >= 4) return null;
+        const cells = Component.cellsOf(WORDS[3]);
+        const i = s.leaStep + 1;
+        return { leaStep: i, letters: mix(s.letters, { [cells[i]]: { ch: 'AMOUR'[i], by: 'lea' } }) };
+      });
+    }, 1700);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  live() { return this.props.opposantEnDirect ?? true; }
+  casesOpposant() { return this.props.casesOpposant ?? true; }
+  modeDefinition() { return this.props.modeDefinition ?? 'ancrée'; }
+  carteTerritoire() { return this.props.carteTerritoire ?? true; }
+
+  word(id) { return WORDS.find((w) => w.id === id) ?? WORDS[0]; }
+
+  solved() {
+    const map = {};
+    WORDS.forEach((w) => {
+      const cells = Component.cellsOf(w);
+      if (!cells.every((id, i) => (this.state.letters[id] || {}).ch === w.answer[i])) return;
+      const lea = cells.filter((id) => (this.state.letters[id] || {}).by === 'lea').length;
+      map[w.id] = lea > cells.length / 2 ? 'lea' : 'me';
+    });
+    return map;
+  }
+
+  ownerOfCell(cellId, solved) {
+    let owner = null;
+    WORDS.forEach((w) => {
+      if (!solved[w.id]) return;
+      if (Component.cellsOf(w).includes(cellId)) { if (solved[w.id] === 'lea' || owner === null) owner = solved[w.id]; }
+    });
+    return owner;
+  }
+
+  selectWord = (id) => {
+    const w = this.word(id);
+    const cells = Component.cellsOf(w);
+    const target = cells.find((cid, i) => (this.state.letters[cid] || {}).ch !== w.answer[i]) || cells[0];
+    this.setState({ activeWord: id, active: target, carte: this.modeDefinition() === 'carte' });
+  };
+
+  selectCell = (cellId) => {
+    const owners = WORDS.filter((w) => Component.cellsOf(w).includes(cellId));
+    if (!owners.length) return;
+    let next = owners[0].id;
+    if (cellId === this.state.active && owners.length > 1) {
+      const i = owners.findIndex((w) => w.id === this.state.activeWord);
+      next = owners[(i + 1) % owners.length].id;
+    } else if (owners.some((w) => w.id === this.state.activeWord)) next = this.state.activeWord;
+    this.setState({ active: cellId, activeWord: next });
+  };
+
+  step(delta) {
+    const cells = Component.cellsOf(this.word(this.state.activeWord));
+    const solved = this.solved();
+    let i = cells.indexOf(this.state.active) + delta;
+    while (i >= 0 && i < cells.length && this.ownerOfCell(cells[i], solved)) i += delta;
+    if (i < 0 || i >= cells.length) return;
+    this.setState({ active: cells[i] });
+  }
+
+  type = (ch) => {
+    const { active } = this.state;
+    if (!active || this.ownerOfCell(active, this.solved())) return;
+    this.setState((s) => {
+      const wrong = mix(s.wrong, {}); delete wrong[active];
+      return { letters: mix(s.letters, { [active]: { ch, by: 'me' } }), wrong };
+    }, () => this.step(1));
+  };
+
+  effacer = () => {
+    const { active, letters } = this.state;
+    if (!active) return;
+    if (this.ownerOfCell(active, this.solved())) { this.step(-1); return; }
+    if (letters[active]) { const next = mix(letters, {}); delete next[active]; this.setState({ letters: next }); }
+    else this.step(-1);
+  };
+
+  indice = () => {
+    if (this.state.hints <= 0) return;
+    const w = this.word(this.state.activeWord);
+    const cells = Component.cellsOf(w);
+    const i = cells.findIndex((id, k) => (this.state.letters[id] || {}).ch !== w.answer[k]);
+    if (i < 0) return;
+    this.setState((s) => ({ hints: s.hints - 1, letters: mix(s.letters, { [cells[i]]: { ch: w.answer[i], by: 'me' } }) }));
+  };
+
+  verifier = () => {
+    const wrong = {};
+    Object.keys(this.state.letters).forEach((id) => {
+      const w = WORDS.find((x) => Component.cellsOf(x).includes(id));
+      if (!w) return;
+      const i = Component.cellsOf(w).indexOf(id);
+      if (this.state.letters[id].ch !== w.answer[i]) wrong[id] = true;
+    });
+    this.setState({ wrong });
+  };
+
+  cycleWord = (delta) => {
+    const i = WORDS.findIndex((w) => w.id === this.state.activeWord);
+    this.selectWord(WORDS[(i + delta + WORDS.length) % WORDS.length].id);
+  };
+
+  go = (screen) => () => this.setState({ screen, carte: false });
+
+  territoryCells(size, solved) {
+    const rows = [];
+    for (let r = 0; r < ROWS; r++) {
+      const cells = [];
+      for (let c = 0; c < COLS; c++) {
+        const id = `${r}-${c}`;
+        let bg = 'var(--color-neutral-200)';
+        if (BLANKS.includes(id)) bg = 'var(--color-neutral-400)';
+        else if (CLUE_CELLS[id]) bg = 'var(--color-neutral-300)';
+        else {
+          const o = this.ownerOfCell(id, solved);
+          if (o === 'me') bg = SAGE;
+          else if (o === 'lea') bg = this.casesOpposant() ? TERRE : SAGE;
+          else if (this.state.letters[id]) bg = 'var(--color-accent-2-300)';
+        }
+        const hair = size >= 10 ? 1 : 0;
+        cells.push({ style: { width: size, height: size, flex: 'none', display: 'block', background: bg, borderRight: hair ? '1px solid var(--color-bg)' : 'none', borderBottom: hair ? '1px solid var(--color-bg)' : 'none' } });
+      }
+      rows.push({ cells });
+    }
+    return rows;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const solved = this.solved();
+    const aw = this.word(s.activeWord);
+    const awCells = Component.cellsOf(aw);
+    const leaCell = Component.cellsOf(WORDS[3])[s.leaStep];
+
+    const gridRows = [];
+    for (let r = 0; r < ROWS; r++) {
+      const cells = [];
+      for (let c = 0; c < COLS; c++) {
+        const id = `${r}-${c}`;
+        if (BLANKS.includes(id)) { cells.push({ isClue: false, isLetter: false, boxStyle: mix(S.cell, { background: 'var(--color-neutral-400)' }) }); continue; }
+        if (CLUE_CELLS[id]) {
+          const list = CLUE_CELLS[id];
+          cells.push({
+            isClue: true, isLetter: false,
+            boxStyle: mix(S.cell, {
+              background: list.length > 1 ? 'var(--color-accent-200)' : 'var(--color-surface)',
+              borderRight: '1px solid rgba(32,30,29,.12)', borderBottom: '1px solid rgba(32,30,29,.12)'
+            }),
+            clues: list.map((e) => {
+              const done = !!solved[e.w];
+              return {
+                text: this.word(e.w).clue,
+                arrow: ARROW_GLYPH[e.arrow],
+                onSelect: () => this.selectWord(e.w),
+                style: mix(S.clueBtn, {
+                  background: e.w === s.activeWord ? 'rgba(255,255,255,.75)' : 'transparent',
+                  color: done ? (solved[e.w] === 'lea' ? 'var(--color-accent-700)' : 'var(--color-accent-2-700)') : 'var(--color-neutral-800)',
+                  textDecoration: done ? 'line-through' : 'none',
+                  opacity: done ? 0.6 : 1
+                })
+              };
+            })
+          });
+          continue;
+        }
+        const owner = this.ownerOfCell(id, solved);
+        const entry = s.letters[id];
+        const isActive = s.active === id;
+        let bg = 'var(--color-neutral-100)', fg = 'var(--color-text)';
+        if (owner === 'me') { bg = 'var(--color-accent-2-200)'; fg = 'var(--color-accent-2-900)'; }
+        if (owner === 'lea') {
+          bg = this.casesOpposant() ? 'var(--color-accent-200)' : 'var(--color-accent-2-200)';
+          fg = this.casesOpposant() ? 'var(--color-accent-800)' : 'var(--color-accent-2-900)';
+        }
+        if (!owner && awCells.includes(id)) bg = 'var(--color-accent-100)';
+        if (isActive) bg = '#fff';
+        if (s.wrong[id]) { bg = 'var(--color-accent-300)'; fg = 'var(--color-accent-900)'; }
+        cells.push({
+          isClue: false, isLetter: true,
+          letter: entry ? entry.ch : '',
+          onSelect: () => this.selectCell(id),
+          leaHere: this.casesOpposant() && this.live() && s.leaStep > 0 && s.leaStep < 4 && id === leaCell,
+          boxStyle: mix(S.cell, {
+            background: bg, color: fg,
+            borderRight: '1px solid rgba(32,30,29,.12)', borderBottom: '1px solid rgba(32,30,29,.12)',
+            boxShadow: isActive ? 'inset 0 0 0 2px var(--color-accent-500)' : 'none',
+            zIndex: isActive ? 1 : 0
+          })
+        });
+      }
+      gridRows.push({ cells });
+    }
+
+    const mesMots = Object.keys(solved).filter((k) => solved[k] === 'me').length;
+    const sesMots = Object.keys(solved).filter((k) => solved[k] === 'lea').length;
+
+    const heroFilled = { '1-1': 'C', '1-2': 'A', '1-3': 'F', '1-4': 'E', '2-1': 'H', '3-1': 'I' };
+    const heroRows = [];
+    for (let r = 0; r < ROWS; r++) {
+      const cells = [];
+      for (let c = 0; c < COLS; c++) {
+        const id = `${r}-${c}`;
+        let bg = 'var(--color-neutral-100)', col = 'var(--color-text)';
+        if (BLANKS.includes(id)) bg = 'var(--color-accent-2-400)';
+        else if (CLUE_CELLS[id]) { bg = 'var(--color-accent-2-300)'; col = 'var(--color-accent-2-900)'; }
+        else if (heroFilled[id]) { bg = 'var(--color-accent-2-500)'; col = '#fff'; }
+        cells.push({ ch: heroFilled[id] || '', style: mix(S.hero, { background: bg, color: col }) });
+      }
+      heroRows.push({ cells });
+    }
+
+    const waitLetters = [['D','U','E'], ['', 'L', ''], ['?','?','?']];
+    const waitRows = waitLetters.map((row) => ({
+      cells: row.map((ch) => ({
+        ch,
+        style: mix(S.wait, ch === '?'
+          ? { background: 'var(--color-neutral-200)', color: 'var(--color-neutral-500)' }
+          : ch === ''
+            ? { background: 'var(--color-neutral-400)', color: 'transparent' }
+            : { background: 'var(--color-accent-500)', color: '#fff' })
+      }))
+    }));
+
+    const teamStyles = {
+      A: mix(S.team, { background: 'var(--color-accent-2-300)', color: 'var(--color-accent-2-900)' }),
+      B: mix(S.team, { background: 'var(--color-accent-200)', color: 'var(--color-accent-800)' }),
+      coop: mix(S.team, { background: 'var(--color-neutral-200)', color: 'var(--color-neutral-700)' })
+    };
+
+    const chrono = [
+      ['CAFE', 'Vous', '0:08', 'me'], ['NUIT', 'Léa', '0:21', 'lea'], ['EAU', 'Vous', '0:34', 'me'],
+      ['ETOILE', 'Vous', '0:41', 'me'], ['CHIEN', 'Léa', '1:02', 'lea'], ['LUNE', 'Vous', '1:19', 'me'],
+      ['AMOUR', 'Léa', '1:47', 'lea'], ['FLEUR', 'Vous', '2:03', 'me']
+    ];
+
+    return {
+      isAccueil: s.screen === 'accueil', isRecherche: s.screen === 'recherche', isSalon: s.screen === 'salon',
+      isGrille: s.screen === 'grille', isResultats: s.screen === 'resultats',
+      isClassement: s.screen === 'classement', isProfil: s.screen === 'profil',
+
+      goAccueil: this.go('accueil'), goRecherche: this.go('recherche'), goSalon: this.go('salon'),
+      goGrille: this.go('grille'), goResultats: this.go('resultats'),
+      goClassement: this.go('classement'), goProfil: this.go('profil'),
+
+      rail: [['accueil','Accueil'],['recherche','Recherche'],['salon','Salon'],['grille','Grille'],['resultats','Résultats'],['classement','Classement'],['profil','Profil']]
+        .map(([k, label]) => ({
+          label, onSelect: this.go(k),
+          style: mix(S.rail, s.screen === k
+            ? { background: 'var(--color-accent-500)', color: '#fff', border: '1px solid var(--color-accent-500)' }
+            : { background: 'transparent', color: 'var(--color-neutral-700)', border: '1px solid var(--color-neutral-300)' })
+        })),
+
+      heroRows,
+      waitRows,
+      duelPips: ['w','w','w','w','l'].map((r) => ({ style: mix(S.pip, { background: r === 'w' ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.35)' }) })),
+      manchePips: ['done','now','next'].map((k) => ({ style: mix(S.pip, { width: k === 'now' ? 16 : 8, background: k === 'next' ? 'var(--color-neutral-300)' : 'var(--color-accent-500)' }) })),
+
+      amis: [
+        ['Léa','L',TERRE,true],['Basile','B','var(--color-neutral-600)',true],['Inès','I',SAGE,true],
+        ['Théo','T','var(--color-neutral-500)',false],['Zoé','Z','var(--color-neutral-500)',false]
+      ].map(([nom, ini, bg, online]) => ({
+        nom, ini, onPress: this.go('salon'),
+        wrapStyle: S.amiWrap,
+        tileStyle: mix(S.tile(44, 17), { background: bg, opacity: online ? 1 : 0.4 }),
+        dotStyle: { position: 'absolute', top: -2, right: -2, width: 11, height: 11, borderRadius: 999, background: online ? 'var(--color-accent-2-600)' : 'var(--color-neutral-400)', boxShadow: '0 0 0 2.5px var(--color-bg)' }
+      })),
+
+      serie: Array.from({ length: 21 }, (_, i) => ({
+        style: mix(S.serie, { background: i < 9 ? 'var(--color-neutral-200)' : i === 9 ? 'var(--color-accent-300)' : SAGE })
+      })),
+
+      historique: [['Léa','L',TERRE,'2 – 3'],['Basile','B','var(--color-neutral-600)','0 – 4'],['Inès','I',SAGE,'5 – 1']]
+        .map(([nom, ini, bg, bilan]) => ({
+          nom, ini, bilan,
+          tileStyle: mix(S.tile(30, 12), { background: bg }),
+          badgeStyle: mix(S.medal, { background: 'var(--color-neutral-200)', color: 'var(--color-neutral-800)', fontVariantNumeric: 'tabular-nums' })
+        })),
+
+      codeTiles: 'RAVIE'.split('').map((ch) => ({ ch, style: S.code })),
+
+      rejoindreOuvert: s.rejoindre,
+      ouvrirRejoindre: () => this.setState({ rejoindre: true, joinCode: '', joinErr: false }),
+      fermerRejoindre: () => this.setState({ rejoindre: false }),
+      joinTiles: [0, 1, 2, 3, 4].map((i) => {
+        const ch = s.joinCode[i] || '';
+        const cur = i === s.joinCode.length;
+        return {
+          ch,
+          style: mix(S.code, s.joinErr
+            ? { background: 'var(--color-accent-200)', border: '1px solid var(--color-accent-500)', color: 'var(--color-accent-900)' }
+            : ch
+              ? { background: 'var(--color-accent-2-200)', border: '1px solid var(--color-accent-2-400)', color: 'var(--color-accent-2-900)' }
+              : { boxShadow: cur ? 'inset 0 0 0 2px var(--color-accent-500)' : 'none' })
+        };
+      }),
+      joinMsg: s.joinErr ? 'Aucun salon avec ce code.' : 'Essayez RAVIE pour la démonstration.',
+      joinMsgStyle: { margin: '9px 0 0', textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: s.joinErr ? 'var(--color-accent-700)' : 'var(--color-neutral-600)' },
+      joinClavier: AZERTY.map((keys, i) => ({
+        hasDelete: i === AZERTY.length - 1,
+        keys: keys.map((k) => ({ label: k, onPress: () => this.tapeCode(k) }))
+      })),
+      joinEffacer: this.effaceCode,
+      validerCode: this.validerCode,
+      joinBtnStyle: {
+        marginTop: 14, width: '100%', cursor: s.joinCode.length === 5 ? 'pointer' : 'default',
+        border: 0, borderRadius: 999, padding: '14px 0', fontFamily: 'var(--font-heading)', fontSize: 15.5,
+        background: s.joinCode.length === 5 ? 'var(--color-accent-500)' : 'var(--color-neutral-300)',
+        color: s.joinCode.length === 5 ? '#fff' : 'var(--color-neutral-600)'
+      },
+      copier: () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1400); },
+      copyLabel: s.copied ? 'Copié' : 'Copier le code',
+
+      formats: [['1v1','Duel 1v1'],['coop','Coop'],['equipes','Équipes']].map(([k, label]) => ({
+        label, onSelect: () => this.setState({ format: k }),
+        style: mix(S.seg, s.format === k
+          ? { background: 'var(--color-bg)', color: 'var(--color-text)', boxShadow: 'var(--shadow-sm)' }
+          : { background: 'transparent', color: 'var(--color-neutral-600)' })
+      })),
+      formatNote: s.format === 'coop'
+        ? 'Une seule grille, tout le monde écrit dedans. Les cases prennent la couleur de qui les a remplies.'
+        : s.format === 'equipes'
+          ? 'Deux équipes sur la même grille. Le score d\'une équipe est celui de ses mots complets.'
+          : 'Chacun sa grille, les mêmes définitions. Le premier à huit mots prend la manche.',
+
+      limites: [['5','5 min'],['10','10 min'],['15','15 min'],['30','30 min'],['∞','Illimité']].map(([k, label]) => ({
+        label, onSelect: () => this.setState({ limite: k }),
+        style: mix(S.limite, s.limite === k
+          ? { background: 'var(--color-accent-2-300)', color: 'var(--color-accent-2-900)', border: '1px solid var(--color-accent-2-400)' }
+          : { background: 'transparent', color: 'var(--color-neutral-700)', border: '1px solid var(--color-neutral-300)' })
+      })),
+      limiteNote: s.limite === '∞'
+        ? 'Sans limite : la partie reste ouverte, chacun revient quand il veut.'
+        : `Le chrono démarre à l'ouverture de la grille. Au bout de ${s.limite} minutes, les mots trouvés sont comptés.`,
+
+      salonJoueurs: [
+        ['Camille (vous)','C',SAGE,true,'Fine lame · 1 480', s.equipe],
+        ['Léa','L',TERRE,false,'Duelliste · 2 884','B'],
+        ['Basile','B','var(--color-neutral-600)',false,'Roi des flèches · 3 210','coop']
+      ].map(([nom, ini, bg, hote, detail, team]) => ({
+        nom, ini, hote, detail,
+        rowStyle: S.salonRow,
+        tileStyle: mix(S.tile(34, 14), { background: bg }),
+        teamLabel: team === 'coop' ? 'Coop' : `Équipe ${team}`,
+        teamStyle: teamStyles[team],
+        onTeam: hote ? () => this.setState({ equipe: s.equipe === 'A' ? 'B' : 'A' }) : () => {}
+      })),
+
+      gridRows,
+      montrerCarte: this.carteTerritoire(),
+      territoire: this.territoryCells(9, solved),
+      territoireLarge: this.territoryCells(11, solved),
+      territoireAccueil: this.territoryCells(7, solved),
+      clavier: AZERTY.map((keys, i) => ({
+        hasDelete: i === AZERTY.length - 1,
+        keys: keys.map((k) => ({ label: k, onPress: () => this.type(k) }))
+      })),
+      effacer: this.effacer, indice: this.indice, verifier: this.verifier,
+      hints: s.hints, trouves: mesMots + sesMots,
+      motClue: aw.clue,
+      motMeta: `${aw.answer.length} lettres · ${aw.dir === 'right' ? 'horizontal' : 'vertical'}`,
+      motArrow: aw.dir === 'right' ? ARROW_GLYPH.right : ARROW_GLYPH.down,
+      motPrec: () => this.cycleWord(-1), motSuiv: () => this.cycleWord(1),
+      ouvrirCarte: () => this.setState({ carte: true }),
+      fermerCarte: () => this.setState({ carte: false }),
+      carteOuverte: s.carte,
+      motSlots: awCells.map((id) => {
+        const e = s.letters[id];
+        const owner = this.ownerOfCell(id, solved);
+        return {
+          ch: e ? e.ch : '',
+          style: mix(S.slot, owner === 'lea' && this.casesOpposant()
+            ? { background: 'var(--color-accent-200)', color: 'var(--color-accent-800)' }
+            : owner
+              ? { background: 'var(--color-accent-2-200)', color: 'var(--color-accent-2-900)' }
+              : { background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-300)', color: 'var(--color-text)' })
+        };
+      }),
+
+      duel: [
+        { nom: 'Vous', ini: 'C', mots: mesMots, pct: `${Math.round((mesMots / 8) * 100)} %`, detail: `${s.hints} indices restants`, tileStyle: mix(S.tile(30, 13), { background: SAGE }), scoreStyle: mix(S.scoreSm, { color: 'var(--color-accent-2-800)' }), pctStyle: mix(S.pct, { color: 'var(--color-accent-2-800)' }), barStyle: mix(S.jauge, { width: `${(mesMots / 8) * 100}%`, background: SAGE }) },
+        { nom: 'Léa', ini: 'L', mots: sesMots, pct: `${Math.round((sesMots / 8) * 100)} %`, detail: this.live() ? 'écrit dans AMOUR' : 'hors ligne', tileStyle: mix(S.tile(30, 13), { background: TERRE }), scoreStyle: mix(S.scoreSm, { color: 'var(--color-accent-800)' }), pctStyle: mix(S.pct, { color: 'var(--color-accent-800)' }), barStyle: mix(S.jauge, { width: `${(sesMots / 8) * 100}%`, background: TERRE }) }
+      ],
+
+      resJoueurs: [
+        { nom: 'Vous', ini: 'C', points: '124', detail: '5 mots · 2 indices', tileStyle: mix(S.tile(34, 14), { background: SAGE }), scoreStyle: mix(S.scoreLg, { color: 'var(--color-accent-2-900)' }), cardStyle: mix(S.resCard, { background: 'var(--color-accent-2-200)', border: '1px solid var(--color-accent-2-300)' }) },
+        { nom: 'Léa', ini: 'L', points: '96', detail: '3 mots · prête', tileStyle: mix(S.tile(34, 14), { background: TERRE }), scoreStyle: mix(S.scoreLg, { color: 'var(--color-neutral-800)' }), cardStyle: mix(S.resCard, { background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-300)' }) }
+      ],
+      chronologie: chrono.map(([mot, par, temps, who]) => ({
+        mot, par, temps,
+        pipStyle: { width: 9, height: 9, flex: 'none', borderRadius: 3, display: 'block', background: who === 'me' ? SAGE : TERRE },
+        rowStyle: mix(S.chronoRow, who === 'me'
+          ? { background: 'var(--color-accent-2-200)' }
+          : { background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-200)' })
+      })),
+
+      lbOnglets: [['semaine','Semaine'],['amis','Amis'],['toujours','Toujours']].map(([k, label]) => ({
+        label, onSelect: () => this.setState({ lbMode: k }),
+        style: mix(S.tab, s.lbMode === k
+          ? { background: 'var(--color-bg)', color: 'var(--color-text)', boxShadow: 'var(--shadow-sm)' }
+          : { background: 'transparent', color: 'var(--color-neutral-600)' })
+      })),
+      podium: [['2','Léa','L',TERRE,58],['1','Basile','B','var(--color-neutral-700)',74],['3','Camille','C',SAGE,44]]
+        .map(([rang, nom, ini, bg, size]) => ({
+          rang, nom, ini,
+          avatarStyle: mix(S.tile(size, size > 60 ? 26 : 20), { background: bg, borderRadius: 999 }),
+          socleStyle: { width: '100%', height: rang === '1' ? 42 : rang === '2' ? 30 : 22, borderRadius: '12px 12px 8px 8px', background: rang === '1' ? 'var(--color-accent-2-300)' : 'var(--color-neutral-200)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontSize: 15, color: 'var(--color-neutral-800)' }
+        })),
+      lbRows: (s.lbMode === 'amis'
+        ? [['4','Camille','Fine lame','1 480'],['5','Théo','Régulier','1 402'],['6','Inès','Montante','1 190'],['7','Marek','Curieux','984'],['8','Zoé','Débutante','651'],['9','Sami','Nouveau','410'],['10','Nour','Nouvelle','288']]
+        : s.lbMode === 'toujours'
+          ? [['4','Marek','Curieux','24 810'],['5','Camille','Fine lame','19 402'],['6','Théo','Régulier','17 090'],['7','Inès','Montante','12 640'],['8','Zoé','Débutante','8 120'],['9','Sami','Nouveau','3 040'],['10','Nour','Nouvelle','1 210']]
+          : [['4','Théo','Régulier','1 402'],['5','Inès','Montante','1 190'],['6','Marek','Curieux','984'],['7','Zoé','Débutante','651'],['8','Sami','Nouveau','410'],['9','Nour','Nouvelle','288'],['10','Rémi','Curieux','204']]
+      ).map(([rang, nom, titre, points]) => ({
+        rang, nom, titre, points, ini: nom[0],
+        tileStyle: mix(S.tile(28, 12), { background: nom === 'Camille' ? SAGE : 'var(--color-neutral-500)' }),
+        rowStyle: mix(S.lbRow, nom === 'Camille'
+          ? { background: 'var(--color-accent-2-200)', border: '1px solid var(--color-accent-2-300)' }
+          : { background: 'var(--color-neutral-100)', border: '1px solid var(--color-neutral-300)' })
+      })),
+
+      profilStats: [
+        { valeur: '221', libelle: 'grilles' }, { valeur: '1 806', libelle: 'mots trouvés' },
+        { valeur: '64 %', libelle: 'duels gagnés' }, { valeur: '11 s', libelle: 'par mot' }
+      ],
+      heat: Array.from({ length: 30 }, (_, i) => {
+        const v = [0,2,3,1,3,2,0,1,3,3,2,3,1,0,2,3,3,1,2,3,0,1,3,2,3,3,1,2,3,3][i];
+        const bg = ['var(--color-neutral-200)','var(--color-accent-2-200)','var(--color-accent-2-400)',SAGE][v];
+        return { style: mix(S.heat, { background: bg }) };
+      }),
+      fleches: [
+        { glyphe: '▶', nom: 'Droite', temps: '8 s', pct: 100 },
+        { glyphe: '↳', nom: 'Coudée bas', temps: '10 s', pct: 80 },
+        { glyphe: '↴', nom: 'Coudée droite', temps: '12 s', pct: 66 },
+        { glyphe: '▼', nom: 'Bas', temps: '14 s', pct: 57 }
+      ].map((f) => ({ ...f, barStyle: { display: 'block', height: '100%', width: `${f.pct}%`, borderRadius: 999, background: SAGE } })),
+      meilleursMots: [
+        { mot: 'ÉTOILE', def: 'Brille la nuit', temps: '4 s' },
+        { mot: 'CAFÉ', def: 'Boisson du matin', temps: '5 s' },
+        { mot: 'LUNE', def: 'Satellite terrestre', temps: '6 s' }
+      ],
+      medailles: [
+        ['Série de 10', 'var(--color-accent-2-300)', 'var(--color-accent-2-900)'],
+        ['Sans indice', 'var(--color-accent-200)', 'var(--color-accent-800)'],
+        ['Grille du jour ×30', 'var(--color-surface)', 'var(--color-neutral-800)'],
+        ['Coop ×50', 'var(--color-surface)', 'var(--color-neutral-800)']
+      ].map(([nom, bg, col]) => ({ nom, style: mix(S.medal, { background: bg, color: col }) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

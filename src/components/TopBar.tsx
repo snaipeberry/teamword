@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { aggregateTeams, TEAM_COLORS } from '../lib/teams';
-import { Avatar } from './Avatar';
 import { SoundToggle } from './SoundToggle';
 import { SessionMenu } from './SessionMenu';
 import { AnimatedNumber } from './AnimatedNumber';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
-import { blockPlayer } from '../lib/roomClient';
 import { GRADE_LABELS, type MultiplayerGrade } from '../lib/difficulty';
 
 /** Même ensemble que REACTIONS côté serveur — un émoji d'ici qu'il ne
@@ -21,13 +19,17 @@ const REACTION_CHOICES: { emoji: string; label: string }[] = [
 ];
 
 /**
- * Bandeau unique regroupant numéro de grille, scores et actions.
+ * Bandeau de repères et d'actions : retour, chrono, numéro de grille,
+ * difficulté, lien d'invitation, réactions, son et menu de partie.
  *
- * L'en-tête, la barre d'invitation et le tableau des scores occupaient trois
- * blocs empilés — soit une hauteur qui croissait avec le nombre de joueurs et
- * mangeait la grille. Tout tient désormais sur UNE ligne de hauteur fixe :
- * les joueurs sont réduits à des pastilles (initiales + score), quel que soit
- * leur nombre, et la ligne défile horizontalement au-delà de trois ou quatre.
+ * Tout tient sur UNE ligne de hauteur fixe — l'en-tête, la barre d'invitation
+ * et le tableau des scores occupaient auparavant trois blocs empilés, soit une
+ * hauteur qui croissait avec le nombre de joueurs et mangeait la grille.
+ *
+ * L'avancement joueur par joueur n'est plus ici : il est passé aux jauges
+ * placées juste sous cette barre (voir PlayerGauges, maquette V2), qui disent
+ * en plus À QUELLE DISTANCE de la fin chacun se trouve. Seuls les totaux par
+ * ÉQUIPE restent affichés ici, faute d'équivalent dans les jauges.
  */
 export function TopBar({
   sessionId,
@@ -68,10 +70,6 @@ export function TopBar({
   const { teams, ranked, matchEndsAt, leaveMatch } = useRound();
   const [copied, setCopied] = useState(false);
   const [reactionsOuvertes, setReactionsOuvertes] = useState(false);
-  // Confirmation en deux temps (même motif que SessionMenu) : bloquer
-  // quelqu'un n'a rien de bénin, un tap accidentel ne doit pas suffire.
-  const [aBloquer, setABloquer] = useState<string | null>(null);
-  const [bloques, setBloques] = useState<Set<string>>(new Set());
   const totals = aggregateTeams(game.scoreboard, teams);
 
   // Chrono du duel classé (10 minutes, voir server/websocket/index.js) — un
@@ -80,10 +78,10 @@ export function TopBar({
   // affichage qui suit `matchEndsAt`.
   const [maintenant, setMaintenant] = useState(Date.now());
   useEffect(() => {
-    if (!ranked || !matchEndsAt) return;
+    if (!matchEndsAt) return;
     const tick = setInterval(() => setMaintenant(Date.now()), 1000);
     return () => clearInterval(tick);
-  }, [ranked, matchEndsAt]);
+  }, [matchEndsAt]);
   const secondesRestantes = matchEndsAt ? Math.max(0, Math.round((matchEndsAt - maintenant) / 1000)) : null;
 
   const copyLink = async () => {
@@ -94,15 +92,6 @@ export function TopBar({
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const bloquer = async (playerId: string) => {
-    if (aBloquer !== playerId) {
-      setABloquer(playerId);
-      return;
-    }
-    setABloquer(null);
-    await blockPlayer(game.myPlayerId, playerId).catch(() => {});
-    setBloques((prev) => new Set(prev).add(playerId));
-  };
 
   return (
     // `relative z-50` : la carte de grille est un motion.div transformé, donc
@@ -127,21 +116,20 @@ export function TopBar({
       >
         ←
       </button>
-      {ranked ? (
-        // Le niveau d'un duel classé varie à chaque grille et n'a pas à être
-        // annoncé (voir la demande produit) — le chrono du match prime ici.
-        secondesRestantes !== null && (
-          <span
-            className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] tabular-nums ${
-              secondesRestantes <= 30
-                ? 'bg-organic-accent-200 text-organic-accent-800'
-                : 'bg-organic-neutral-200 text-organic-text'
-            }`}
-          >
-            {Math.floor(secondesRestantes / 60)}:{String(secondesRestantes % 60).padStart(2, '0')}
-          </span>
-        )
-      ) : (
+      {/* Le chrono s'affiche dès qu'une fin est programmée : duel classé
+          (10 min imposées) comme partie privée limitée par l'hôte. */}
+      {secondesRestantes !== null && (
+        <span
+          className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] tabular-nums ${
+            secondesRestantes <= 30
+              ? 'bg-organic-accent-200 text-organic-accent-800'
+              : 'bg-organic-neutral-200 text-organic-text'
+          }`}
+        >
+          {Math.floor(secondesRestantes / 60)}:{String(secondesRestantes % 60).padStart(2, '0')}
+        </span>
+      )}
+      {ranked ? null : (
         <>
           <span
             className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] ${
@@ -159,8 +147,10 @@ export function TopBar({
       )}
 
       {/* En partie par équipes, on affiche les TOTAUX de camp : c'est le score
-          qui compte, celui de chacun n'étant qu'un détail. */}
-      {totals.length > 0 ? (
+          qui compte, celui de chacun n'étant qu'un détail. Le détail joueur
+          par joueur, lui, est passé aux jauges sous la barre (PlayerGauges,
+          maquette V2) — le répéter ici ne ferait que doubler l'information. */}
+      {totals.length > 0 && (
         <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
           {totals.map((t) => (
             <span
@@ -174,55 +164,8 @@ export function TopBar({
             </span>
           ))}
         </div>
-      ) : (
-      /* Pastilles joueurs — `min-w-0` autorise la compression, sinon la
-         ligne pousserait les boutons hors de l'écran à trois joueurs. */
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {game.scoreboard.map((p) => (
-          <motion.span
-            key={p.playerId}
-            layout
-            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className={`flex shrink-0 items-center gap-1 rounded-full py-0.5 pl-0.5 pr-2 text-[11px] font-bold ${
-              p.isMe ? 'bg-organic-accent2-200 text-organic-accent2-900' : 'bg-organic-neutral-200 text-organic-neutral-700'
-            }`}
-            title={`${p.name}${p.online ? '' : ' (hors ligne)'} — ${p.score} mot${p.score === 1 ? '' : 's'}${p.hints ? `, ${p.hints} indice(s)` : ''}`}
-          >
-            <span className="relative shrink-0">
-              <Avatar name={p.isMe ? 'Vous' : p.name} color={p.color} size={20} />
-              {!p.online && (
-                <span className="absolute -bottom-px -right-px h-2 w-2 rounded-full bg-organic-neutral-500 ring-1 ring-organic-bg" />
-              )}
-            </span>
-            <AnimatedNumber value={p.score} />
-            {p.hints > 0 && <span className="text-[9px] font-medium opacity-70">{p.hints} ind.</span>}
-            {/* Bloquer n'a de sens qu'en duel ALÉATOIRE — inviter soi-même
-                quelqu'un en partie privée puis le bloquer n'en a aucun. */}
-            {ranked && !p.isMe && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void bloquer(p.playerId);
-                }}
-                disabled={bloques.has(p.playerId)}
-                aria-label={aBloquer === p.playerId ? 'Confirmer le blocage' : `Bloquer ${p.name}`}
-                title={bloques.has(p.playerId) ? 'Bloqué' : undefined}
-                className={`shrink-0 rounded-full px-1.5 text-[9px] font-bold uppercase tracking-wide ${
-                  bloques.has(p.playerId)
-                    ? 'text-organic-neutral-500'
-                    : aBloquer === p.playerId
-                      ? 'bg-organic-accent-500 text-organic-bg'
-                      : 'text-organic-neutral-600 active:bg-organic-neutral-300'
-                }`}
-              >
-                {bloques.has(p.playerId) ? 'bloqué' : 'bloquer'}
-              </button>
-            )}
-          </motion.span>
-        ))}
-      </div>
       )}
+      {totals.length === 0 && <span className="min-w-0 flex-1" />}
 
       {game.multiplayer && !solo && (
         <button

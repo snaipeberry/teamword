@@ -15,7 +15,10 @@ import { BackButton } from './BackButton';
  */
 export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boolean }) {
   const game = useGameState();
-  const { hostId, startGame, kickPlayer, isKicked, teams, setTeam, grade, setGrade } = useRound();
+  const {
+    hostId, startGame, kickPlayer, isKicked, teams, setTeam, grade, setGrade,
+    format, setFormat, timeLimitMin, setTimeLimit,
+  } = useRound();
   const [copied, setCopied] = useState<'code' | 'lien' | null>(null);
 
   const jeSuisHote = hostId === game.myPlayerId;
@@ -47,10 +50,26 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
           personne d'autre, partager son code n'aurait aucun sens (le
           "match" est déjà complet : vous + le bot au lancement). */}
       {!bot && (
-        <div className="mt-4 w-full rounded-[28px] bg-organic-surface p-4 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">Code de la partie</p>
-          <p className="my-1.5 font-display text-[28px] tracking-[0.22em] text-organic-text">{sessionId}</p>
-          <div className="flex justify-center gap-2">
+        <>
+          <p className="mb-2 mt-4 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+            Code de la partie
+          </p>
+          {/* Une case par lettre, flèche comprise : le code se lit comme une
+              réponse de grille (maquette V2). */}
+          <div className="flex items-center gap-1.5">
+            {sessionId.split('').map((ch, i) => (
+              <span
+                key={i}
+                className="flex h-[50px] w-[44px] shrink-0 items-center justify-center rounded-lg border border-organic-neutral-300 bg-organic-neutral-100 font-display text-[24px] text-organic-text"
+              >
+                {ch}
+              </span>
+            ))}
+            <span className="ml-0.5 text-[15px] text-organic-accent-600" aria-hidden="true">
+              ▶
+            </span>
+          </div>
+          <div className="mt-2.5 flex gap-2">
             <button
               type="button"
               onClick={() => copier('code')}
@@ -66,15 +85,79 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
               {copied === 'lien' ? 'Copié' : 'Partager le lien'}
             </button>
           </div>
-        </div>
+
+          {/* Format : c'est lui qui décide si les camps existent, donc il
+              précède la liste des joueurs. Réservé à l'hôte, comme la
+              difficulté — le serveur refuse de toute façon les autres. */}
+          <p className="mb-2 mt-5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+            Format
+          </p>
+          <div className="flex gap-1.5 rounded-full bg-organic-surface p-1">
+            {([
+              ['1v1', 'Duel 1v1'],
+              ['coop', 'Coop'],
+              ['equipes', 'Équipes'],
+            ] as const).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                disabled={!jeSuisHote}
+                onClick={() => setFormat(k)}
+                aria-pressed={format === k}
+                className={`flex-1 rounded-full py-2 font-display text-[12.5px] transition ${
+                  format === k
+                    ? 'bg-organic-bg text-organic-text shadow-sm'
+                    : 'text-organic-neutral-600'
+                } ${jeSuisHote ? 'active:scale-95' : 'cursor-default'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[12px] leading-[1.45] text-organic-neutral-700">
+            {format === 'coop'
+              ? 'Une seule grille, tout le monde écrit dedans. Les cases prennent la couleur de qui les a remplies.'
+              : format === 'equipes'
+                ? 'Deux équipes sur la même grille. Le score d’une équipe est celui de ses mots complets.'
+                : 'Deux joueurs, camps attribués d’office. Le plus de mots trouvés prend la manche.'}
+          </p>
+
+          <p className="mb-2 mt-4 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+            Limite de temps
+          </p>
+          <div className="flex gap-1.5">
+            {([5, 10, 15, 30, null] as const).map((min) => (
+              <button
+                key={min ?? 'illimite'}
+                type="button"
+                disabled={!jeSuisHote}
+                onClick={() => setTimeLimit(min)}
+                aria-pressed={timeLimitMin === min}
+                className={`flex-1 rounded-xl border py-2.5 text-center font-display text-[12.5px] transition ${
+                  timeLimitMin === min
+                    ? 'border-organic-accent2-400 bg-organic-accent2-300 text-organic-accent2-900'
+                    : 'border-organic-neutral-300 text-organic-neutral-700'
+                } ${jeSuisHote ? 'active:scale-95' : 'cursor-default'}`}
+              >
+                {min === null ? '∞' : `${min} min`}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[12px] leading-[1.45] text-organic-neutral-700">
+            {timeLimitMin === null
+              ? 'Sans limite : la partie reste ouverte, chacun revient quand il veut.'
+              : `Le chrono démarre à l’ouverture de la grille. Au bout de ${timeLimitMin} minutes, les mots trouvés sont comptés.`}
+          </p>
+        </>
       )}
 
       {/* Joueurs, équipes et format : sans objet contre un bot — vous seul
           êtes dans ce salon, personne à lister ni à mettre en équipe. */}
       {!bot && (
       <div className="mt-5 w-full">
-        <p className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-organic-neutral-600">
+        <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
           {presents.length} joueur{presents.length > 1 ? 's' : ''}
+          {format === 'equipes' ? ' · appuyez sur l’étiquette pour changer d’équipe' : ''}
         </p>
         <div className="flex flex-col gap-1.5">
           <AnimatePresence initial={false}>
@@ -85,9 +168,9 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 rounded-[20px] border border-organic-divider bg-organic-neutral-100 px-3 py-2"
+                className="flex items-center gap-2.5 rounded-[18px] border border-organic-neutral-300 bg-organic-neutral-100 px-3 py-2"
               >
-                <Avatar name={p.isMe ? game.myName : p.name} color={p.color} size={28} />
+                <Avatar name={p.isMe ? game.myName : p.name} color={p.color} size={34} square />
                 <span className="min-w-0 flex-1 truncate text-[13.5px] font-bold text-organic-text">
                   {p.isMe ? game.myName : p.name}
                   {p.isMe && <span className="ml-1 text-[10px] font-medium text-organic-neutral-500">(vous)</span>}
@@ -100,22 +183,33 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
                     hôte
                   </span>
                 )}
-                {/* Équipe : chacun choisit la sienne, ce qui couvre 1v1, 2v2
-                    et 3v3 sans mode dédié — le nombre de joueurs par camp
-                    suffit à définir le format. */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!p.isMe) return;
-                    const actuelle = teams[p.playerId];
-                    setTeam(actuelle === 'A' ? 'B' : actuelle === 'B' ? null : 'A');
-                  }}
-                  disabled={!p.isMe}
-                  aria-label={p.isMe ? 'Changer d’équipe' : undefined}
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[10.5px] font-bold ${styleEquipe(p.playerId)} ${p.isMe ? 'active:scale-95' : 'cursor-default'}`}
-                >
-                  {teams[p.playerId] ? `Équipe ${teams[p.playerId]}` : 'Coop'}
-                </button>
+                {/* L'étiquette d'équipe n'a de sens qu'en format « Équipes » :
+                    en coop il n'y a pas de camp, en 1v1 ils sont imposés par
+                    le serveur (voir l'intent `format`). */}
+                {format === 'equipes' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!p.isMe) return;
+                      const actuelle = teams[p.playerId];
+                      setTeam(actuelle === 'A' ? 'B' : actuelle === 'B' ? null : 'A');
+                    }}
+                    disabled={!p.isMe}
+                    aria-label={p.isMe ? 'Changer d’équipe' : undefined}
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[10.5px] font-bold ${styleEquipe(p.playerId)} ${p.isMe ? 'active:scale-95' : 'cursor-default'}`}
+                  >
+                    {teams[p.playerId] ? `Équipe ${teams[p.playerId]}` : 'Coop'}
+                  </button>
+                ) : (
+                  format === '1v1' &&
+                  teams[p.playerId] && (
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10.5px] font-bold ${styleEquipe(p.playerId)}`}
+                    >
+                      Équipe {teams[p.playerId]}
+                    </span>
+                  )
+                )}
 
                 {jeSuisHote && !p.isMe && (
                   <button

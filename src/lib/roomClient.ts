@@ -29,6 +29,13 @@ export interface RoomState {
   ranked?: boolean;
   /** Grade choisi par l'hôte — répartition facile/moyen/difficile des indices. */
   grade?: string;
+  /** Format d'une partie privée : 'coop' | 'equipes' | '1v1'. Pilote `teams`. */
+  format?: string;
+  /** Ordre de découverte des mots de la manche : qui a pris quoi, et au bout
+   *  de combien de millisecondes depuis l'ouverture de la grille. */
+  timeline?: { wordId: string; playerId: string; at: number }[];
+  /** Limite de temps du salon en minutes — `null` = illimité. */
+  timeLimitMin?: number | null;
 
   // ---------- duel classé (1v1 aléatoire) ----------
   /** Horodatage de fin de match (`Date.now()` + 10 min à l'appariement). */
@@ -81,13 +88,49 @@ export interface Profile {
   allMedals: CatalogMedal[];
   title: string;
   rank: number | null;
-  /** Économie solo — séparée du classement général ci-dessus. */
+  /** Solo + multijoueur additionnés — c'est CE total qui classe et qui donne
+   *  le palier (voir `totalPointsOf` côté serveur). `points` et `soloPoints`
+   *  n'en sont plus que le détail. */
+  totalPoints: number;
+  /** Points gagnés sur les sept derniers jours — onglet « Semaine ». */
+  weekPoints: number;
+  /** Points par jour sur 30 jours, du plus ancien au plus récent — frise
+   *  d'activité du profil. */
+  activity: number[];
+  /** Derniers adversaires en duel classé, du plus récent au plus ancien. */
+  recentOpponents: {
+    id: string;
+    name: string;
+    avatar: string | null;
+    wins: number;
+    losses: number;
+    draws: number;
+  }[];
+  /** Mots trouvés le plus vite, du plus rapide au plus lent. */
+  bestWords: { answer: string; clue: string; ms: number }[];
+  /** Temps moyen pour trouver un mot, en millisecondes — `null` tant
+   *  qu'aucun mot n'a été mesuré. */
+  avgWordMs: number | null;
+  /** Détail de l'économie solo, à l'intérieur de `totalPoints`. */
   soloPoints: number;
   soloGrids: number;
   hintBalance: number;
   tier: SoloTier;
   next: SoloTier | null;
   pointsToNext: number | null;
+
+  // ---------- grille du jour (accueil V2) ----------
+  /** Jours d'affilée avec la grille du jour faite. Tolère qu'elle ne soit pas
+   *  encore faite AUJOURD'HUI (voir `dailyStatsFor` côté serveur). */
+  streak: number;
+  /** 21 derniers jours, du plus ancien au plus récent : grille du jour faite ? */
+  dailyHistory: boolean[];
+  /** Rang sur la grille du jour — `null` tant qu'on ne l'a pas jouée. */
+  dailyRank: number | null;
+  /** Nombre de joueurs ayant fait la grille du jour. */
+  dailyTotal: number;
+  /** La grille du jour est-elle déjà faite aujourd'hui ? */
+  dailyDone: boolean;
 }
 
 export interface LeaderboardRow {
@@ -246,9 +289,21 @@ function httpBase(): string {
   return '/rt';
 }
 
-export async function fetchLeaderboard(limit = 50, mode?: 'solo'): Promise<LeaderboardRow[]> {
-  const params = mode ? `&mode=${mode}` : '';
-  const res = await fetch(`${httpBase()}/leaderboard?limit=${limit}${params}`);
+/**
+ * Classement — un seul barème, solo et multijoueur additionnés (voir
+ * `totalPointsOf` côté serveur). `scope` ne change que la PÉRIODE prise en
+ * compte, plus le mode de jeu : 'global' cumule tout, 'semaine' les sept
+ * derniers jours.
+ */
+export async function fetchLeaderboard(
+  limit = 50,
+  scope: 'global' | 'semaine' | 'amis' = 'global',
+  /** Requis pour `scope: 'amis'` — le serveur ne classe alors que ce joueur
+   *  et son cercle. */
+  id?: string,
+): Promise<LeaderboardRow[]> {
+  const params = id ? `&id=${encodeURIComponent(id)}` : '';
+  const res = await fetch(`${httpBase()}/leaderboard?limit=${limit}&scope=${scope}${params}`);
   if (!res.ok) throw new Error(`classement: ${res.status}`);
   return (await res.json()).top as LeaderboardRow[];
 }
@@ -296,4 +351,55 @@ export async function updateProfile(id: string, patch: { name?: string; avatar?:
     body: JSON.stringify({ id, token, ...patch }),
   });
   if (!res.ok) throw new Error(`profil: ${res.status}`);
+}
+
+// ---------- amis ----------
+
+/** Un joueur tel qu'il apparaît dans la liste d'amis ou une demande. */
+export interface FriendView {
+  id: string;
+  name: string;
+  avatar: string | null;
+  online: boolean;
+  /** Dernière connexion (ms epoch) — `0` si jamais vu. */
+  lastSeenAt: number;
+  tier: string | null;
+  points: number;
+}
+
+/** État complet des relations : les trois listes arrivent ensemble, l'écran
+ *  Amis les affichant côte à côte. */
+export interface FriendState {
+  friends: FriendView[];
+  incoming: FriendView[];
+  outgoing: FriendView[];
+  /** Message d'échec d'une action (pseudo inconnu, déjà amis…). */
+  error?: string | null;
+}
+
+export async function fetchFriends(id: string): Promise<FriendState> {
+  const res = await fetch(`${httpBase()}/friends?id=${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(`amis: ${res.status}`);
+  return (await res.json()) as FriendState;
+}
+
+/**
+ * Toutes les actions d'amitié passent par la même route, qui renvoie l'état
+ * complet mis à jour — inutile de recharger derrière.
+ *
+ * `request` vise un PSEUDO (c'est ce qu'on tape), les autres un identifiant
+ * (on agit sur quelqu'un déjà présent dans une des listes).
+ */
+export async function friendAction(
+  id: string,
+  action: 'request' | 'accept' | 'decline' | 'cancel' | 'remove',
+  cible: { username?: string; playerId?: string },
+): Promise<FriendState> {
+  const res = await fetch(`${httpBase()}/friend`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, token: activePlayerToken(), action, ...cible }),
+  });
+  if (!res.ok) throw new Error(`amis: ${res.status}`);
+  return (await res.json()) as FriendState;
 }

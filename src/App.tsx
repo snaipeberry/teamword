@@ -153,7 +153,7 @@ function SessionRouter({
   bot: boolean;
   solo: boolean;
 }) {
-  const { started, isKicked, ranked, matchOver } = useRound();
+  const { started, isKicked, matchOver } = useRound();
   const game = useGameState();
 
   // Grille du jour et solo se jouent directement : il n'y a personne à
@@ -164,10 +164,10 @@ function SessionRouter({
   // n'importe quelle partie à plusieurs. Voir Lobby.tsx pour ce que ça
   // change côté affichage (pas de code à partager).
   //
-  // Un duel classé, lui, se conclut par son PROPRE chrono (10 minutes, voir
-  // server/websocket/index.js) plutôt que par l'avancement des grilles —
-  // `matchOver` prime donc sur tout le reste dès qu'il est vrai.
-  const key = ranked && matchOver
+  // Une partie CHRONOMÉTRÉE (duel classé, ou partie privée à laquelle l'hôte
+  // a fixé une limite) se conclut par son chrono plutôt que par l'avancement
+  // des grilles — `matchOver` prime donc sur tout le reste dès qu'il est vrai.
+  const key = matchOver
     ? 'matchEnd'
     : isKicked(game.myPlayerId)
       ? 'kicked'

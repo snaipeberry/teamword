@@ -5,9 +5,16 @@ import { aggregateTeams, winningTeam, TEAM_COLORS } from '../lib/teams';
 import { Avatar } from './Avatar';
 import { AnimatedNumber } from './AnimatedNumber';
 import { ResultModal } from './ResultModal';
+import type { WordEntry } from '../types/puzzle';
 
 function initials(name: string): string {
   return name.slice(0, 2).toUpperCase();
+}
+
+/** `0:08` — la chronologie compte depuis l'ouverture de la grille. */
+function chrono(ms: number): string {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
 /**
@@ -23,6 +30,7 @@ export function RoundResults({
   round,
   daily = false,
   soloPointsEarned,
+  words,
   onAdvance,
 }: {
   round: number;
@@ -30,6 +38,9 @@ export function RoundResults({
   daily?: boolean;
   /** Grille du jour uniquement : points solo gagnés, pour la ligne "+ N points solo". */
   soloPointsEarned?: number;
+  /** Mots de la grille — le serveur ne stocke que des identifiants dans la
+   *  chronologie (il ignore les réponses), c'est ici qu'on les retraduit. */
+  words: WordEntry[];
   onAdvance: () => void;
 }) {
   const game = useGameState();
@@ -144,6 +155,46 @@ export function RoundResults({
               );
             })}
           </div>
+        )}
+
+        {/* « Mot par mot » (maquette V2) : on relit la manche au lieu de lire
+            un total. Chaque ligne porte la couleur de qui a pris le mot, ce
+            qui rend le déroulé lisible d'un coup d'œil. */}
+        {game.timeline.length > 0 && (
+          <>
+            <p className="mb-1.5 mt-4 text-[10.5px] font-bold uppercase tracking-[0.1em] text-organic-neutral-600">
+              Mot par mot
+            </p>
+            <div className="flex max-h-[168px] flex-col gap-[5px] overflow-y-auto">
+              {game.timeline.map((e) => {
+                const mot = words.find((w) => w.id === e.wordId);
+                const joueur = game.scoreboard.find((p) => p.playerId === e.playerId);
+                const parMoi = e.playerId === game.myPlayerId;
+                return (
+                  <div
+                    key={e.wordId}
+                    className={`flex items-center gap-2 rounded-[14px] px-2.5 py-1.5 ${
+                      parMoi ? 'bg-organic-accent2-200' : 'border border-organic-neutral-200 bg-organic-neutral-100'
+                    }`}
+                  >
+                    <span
+                      className="block h-[9px] w-[9px] shrink-0 rounded-[3px]"
+                      style={{ backgroundColor: joueur?.color ?? '#A19786' }}
+                    />
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold tracking-[0.03em] text-organic-text">
+                      {mot?.answer ?? '—'}
+                    </span>
+                    <span className="shrink-0 text-[11px] font-semibold text-organic-neutral-600">
+                      {parMoi ? 'Vous' : (joueur?.name ?? 'Joueur')}
+                    </span>
+                    <span className="w-[38px] shrink-0 text-right text-[11.5px] font-bold tabular-nums text-organic-neutral-700">
+                      {chrono(e.at)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
 
         <button

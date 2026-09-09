@@ -33,6 +33,11 @@ export function AuthScreen({
   const [password, setPassword] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  // 'attente' pendant le chargement du SDK Google (généralement déjà bien
+  // avancé grâce à `preloadGoogleAuth`, voir main.tsx) : un squelette occupe
+  // la place le temps que le vrai bouton apparaisse, pour ne pas laisser un
+  // vide qui ferait croire à un écran cassé pendant ce court instant.
+  const [googleEtat, setGoogleEtat] = useState<'attente' | 'prêt' | 'indisponible'>('attente');
   const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const valider = async () => {
@@ -62,10 +67,14 @@ export function AuthScreen({
     if (!googleButtonRef.current) return;
     renderGoogleButton(googleButtonRef.current, (credential) => {
       void viaOAuth('google', credential);
-    }).catch(() => {
-      // Pas de VITE_GOOGLE_CLIENT_ID configuré, ou SDK injoignable : le
-      // bouton pseudo/mot de passe reste utilisable, on n'affiche rien.
-    });
+    })
+      .then(() => setGoogleEtat('prêt'))
+      .catch(() => {
+        // Pas de VITE_GOOGLE_CLIENT_ID configuré, ou SDK injoignable : le
+        // bouton pseudo/mot de passe reste utilisable, le squelette cède
+        // juste la place à rien plutôt que de tourner indéfiniment.
+        setGoogleEtat('indisponible');
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,7 +112,15 @@ export function AuthScreen({
           Continuer avec Apple
         </button>
 
-        <div ref={googleButtonRef} />
+        <div
+          className="relative w-full max-w-[320px]"
+          style={{ minHeight: googleEtat === 'indisponible' ? 0 : 40 }}
+        >
+          {googleEtat === 'attente' && (
+            <div className="h-10 w-full animate-pulse rounded-full bg-organic-neutral-200" aria-hidden="true" />
+          )}
+          <div ref={googleButtonRef} className={googleEtat === 'attente' ? 'invisible absolute inset-0' : undefined} />
+        </div>
 
         <div className="my-1 flex w-full max-w-[320px] items-center gap-3">
           <div className="h-px flex-1 bg-organic-divider" />

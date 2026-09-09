@@ -82,11 +82,26 @@ function titleFor(profile) {
 }
 
 /**
- * Paliers du mode solo, sur `profile.soloPoints`.
+ * Points d'un joueur, TOUS MODES CONFONDUS — solo et multijoueur additionnés.
+ *
+ * Les deux économies restent stockées séparément (`points` pour le classé,
+ * `soloPoints` pour le solo) : ça évite une migration des profils existants
+ * et permet de garder le détail. Mais tout ce qui CLASSE un joueur — palier,
+ * classement, appariement — se fait sur ce total, de sorte qu'un joueur
+ * exclusivement solo puisse atteindre le même rang qu'un gros joueur
+ * multijoueur.
+ */
+function totalPointsOf(profile) {
+  return (profile.points ?? 0) + (profile.soloPoints ?? 0);
+}
+
+/**
+ * Paliers de progression, sur le total tous modes confondus
+ * (`totalPointsOf`).
  *
  * Seuils volontairement élevés (~30 grilles pour Argent, ×2 à ×3 par palier
- * ensuite) : le solo est annoncé comme théoriquement infini, il doit rester
- * un vrai horizon de progression et non se vider en une soirée.
+ * ensuite) : la progression est annoncée comme théoriquement infinie, elle
+ * doit rester un vrai horizon et non se vider en une soirée.
  */
 const SOLO_TIERS = [
   { id: 'bronze', label: 'Bronze', icon: '🥉', min: 0 },
@@ -101,22 +116,23 @@ const SOLO_TIERS = [
 ];
 
 /** Index du palier courant dans SOLO_TIERS, à partir d'un total de points. */
-function soloTierIndex(soloPoints) {
+function soloTierIndex(points) {
   let i = 0;
   for (let n = 0; n < SOLO_TIERS.length; n++) {
-    if (soloPoints >= SOLO_TIERS[n].min) i = n;
+    if (points >= SOLO_TIERS[n].min) i = n;
   }
   return i;
 }
 
-/** Palier courant + progression vers le suivant, pour l'affichage. */
+/** Palier courant + progression vers le suivant, sur le total tous modes. */
 function soloTierFor(profile) {
-  const i = soloTierIndex(profile.soloPoints);
+  const total = totalPointsOf(profile);
+  const i = soloTierIndex(total);
   const suivant = SOLO_TIERS[i + 1] ?? null;
   return {
     tier: SOLO_TIERS[i],
     next: suivant,
-    pointsToNext: suivant ? suivant.min - profile.soloPoints : null,
+    pointsToNext: suivant ? suivant.min - total : null,
   };
 }
 
@@ -144,6 +160,33 @@ function emptyRoom() {
     // `tryMatch` et l'intent `advance`.
     grade: 'moyen',
     touchedAt: Date.now(),
+
+    /**
+     * Format d'une partie privée, choisi par l'hôte dans le salon :
+     * 'coop' (tout le monde ensemble, aucune équipe), 'equipes' (chacun
+     * choisit son camp) ou '1v1' (deux joueurs, camps attribués d'office).
+     * Pilote `teams` — voir l'intent `format`.
+     */
+    /**
+     * Chronologie de la manche EN COURS : dans quel ordre les mots sont
+     * tombés, par qui, et au bout de combien de temps. Alimentée par les
+     * intents `letter` (multijoueur classique, le client indique quels mots
+     * il vient de compléter) et `solveWord` (duel classé). Remise à zéro à
+     * chaque nouvelle grille, comme les lettres.
+     *
+     * Le serveur ignore tout du contenu des grilles (voir l'en-tête) : il ne
+     * stocke donc que des identifiants de mots, à charge du client de les
+     * retraduire en réponses — il a déjà la grille sous la main.
+     */
+    timeline: [],
+    roundStartedAt: Date.now(),
+    format: 'coop',
+    /**
+     * Limite de temps de la partie, en minutes — `null` = illimité (défaut,
+     * comportement historique). Le chrono ne part qu'au lancement, pas à la
+     * création du salon : voir l'intent `start`.
+     */
+    timeLimitMin: null,
 
     // ---------- duel classé (1v1 aléatoire) ----------
     // Rien de tout ceci n'est utilisé hors ranked — laissé à sa valeur par
@@ -206,8 +249,244 @@ function emptyProfile(id) {
     soloPoints: 0,
     soloGrids: 0,
     hintBalance: 3,
+    /**
+     * Grille du jour, date (UTC, `YYYY-MM-DD`) -> points marqués ce jour-là.
+     * `dailies` ne comptait qu'un total, d'où l'impossibilité d'en tirer une
+     * série ou un classement du jour — c'est ce que cette carte débloque
+     * (voir `dailyStatsFor`). Élaguée à DAILY_KEEP_DAYS pour ne pas gonfler
+     * l'instantané indéfiniment.
+     */
+    dailyScores: {},
+    /**
+     * Points gagnés par jour (UTC), TOUS MODES CONFONDUS — c'est ce qui rend
+     * le classement « Semaine » possible : `points`/`soloPoints` ne sont que
+     * des totaux cumulés, sans notion de quand. Élagué comme `dailyScores`.
+     */
+    pointsHistory: {},
+    /**
+     * Bilan face à chaque adversaire déjà rencontré en duel classé :
+     * `{ [id]: { v, d, n, at } }` — victoires, défaites, nuls, dernière
+     * rencontre. Alimente « Vos derniers adversaires » sur l'écran de
+     * recherche.
+     */
+    opponents: {},
+    /**
+     * Les mots trouvés le plus vite, du plus rapide au plus lent (3 au plus).
+     * `answer`/`clue` viennent du CLIENT — le serveur ne connaît pas les
+     * grilles (voir l'en-tête du fichier) et ne peut donc pas les déduire.
+     */
+    bestWords: [],
+    /**
+     * Cumul servant le « temps moyen par mot » du profil. Deux compteurs
+     * plutôt qu'une moyenne stockée : une moyenne ne peut pas être mise à
+     * jour sans savoir sur combien de mots elle porte.
+     */
+    wordTimeMs: 0,
+    wordTimeCount: 0,
+    /**
+     * Relations. Une amitié est SYMÉTRIQUE : accepter écrit dans les deux
+     * profils, il n'y a donc jamais à croiser deux listes pour savoir si
+     * deux joueurs sont amis.
+     */
+    friends: [],
+    /** Demandes reçues, en attente de réponse (ids). */
+    reqIn: [],
+    /** Demandes envoyées, en attente chez l'autre (ids). */
+    reqOut: [],
+    /** Dernière fois que ce joueur s'est connecté à une partie — sert le
+     *  « Vu il y a 2 h » de la liste d'amis. */
+    lastSeenAt: 0,
     updatedAt: Date.now(),
   };
+}
+
+/** Combien de mots ce joueur garde en vitrine sur son profil. */
+const BEST_WORDS_KEEP = 3;
+/**
+ * En dessous, on ne retient pas le mot.
+ *
+ * Une seule frappe peut compléter DEUX mots croisés d'un coup : le second
+ * est alors « trouvé » en quelques millisecondes, ce qui n'a rien d'une
+ * performance et squatterait le podium à vie. Un vrai mot rapide se trouve
+ * en quelques secondes, pas en un centième.
+ */
+const BEST_WORD_MIN_MS = 1000;
+/**
+ * Au-delà, on ne compte pas le mot dans la moyenne : personne ne « cherche »
+ * deux minutes d'affilée. Un tel écart veut dire que la grille est restée
+ * ouverte pendant une pause — c'est du temps mort, pas du temps de
+ * réflexion, et il ferait exploser la moyenne.
+ */
+const WORD_TIME_MAX_MS = 120_000;
+
+/**
+ * Alimente le « temps moyen par mot » du profil.
+ *
+ * Deux compteurs plutôt qu'une moyenne : une moyenne seule ne peut pas être
+ * mise à jour. Mêmes bornes que les meilleurs mots — un mot croisé complété
+ * par la même frappe n'est pas une trouvaille, et une pause n'est pas une
+ * recherche.
+ */
+function recordWordTime(profile, ms) {
+  if (!Number.isFinite(ms) || ms < BEST_WORD_MIN_MS || ms > WORD_TIME_MAX_MS) return;
+  profile.wordTimeMs = (profile.wordTimeMs ?? 0) + Math.round(ms);
+  profile.wordTimeCount = (profile.wordTimeCount ?? 0) + 1;
+}
+
+/**
+ * Retient un mot trouvé s'il fait partie des plus rapides du joueur.
+ * Dédoublonné sur la réponse : retrouver deux fois ÉTOILE ne doit pas
+ * occuper deux lignes, seul le meilleur temps compte.
+ */
+function recordBestWord(profile, { answer, clue, ms }) {
+  if (typeof answer !== 'string' || !answer.trim() || !Number.isFinite(ms)) return;
+  if (ms < BEST_WORD_MIN_MS) return;
+  const mot = {
+    answer: answer.trim().slice(0, 24).toUpperCase(),
+    clue: typeof clue === 'string' ? clue.trim().slice(0, 60) : '',
+    ms: Math.round(ms),
+  };
+  if (!Array.isArray(profile.bestWords)) profile.bestWords = [];
+  // Purge des entrées trop rapides enregistrées avant ce seuil : sans ça
+  // elles resteraient en tête à vie, aucun vrai mot ne pouvant les battre.
+  profile.bestWords = profile.bestWords.filter((m) => m.ms >= BEST_WORD_MIN_MS);
+  const existant = profile.bestWords.find((m) => m.answer === mot.answer);
+  if (existant) {
+    if (mot.ms >= existant.ms) return;
+    existant.ms = mot.ms;
+    existant.clue = mot.clue || existant.clue;
+  } else {
+    profile.bestWords.push(mot);
+  }
+  profile.bestWords.sort((a, b) => a.ms - b.ms);
+  profile.bestWords = profile.bestWords.slice(0, BEST_WORDS_KEEP);
+}
+
+/**
+ * Solde une rencontre de duel classé dans les deux profils concernés.
+ * `issue` vaut 'v', 'd' ou 'n' du point de vue du premier joueur.
+ */
+function recordOpponent(profile, adversaireId, issue) {
+  if (!adversaireId) return;
+  if (!profile.opponents) profile.opponents = {};
+  const bilan = profile.opponents[adversaireId] ?? { v: 0, d: 0, n: 0, at: 0 };
+  bilan[issue] = (bilan[issue] ?? 0) + 1;
+  bilan.at = Date.now();
+  profile.opponents[adversaireId] = bilan;
+}
+
+/**
+ * Ajoute des mots à la chronologie de la manche, sans doublon : deux clients
+ * peuvent parfaitement signaler le même mot (frappe croisée, renvoi réseau),
+ * et c'est le PREMIER arrivé qui fait foi — comme pour le score.
+ */
+function recordTimeline(state, mots, playerId) {
+  if (!Array.isArray(state.timeline)) state.timeline = [];
+  // Salle créée avant l'existence de ce champ (instantané restauré), ou
+  // partie qui n'est jamais passée par `start` (solo, quotidien) : sans
+  // origine de temps, toutes les durées vaudraient zéro.
+  if (!state.roundStartedAt) state.roundStartedAt = Date.now();
+  for (const brut of mots) {
+    // Le client peut envoyer un simple identifiant, ou un objet portant en
+    // plus la réponse et la définition (pour « Vos meilleurs mots »).
+    const mot = typeof brut === 'string' ? { id: brut } : (brut ?? {});
+    if (typeof mot.id !== 'string' || !mot.id) continue;
+    if (state.timeline.some((e) => e.wordId === mot.id)) continue;
+
+    const depuisDebut = Date.now() - (state.roundStartedAt ?? Date.now());
+    // Temps de résolution = depuis la trouvaille PRÉCÉDENTE de ce joueur (ou
+    // le début de la grille pour son premier mot). C'est une mesure de
+    // rythme, la seule que la chronologie permette : on ne sait pas quand le
+    // joueur a commencé à réfléchir à CE mot en particulier.
+    const precedent = [...state.timeline].reverse().find((e) => e.playerId === playerId);
+    const ms = depuisDebut - (precedent ? precedent.at : 0);
+
+    state.timeline.push({ wordId: mot.id.slice(0, 64), playerId, at: depuisDebut });
+    const profile = getProfile(playerId);
+    // La moyenne compte TOUS les mots trouvés, même ceux qui n'entrent pas au
+    // palmarès — elle décrit le rythme habituel, pas les exploits.
+    recordWordTime(profile, ms);
+    if (mot.answer) recordBestWord(profile, { answer: mot.answer, clue: mot.clue, ms });
+  }
+}
+
+/**
+ * Enregistre des points gagnés MAINTENANT, pour les classements par période.
+ * À appeler partout où `points` ou `soloPoints` augmente — c'est le seul
+ * endroit qui sait de quel jour il s'agit.
+ */
+function recordPoints(profile, gagnes) {
+  if (!gagnes) return;
+  if (!profile.pointsHistory) profile.pointsHistory = {};
+  const jour = dayKey();
+  profile.pointsHistory[jour] = (profile.pointsHistory[jour] ?? 0) + gagnes;
+  for (const k of Object.keys(profile.pointsHistory)) {
+    if (k < shiftDay(-DAILY_KEEP_DAYS)) delete profile.pointsHistory[k];
+  }
+}
+
+/** Points gagnés sur les `jours` derniers jours (aujourd'hui compris). */
+function pointsSince(profile, jours) {
+  const depuis = shiftDay(-(jours - 1));
+  let total = 0;
+  for (const [k, v] of Object.entries(profile.pointsHistory ?? {})) {
+    if (k >= depuis) total += v;
+  }
+  return total;
+}
+
+/** Même découpage de journée que le client (`dailySeed`, en UTC) : sans ça,
+ *  la grille « du jour » et la série ne changeraient pas au même instant. */
+function dayKey(date = new Date()) {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Au-delà, une journée ne sert plus ni à la série ni à l'historique affiché. */
+const DAILY_KEEP_DAYS = 60;
+/** Nombre de cases de la frise « Série » côté accueil (voir Home.tsx). */
+const DAILY_HISTORY_DAYS = 21;
+
+function shiftDay(offset) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + offset);
+  return dayKey(d);
+}
+
+/**
+ * Série, historique et rang du jour d'un profil.
+ *
+ * La série tolère que la grille du jour ne soit pas ENCORE faite aujourd'hui
+ * (on repart alors d'hier) : sinon elle afficherait 0 tous les matins, ce qui
+ * en ferait un compteur de culpabilité plutôt qu'une récompense.
+ */
+function dailyStatsFor(profile) {
+  const scores = profile.dailyScores ?? {};
+
+  let streak = 0;
+  for (let i = scores[dayKey()] != null ? 0 : 1; ; i++) {
+    if (scores[shiftDay(-i)] == null) break;
+    streak += 1;
+  }
+
+  const history = [];
+  for (let i = DAILY_HISTORY_DAYS - 1; i >= 0; i--) history.push(scores[shiftDay(-i)] != null);
+
+  // Rang du jour : calculé à la volée sur les profils ayant joué aujourd'hui.
+  // Quelques centaines de profils au plus, et seulement à l'ouverture d'un
+  // écran — pas de quoi justifier un index maintenu en permanence.
+  const today = dayKey();
+  const mine = scores[today];
+  let dailyRank = null;
+  let dailyTotal = 0;
+  for (const p of profiles.values()) {
+    const s = (p.dailyScores ?? {})[today];
+    if (s == null) continue;
+    dailyTotal += 1;
+    if (mine != null && s > mine) dailyRank = (dailyRank ?? 0) + 1;
+  }
+  if (mine != null) dailyRank = (dailyRank ?? 0) + 1; // 0 devant = 1er
+
+  return { streak, dailyHistory: history, dailyRank, dailyTotal, dailyDone: mine != null };
 }
 
 function getProfile(id) {
@@ -226,7 +505,43 @@ function publicProfile(id) {
     // ne rien casser chez qui l'utilisait déjà pour le compte "x/7".
     allMedals: MEDALS.map(({ id, label, icon, reason, test }) => ({ id, label, icon, reason, earned: test(p) })),
     title: titleFor(p),
+    /** Solo + multijoueur : c'est CE total qui classe (voir `totalPointsOf`).
+     *  `points` et `soloPoints` restent exposés pour le détail. */
+    totalPoints: totalPointsOf(p),
+    /** Points gagnés sur les 7 derniers jours — onglet « Semaine ». */
+    weekPoints: pointsSince(p, 7),
+    /** Points par jour sur 30 jours, du plus ancien au plus récent — la
+     *  frise d'activité du profil (maquette V2). */
+    activity: Array.from({ length: 30 }, (_, i) => (p.pointsHistory ?? {})[shiftDay(-(29 - i))] ?? 0),
+    /** Derniers adversaires rencontrés en duel classé, du plus récent au
+     *  plus ancien — les noms sont résolus ici, jamais dupliqués dans le
+     *  bilan lui-même (un joueur peut se renommer). */
+    recentOpponents: Object.entries(p.opponents ?? {})
+      .sort(([, a], [, b]) => (b.at ?? 0) - (a.at ?? 0))
+      .slice(0, 5)
+      .map(([id, bilan]) => ({
+        id,
+        name: profiles.get(id)?.name ?? 'Joueur',
+        avatar: profiles.get(id)?.avatar ?? null,
+        wins: bilan.v ?? 0,
+        losses: bilan.d ?? 0,
+        draws: bilan.n ?? 0,
+      })),
+    bestWords: p.bestWords ?? [],
+    /** Temps moyen pour trouver un mot, en ms — `null` tant qu'aucun mot
+     *  n'a été mesuré (voir `recordWordTime`). */
+    avgWordMs: p.wordTimeCount > 0 ? Math.round(p.wordTimeMs / p.wordTimeCount) : null,
     ...soloTierFor(p),
+    // Série, frise des 21 derniers jours et rang du jour — voir l'accueil
+    // (maquette V2), qui en fait ses deux dernières sections.
+    ...dailyStatsFor(p),
+    // Jamais renvoyées telles quelles : les cartes complètes date par date
+    // n'ont d'intérêt que pour les calculs ci-dessus, et grossissent sans fin.
+    dailyScores: undefined,
+    pointsHistory: undefined,
+    // Le bilan brut n'a d'intérêt que pour `recentOpponents` ci-dessus, qui
+    // en donne déjà la version lisible.
+    opponents: undefined,
   };
 }
 
@@ -260,6 +575,84 @@ function blockedIds(id) {
 
 function isBlockedPair(a, b) {
   return blockedIds(a).has(b) || blockedIds(b).has(a);
+}
+
+// ---------- amis ----------
+
+/**
+ * Joueurs actuellement connectés à une partie.
+ *
+ * Reconstruit à chaque connexion/déconnexion plutôt que déduit des salles :
+ * un même joueur peut avoir plusieurs onglets ouverts, et on veut savoir
+ * s'il en reste AU MOINS un. Volontairement en mémoire seule — une présence
+ * ne survit pas à un redémarrage, par définition.
+ */
+const onlineCounts = new Map();
+
+function markOnline(playerId) {
+  onlineCounts.set(playerId, (onlineCounts.get(playerId) ?? 0) + 1);
+  const p = getProfile(playerId);
+  p.lastSeenAt = Date.now();
+}
+
+function markOffline(playerId) {
+  const n = (onlineCounts.get(playerId) ?? 0) - 1;
+  if (n > 0) onlineCounts.set(playerId, n);
+  else onlineCounts.delete(playerId);
+  const p = profiles.get(playerId);
+  if (p) p.lastSeenAt = Date.now();
+}
+
+function isOnline(playerId) {
+  return (onlineCounts.get(playerId) ?? 0) > 0;
+}
+
+/** Retrouve un joueur par son PSEUDO DE COMPTE — c'est ce que l'autre tape
+ *  pour l'ajouter, et c'est unique, contrairement au nom de profil. */
+function findAccountByUsername(username) {
+  const cherche = String(username ?? '').trim().toLowerCase();
+  if (!cherche) return null;
+  for (const compte of accounts.values()) {
+    if (compte.username.toLowerCase() === cherche) return compte;
+  }
+  return null;
+}
+
+/** Retire une valeur d'un tableau de profil, sans trou ni doublon. */
+function retirer(liste, valeur) {
+  return (liste ?? []).filter((x) => x !== valeur);
+}
+
+/**
+ * Défait une amitié ET toute demande en cours, DANS LES DEUX SENS.
+ *
+ * Appelé aussi bien par « retirer un ami » que par un blocage : bloquer
+ * quelqu'un tout en restant son ami n'aurait aucun sens, et laisserait la
+ * personne bloquée apparaître au classement « Amis ».
+ */
+function defaireRelation(idA, idB) {
+  for (const [a, b] of [[idA, idB], [idB, idA]]) {
+    const p = profiles.get(a);
+    if (!p) continue;
+    p.friends = retirer(p.friends, b);
+    p.reqIn = retirer(p.reqIn, b);
+    p.reqOut = retirer(p.reqOut, b);
+    p.updatedAt = Date.now();
+  }
+}
+
+/** Vue lisible d'une relation, pour l'écran Amis. */
+function vueAmi(id) {
+  const p = profiles.get(id);
+  return {
+    id,
+    name: accounts.get(id)?.username ?? p?.name ?? 'Joueur',
+    avatar: p?.avatar ?? null,
+    online: isOnline(id),
+    lastSeenAt: p?.lastSeenAt ?? 0,
+    tier: p ? soloTierFor(p).tier.label : null,
+    points: p ? totalPointsOf(p) : 0,
+  };
 }
 
 function hashPassword(password, salt) {
@@ -652,10 +1045,17 @@ function broadcastPresence(code) {
 // Chaque entrée reçoit (state, payload, playerId) et renvoie true si l'état a
 // changé — c'est ce qui décide de rediffuser ou non.
 const INTENTS = {
-  letter(state, { cellId, letter, scored = 0 }, playerId) {
+  letter(state, { cellId, letter, scored = 0, wordIds, words }, playerId) {
     if (typeof cellId !== 'string') return false;
     if (letter) state.letters[cellId] = String(letter).slice(0, 1);
     else delete state.letters[cellId];
+    // Quels mots viennent d'être complétés — le serveur ne peut pas le
+    // déduire seul (il ne connaît pas les réponses), c'est donc le client
+    // qui les nomme, au même niveau de confiance que `scored`. `words` porte
+    // en plus la réponse et la définition ; `wordIds` reste accepté pour un
+    // client resté sur l'ancienne version (cache de service worker).
+    const trouves = Array.isArray(words) ? words : Array.isArray(wordIds) ? wordIds : null;
+    if (trouves?.length) recordTimeline(state, trouves.slice(0, 4), playerId);
     if (scored > 0) {
       state.scores[playerId] = (state.scores[playerId] ?? 0) + scored;
       // Les points de profil suivent les mots trouvés, pas les grilles : c'est
@@ -669,6 +1069,7 @@ const INTENTS = {
       // ou entre amis complices.
       if (state.ranked === true) {
         profile.points += scored;
+        recordPoints(profile, scored);
       }
       profile.words += scored;
       profile.updatedAt = Date.now();
@@ -783,6 +1184,9 @@ const INTENTS = {
     state.round += 1;
     state.letters = {};
     state.revealed = {};
+    // Nouvelle grille : la chronologie repart de zéro, et son horloge aussi.
+    state.timeline = [];
+    state.roundStartedAt = Date.now();
     if (state.ranked) {
       // Une difficulté différente à chaque grille plutôt qu'une seule fixée
       // pour tout le match — jamais 'difficile' : un duel se joue vite, la
@@ -805,11 +1209,52 @@ const INTENTS = {
     state.scores = {};
     state.hints = {};
     state.ready = {};
+    state.timeline = [];
+    state.roundStartedAt = Date.now();
     return true;
   },
 
   start(state) {
     state.started = true;
+    // Le chrono d'une partie limitée démarre à l'ouverture de la grille, pas
+    // à la création du salon : sinon le temps passé à régler le format et à
+    // attendre les joueurs serait décompté de la partie.
+    if (state.timeLimitMin) state.matchEndsAt = Date.now() + state.timeLimitMin * 60 * 1000;
+    // La chronologie compte à partir de l'ouverture de la grille, pas de la
+    // création du salon — sinon le premier mot afficherait le temps passé à
+    // attendre les autres joueurs.
+    state.roundStartedAt = Date.now();
+    state.timeline = [];
+    return true;
+  },
+
+  /**
+   * Format d'une partie privée. C'est lui qui décide de la signification de
+   * `teams`, donc il les réécrit au passage plutôt que de laisser un état
+   * incohérent (des camps résiduels en coop, par exemple).
+   */
+  format(state, { format }, playerId) {
+    if (state.hostId !== playerId) return false;
+    if (!['coop', 'equipes', '1v1'].includes(format)) return false;
+    state.format = format;
+    if (format === 'coop') {
+      state.teams = {};
+    } else if (format === '1v1') {
+      // Camps attribués d'office : en 1v1 il n'y a rien à choisir, et laisser
+      // deux joueurs atterrir dans le même camp n'aurait aucun sens.
+      const ids = Object.keys(state.players);
+      state.teams = {};
+      ids.slice(0, 2).forEach((id, i) => { state.teams[id] = i === 0 ? 'A' : 'B'; });
+    }
+    return true;
+  },
+
+  /** Limite de temps du salon — `null`/0 pour illimité. */
+  timeLimit(state, { minutes }, playerId) {
+    if (state.hostId !== playerId) return false;
+    const n = Number(minutes);
+    if (minutes !== null && ![5, 10, 15, 30].includes(n)) return false;
+    state.timeLimitMin = minutes === null ? null : n;
     return true;
   },
 
@@ -822,16 +1267,30 @@ const INTENTS = {
     const profile = getProfile(playerId);
     const gagne = Math.max(0, Math.floor(Number(points) || 0));
 
-    const avant = soloTierIndex(profile.soloPoints);
+    // Le palier se calcule sur le TOTAL tous modes (voir `totalPointsOf`) :
+    // franchir un palier grâce à des points multijoueur doit récompenser
+    // pareil que le franchir en solo.
+    const avant = soloTierIndex(totalPointsOf(profile));
     profile.soloPoints += gagne;
+    recordPoints(profile, gagne);
     profile.soloGrids += 1;
-    const apres = soloTierIndex(profile.soloPoints);
+    const apres = soloTierIndex(totalPointsOf(profile));
 
     // +1 ampoule à chaque grille, +5 de plus si on vient de franchir un
     // palier — la progression solo doit se sentir, pas juste s'afficher.
     profile.hintBalance += 1 + (apres > avant ? 5 : 0);
 
-    if (daily) profile.dailies += 1;
+    if (daily) {
+      profile.dailies += 1;
+      // Le meilleur score du jour fait foi : rejouer la même grille ne doit
+      // pas pouvoir faire BAISSER son rang du jour.
+      if (!profile.dailyScores) profile.dailyScores = {};
+      const jour = dayKey();
+      profile.dailyScores[jour] = Math.max(profile.dailyScores[jour] ?? 0, gagne);
+      for (const k of Object.keys(profile.dailyScores)) {
+        if (k < shiftDay(-DAILY_KEEP_DAYS)) delete profile.dailyScores[k];
+      }
+    }
     profile.updatedAt = Date.now();
     return false; // rien de partagé au niveau salle ne change
   },
@@ -905,13 +1364,15 @@ const INTENTS = {
    * Premier arrivé : le mot devient PUBLIC (visible et verrouillé pour les
    * deux, teinté de la couleur du trouveur) et rapporte le point.
    */
-  solveWord(state, { wordId }, playerId) {
+  solveWord(state, { wordId, answer, clue }, playerId) {
     if (!state.ranked || typeof wordId !== 'string' || !wordId) return false;
     if (state.solvedWords[wordId]) return false; // déjà pris — l'autre a été plus rapide
     state.solvedWords[wordId] = playerId;
+    recordTimeline(state, [{ id: wordId, answer, clue }], playerId);
     state.scores[playerId] = (state.scores[playerId] ?? 0) + 1;
     const profile = getProfile(playerId);
     profile.points += 1;
+    recordPoints(profile, 1);
     profile.words += 1;
     profile.updatedAt = Date.now();
     return true;
@@ -985,7 +1446,11 @@ function otherPlayerId(state, playerId) {
  * profil pour tout le match — pas grille par grille, voir l'intent `advance`.
  */
 function concludeRankedMatch(state, { forfeitedBy } = {}) {
-  if (!state.ranked || state.matchOver) return;
+  // Duel classé OU partie privée arrivée au bout de sa limite de temps : les
+  // deux se terminent de la même façon (écran de fin, vainqueur au score).
+  // Seul le duel classé solde des statistiques de profil — voir plus bas.
+  if (state.matchOver) return;
+  if (!state.ranked && !state.timeLimitMin) return;
   state.matchOver = true;
   state.forfeitedBy = forfeitedBy ?? null;
 
@@ -999,12 +1464,38 @@ function concludeRankedMatch(state, { forfeitedBy } = {}) {
     state.winnerId = gagnants.length === 1 ? gagnants[0] : null;
   }
 
+  // Uniquement en classé : une partie privée compte déjà ses grilles une par
+  // une dans l'intent `advance`, les recompter ici les doublerait.
+  if (!state.ranked) return;
   for (const id of Object.keys(state.players)) {
     const profile = getProfile(id);
     profile.games += 1;
     if (id === state.winnerId) profile.wins += 1;
+    // Bilan face à cet adversaire précis — « Vos derniers adversaires ».
+    const adversaire = otherPlayerId(state, id);
+    if (adversaire) {
+      recordOpponent(profile, adversaire, state.winnerId === null ? 'n' : state.winnerId === id ? 'v' : 'd');
+    }
     profile.updatedAt = Date.now();
   }
+}
+
+/**
+ * Écart de points toléré entre deux adversaires, qui s'élargit avec
+ * l'attente.
+ *
+ * Le but est d'apparier des joueurs de niveau proche SANS JAMAIS bloquer :
+ * sur une base de joueurs encore petite, exiger un écart strict laisserait
+ * des gens seuls dans la file indéfiniment. Au bout d'une trentaine de
+ * secondes la fenêtre dépasse donc n'importe quel écart réel, et
+ * l'appariement redevient « le premier venu ».
+ */
+const RANGE_BASE = 300;
+const RANGE_PAR_SECONDE = 250;
+
+function toleranceDe(ws) {
+  const attente = (Date.now() - (ws.queuedAt ?? Date.now())) / 1000;
+  return RANGE_BASE + attente * RANGE_PAR_SECONDE;
 }
 
 function tryMatch() {
@@ -1026,6 +1517,12 @@ function tryMatch() {
         const a = queue[i];
         const b = queue[j];
         if (!a.player || !b.player || isBlockedPair(a.player.id, b.player.id)) continue;
+
+        // Niveau proche de préférence — la tolérance du plus PATIENT des deux
+        // s'applique, pour qu'un joueur qui attend depuis longtemps débloque
+        // la situation même face à un arrivant très mal classé.
+        const ecart = Math.abs(totalPointsOf(getProfile(a.player.id)) - totalPointsOf(getProfile(b.player.id)));
+        if (ecart > Math.max(toleranceDe(a), toleranceDe(b))) continue;
 
         queue.splice(j, 1);
         queue.splice(i, 1);
@@ -1053,9 +1550,16 @@ function tryMatch() {
 // entre-temps (aucune frappe, aucun `advance`) : rien d'autre ne déclenche sa
 // fin, il faut donc la vérifier activement plutôt que réactivement.
 setInterval(() => {
+  // La fenêtre de niveau s'élargit avec l'attente : sans ce rappel, deux
+  // joueurs déjà en file et trop éloignés ne seraient jamais réévalués —
+  // `tryMatch` n'est autrement appelé qu'à l'arrivée d'un nouveau joueur.
+  if (queue.length >= 2) tryMatch();
+
   const now = Date.now();
   for (const [code, state] of rooms) {
-    if (state.ranked && !state.matchOver && state.matchEndsAt && now >= state.matchEndsAt) {
+    // Duel classé (10 min imposées) comme partie privée limitée par l'hôte :
+    // `matchEndsAt` suffit à les reconnaître toutes les deux.
+    if (!state.matchOver && state.matchEndsAt && now >= state.matchEndsAt) {
       concludeRankedMatch(state);
       markDirty();
       broadcastState(code);
@@ -1333,6 +1837,9 @@ const http = createServer((req, res) => {
         if (url.pathname === '/block') {
           if (!blocks.has(id)) blocks.set(id, new Set());
           blocks.get(id).add(String(playerId).slice(0, 64));
+          // Rester ami avec quelqu'un qu'on vient de bloquer n'a pas de sens
+          // — et le laisserait apparaître au classement « Amis ».
+          defaireRelation(id, String(playerId).slice(0, 64));
         } else {
           blocks.get(id)?.delete(playerId);
         }
@@ -1355,34 +1862,167 @@ const http = createServer((req, res) => {
     return json(res, { blocked: [...blockedIds(id)] });
   }
 
+  /**
+   * État complet des relations d'un joueur : amis, demandes reçues et
+   * envoyées. Une seule route plutôt que trois — l'écran Amis affiche les
+   * trois ensemble, et les séparer multiplierait les allers-retours.
+   */
+  if (url.pathname === '/friends') {
+    const id = url.searchParams.get('id');
+    if (!id) {
+      res.writeHead(400);
+      return res.end();
+    }
+    const p = profiles.get(id);
+    return json(res, {
+      friends: (p?.friends ?? []).map(vueAmi).sort((a, b) => Number(b.online) - Number(a.online)),
+      incoming: (p?.reqIn ?? []).map(vueAmi),
+      outgoing: (p?.reqOut ?? []).map(vueAmi),
+    });
+  }
+
+  /**
+   * Toutes les actions d'amitié passent par ici — elles partagent la même
+   * vérification d'identité et renvoient le même état complet, ce qui évite
+   * au client de recharger derrière chaque action.
+   */
+  if (req.method === 'POST' && url.pathname === '/friend') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 2_000) req.destroy();
+    });
+    req.on('end', () => {
+      try {
+        const { id: claimedId, token, action, username, playerId } = JSON.parse(body);
+        const id = verifiedId(claimedId, token);
+        // Une relation engage DEUX comptes : un invité, dont l'identité
+        // disparaît au prochain rechargement, n'a rien à faire ici.
+        if (!id || !id.startsWith('acc_')) {
+          res.writeHead(403);
+          return res.end();
+        }
+        const moi = getProfile(id);
+        let cible = null;
+        let erreur = null;
+
+        if (action === 'request') {
+          const compte = findAccountByUsername(username);
+          if (!compte) erreur = 'Aucun joueur à ce pseudo.';
+          else if (compte.id === id) erreur = 'C’est vous.';
+          else if (isBlockedPair(id, compte.id)) erreur = 'Impossible d’ajouter ce joueur.';
+          else cible = compte.id;
+
+          if (cible) {
+            if ((moi.friends ?? []).includes(cible)) erreur = 'Vous êtes déjà amis.';
+            else if ((moi.reqOut ?? []).includes(cible)) erreur = 'Demande déjà envoyée.';
+          }
+          if (!erreur && cible) {
+            const autre = getProfile(cible);
+            // Demande croisée : les deux se sont ajoutés chacun de leur côté,
+            // il n'y a plus rien à confirmer.
+            if ((moi.reqIn ?? []).includes(cible)) {
+              moi.reqIn = retirer(moi.reqIn, cible);
+              autre.reqOut = retirer(autre.reqOut, id);
+              moi.friends = [...new Set([...(moi.friends ?? []), cible])];
+              autre.friends = [...new Set([...(autre.friends ?? []), id])];
+            } else {
+              moi.reqOut = [...new Set([...(moi.reqOut ?? []), cible])];
+              autre.reqIn = [...new Set([...(autre.reqIn ?? []), id])];
+            }
+            autre.updatedAt = Date.now();
+          }
+        } else if (action === 'accept') {
+          cible = String(playerId ?? '').slice(0, 64);
+          if (!(moi.reqIn ?? []).includes(cible)) erreur = 'Demande introuvable.';
+          else {
+            const autre = getProfile(cible);
+            moi.reqIn = retirer(moi.reqIn, cible);
+            autre.reqOut = retirer(autre.reqOut, id);
+            moi.friends = [...new Set([...(moi.friends ?? []), cible])];
+            autre.friends = [...new Set([...(autre.friends ?? []), id])];
+            autre.updatedAt = Date.now();
+          }
+        } else if (action === 'decline') {
+          cible = String(playerId ?? '').slice(0, 64);
+          const autre = profiles.get(cible);
+          moi.reqIn = retirer(moi.reqIn, cible);
+          if (autre) {
+            autre.reqOut = retirer(autre.reqOut, id);
+            autre.updatedAt = Date.now();
+          }
+        } else if (action === 'cancel' || action === 'remove') {
+          // `cancel` annule une demande envoyée, `remove` défait une amitié :
+          // dans les deux cas il s'agit de couper la relation des deux côtés.
+          defaireRelation(id, String(playerId ?? '').slice(0, 64));
+        } else {
+          res.writeHead(400);
+          return res.end();
+        }
+
+        moi.updatedAt = Date.now();
+        markDirty();
+        return json(res, {
+          error: erreur,
+          friends: (moi.friends ?? []).map(vueAmi).sort((a, b) => Number(b.online) - Number(a.online)),
+          incoming: (moi.reqIn ?? []).map(vueAmi),
+          outgoing: (moi.reqOut ?? []).map(vueAmi),
+        });
+      } catch {
+        res.writeHead(400);
+        res.end();
+      }
+    });
+    return;
+  }
+
   if (url.pathname === '/health') {
     return json(res, { status: 'ok', rooms: rooms.size, profiles: profiles.size, queue: queue.length });
   }
 
   if (url.pathname === '/leaderboard') {
     const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 200);
-    const solo = url.searchParams.get('mode') === 'solo';
+    // 'global' (total de toujours) ou 'semaine' (7 derniers jours). Un seul
+    // barème dans les deux cas : solo et multijoueur additionnés, voir
+    // `totalPointsOf` — il n'y a plus de classement séparé par mode.
+    const scope = url.searchParams.get('scope');
+    const semaine = scope === 'semaine';
+    const score = (p) => (semaine ? pointsSince(p, 7) : totalPointsOf(p));
+
+    // « Amis » : soi-même et ses amis uniquement. Un classement de trois
+    // personnes n'a d'intérêt que si l'on s'y voit, d'où l'inclusion de soi.
+    let cercle = null;
+    if (scope === 'amis') {
+      const moi = url.searchParams.get('id');
+      const p = moi ? profiles.get(moi) : null;
+      cercle = new Set([...(p?.friends ?? []), moi].filter(Boolean));
+    }
+
     const top = [...profiles.values()]
+      .filter((p) => !cercle || cercle.has(p.id))
       // Un invité (id préfixé `guest-`, jamais persisté côté client) ne doit
       // jamais apparaître au classement — c'est explicitement ce qu'« aucune
       // persistance, pas de classement » veut dire. L'adversaire artificiel
       // (id préfixé `bot-`, voir BotGame.tsx) n'est pas un joueur non plus.
       .filter((p) => !p.id.startsWith('guest-') && !p.id.startsWith('bot-'))
-      .filter((p) => (solo ? p.soloPoints > 0 : p.points > 0))
-      .sort((a, b) =>
-        solo ? b.soloPoints - a.soloPoints || b.soloGrids - a.soloGrids : b.points - a.points || b.words - a.words,
-      )
+      // Un joueur sans point n'a rien à faire dans un classement ouvert —
+      // sauf entre amis, où l'on veut voir TOUT son cercle, y compris celui
+      // qui vient de s'inscrire.
+      .filter((p) => cercle || score(p) > 0)
+      .sort((a, b) => score(b) - score(a) || b.words - a.words)
       .slice(0, limit)
       .map((p, i) => ({
         rank: i + 1,
         id: p.id,
         name: p.name,
         avatar: p.avatar,
-        points: solo ? p.soloPoints : p.points,
+        points: score(p),
         words: p.words,
         wins: p.wins,
         soloGrids: p.soloGrids,
-        title: solo ? soloTierFor(p).tier.label : titleFor(p),
+        // Le palier tient lieu de titre : c'est lui qui est généralisé à
+        // tous les modes, contrairement aux médailles.
+        title: soloTierFor(p).tier.label,
       }));
     return json(res, { top });
   }
@@ -1399,10 +2039,12 @@ const http = createServer((req, res) => {
     // n'apparaît jamais au classement (voir /leaderboard) — et ne doit pas
     // non plus en gonfler le calcul pour les autres ; même chose pour le bot.
     const horsClassement = id.startsWith('guest-') || id.startsWith('bot-');
+    // Sur le TOTAL tous modes, comme /leaderboard : un joueur exclusivement
+    // solo doit pouvoir être mieux classé qu'un joueur multijoueur moyen.
     const mieux = [...profiles.values()]
       .filter((p) => !p.id.startsWith('guest-') && !p.id.startsWith('bot-'))
-      .filter((p) => p.points > me.points).length;
-    return json(res, { ...me, rank: !horsClassement && me.points > 0 ? mieux + 1 : null });
+      .filter((p) => totalPointsOf(p) > me.totalPoints).length;
+    return json(res, { ...me, rank: !horsClassement && me.totalPoints > 0 ? mieux + 1 : null });
   }
 
   res.writeHead(404);
@@ -1474,6 +2116,15 @@ wss.on('connection', (ws) => {
 
       const state = rooms.get(code);
       state.touchedAt = Date.now();
+      // Solo et quotidien ne passent jamais par `start` : c'est l'arrivée du
+      // joueur qui donne son origine de temps à la chronologie.
+      if (!state.roundStartedAt) state.roundStartedAt = Date.now();
+      // Présence : compte les connexions, pas les salles — un joueur peut
+      // avoir plusieurs onglets, il reste en ligne tant qu'il en reste un.
+      if (!ws.compteEnLigne) {
+        ws.compteEnLigne = true;
+        markOnline(playerId);
+      }
       // Le PREMIER arrivant devient hôte, et le reste : réattribuer ferait
       // hériter le rôle au moindre départ du créateur.
       if (state.hostId == null) state.hostId = ws.player.id;
@@ -1515,7 +2166,12 @@ wss.on('connection', (ws) => {
           activeCell: null,
         };
       }
-      if (!queue.includes(ws)) queue.push(ws);
+      if (!queue.includes(ws)) {
+        // Horodaté à l'entrée : c'est l'ancienneté dans la file qui élargit
+        // la fenêtre de niveau (voir `toleranceDe`).
+        ws.queuedAt = Date.now();
+        queue.push(ws);
+      }
       send(ws, { t: 'queued', position: queue.indexOf(ws) + 1 });
       tryMatch();
       return;
@@ -1601,6 +2257,10 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     leaveQueue(ws);
+    if (ws.compteEnLigne && ws.player) {
+      ws.compteEnLigne = false;
+      markOffline(ws.player.id);
+    }
     if (!ws.room) return;
     peers(ws.room).delete(ws);
     const state = rooms.get(ws.room);

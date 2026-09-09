@@ -58,6 +58,10 @@ export interface GameStateApi {
   /** Ranked by words found, descending. Empty outside multiplayer. */
   scoreboard: PlayerScore[];
 
+  /** Ordre de découverte des mots de la manche — voir `timeline` côté
+   *  serveur. Sert l'écran de fin de manche (« mot par mot »). */
+  timeline: { wordId: string; playerId: string; at: number }[];
+
   /** Se déclarer prêt pour passer à la grille suivante. */
   setReady: (round: number) => void;
   /** Vrai quand tous les joueurs EN LIGNE sont prêts pour cette grille. */
@@ -106,6 +110,10 @@ export function useGameState(): GameStateApi {
  * Séparé de GameStateApi parce qu'il faut connaître la manche AVANT d'avoir
  * la grille : c'est elle qui détermine quelle grille charger.
  */
+/** Formats proposés dans le salon d'une partie privée — voir l'intent
+ *  `format` côté serveur, qui est seul à réécrire `teams`. */
+export type RoomFormat = 'coop' | 'equipes' | '1v1';
+
 export interface RoundApi {
   round: number;
   /** Numéro de partie — entre dans la graine, voir seedFor. */
@@ -144,6 +152,15 @@ export interface RoundApi {
    *  (voir server/websocket/index.js) — jamais affiché, voir TopBar. */
   grade: MultiplayerGrade;
   setGrade: (grade: MultiplayerGrade) => void;
+
+  // ---- Format et durée (salon d'une partie privée) ----
+  /** 'coop' (aucune équipe) | 'equipes' (chacun choisit) | '1v1' (imposé). */
+  format: RoomFormat;
+  setFormat: (format: RoomFormat) => void;
+  /** Limite de temps en minutes — `null` = illimité. Le chrono ne part qu'au
+   *  lancement de la partie (voir l'intent `start` côté serveur). */
+  timeLimitMin: number | null;
+  setTimeLimit: (minutes: number | null) => void;
 
   // ---- Duel classé (1v1 aléatoire) ----
   /** Horodatage de fin de match — `null` hors duel classé. */
@@ -230,6 +247,10 @@ function LocalSessionProvider({ children }: { children: React.ReactNode }) {
       ranked: false,
       grade: 'moyen',
       setGrade: () => {},
+      format: 'coop',
+      setFormat: () => {},
+      timeLimitMin: null,
+      setTimeLimit: () => {},
       matchEndsAt: null,
       matchOver: false,
       winnerId: null,
@@ -284,6 +305,7 @@ function LocalGameProvider({ children }: { children: React.ReactNode }) {
       reportGridDone: () => {},
       sendReaction: () => {},
       reactions: [],
+      timeline: [],
     }),
     [letters, revealed, setLetters, setRevealed, myColor, localName],
   );
@@ -438,6 +460,10 @@ function RemoteSessionProvider({
       ranked: state.ranked === true,
       grade: (state.grade as MultiplayerGrade) ?? 'moyen',
       setGrade: (grade) => send({ t: 'grade', grade }),
+      format: (state.format as RoomFormat) ?? 'coop',
+      setFormat: (format) => send({ t: 'format', format }),
+      timeLimitMin: state.timeLimitMin ?? null,
+      setTimeLimit: (minutes) => send({ t: 'timeLimit', minutes }),
       matchEndsAt: state.matchEndsAt ?? null,
       matchOver: state.matchOver === true,
       winnerId: state.winnerId ?? null,
@@ -598,7 +624,7 @@ function RemoteGameProvider({
           const complete = cells.every(
             (id, i) => (id === cellId ? letter : lettreEffective(id)) === word.answer[i],
           );
-          if (complete) send({ t: 'solveWord', wordId });
+          if (complete) send({ t: 'solveWord', wordId, answer: word.answer, clue: word.clue });
         }
         return;
       }
@@ -617,13 +643,27 @@ function RemoteGameProvider({
         });
       };
       const avant = new Map(affected.map((id) => [id, complete(id, lettreEffective(cellId))]));
-      const scored = affected.filter((id) => !avant.get(id) && complete(id, letter)).length;
+      const nouveaux = affected.filter((id) => !avant.get(id) && complete(id, letter));
 
       // Affichage immédiat, puis envoi. L'ordre importe peu techniquement,
       // mais dit l'intention : l'écran ne dépend pas du réseau.
       enAttente.current.set(cellId, { letter, at: Date.now() });
       setVersionAttente((v) => v + 1);
-      send({ t: 'letter', cellId, letter, scored });
+      // `words` alimente la chronologie de fin de manche ET « vos meilleurs
+      // mots » : le serveur ne connaît pas les grilles, il ne peut déduire
+      // seul ni QUELS mots viennent de tomber ni ce qu'ils disaient (voir
+      // `recordTimeline` côté serveur).
+      send({
+        t: 'letter',
+        cellId,
+        letter,
+        scored: nouveaux.length,
+        words: nouveaux.map((id) => ({
+          id,
+          answer: wordsById.get(id)?.answer,
+          clue: wordsById.get(id)?.clue,
+        })),
+      });
     },
     [ranked, solvedLetterFor, send, lettreEffective, wordsById, cellsByWordId, wordIdsByCellId, solvedWords],
   );
@@ -638,7 +678,7 @@ function RemoteGameProvider({
       const cells = cellsByWordId.get(word.id);
       if (!cells) continue;
       if (cells.every((id, i) => lettreEffective(id) === word.answer[i])) {
-        send({ t: 'solveWord', wordId: word.id });
+        send({ t: 'solveWord', wordId: word.id, answer: word.answer, clue: word.clue });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -704,6 +744,7 @@ function RemoteGameProvider({
       revealLetter,
       isRevealed: (cellId) => state.revealed[cellId] === true,
       solvedColorFor,
+      timeline: state.timeline ?? [],
       others: peers
         .filter((p) => p.id !== me.id)
         .map((p) => ({
