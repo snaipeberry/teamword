@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { fetchFriends, friendAction, type FriendState, type FriendView } from '../lib/roomClient';
 import { PRESENCE_PING_MS } from '../lib/presence';
+import { playNoticeSound } from '../lib/sounds';
 import { activePlayerId, currentSession } from '../lib/auth';
 import { generateSessionCode } from '../lib/sessionCode';
 import { screenShell } from '../lib/motion';
@@ -51,7 +52,13 @@ export function FriendsScreen({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (estInvite) return;
     fetchFriends(moi)
-      .then(setEtat)
+      .then((suivant) => {
+        setEtat(suivant);
+        // Une demande en attente arrivait sans un mot : la pastille de
+        // l'accueil apparaissait, et c'était tout. Un repère léger à
+        // l'ouverture de l'écran — un repère, pas une alerte.
+        if (suivant.incoming.length > 0) playNoticeSound();
+      })
       .catch(() => setMessage({ texte: 'Liste indisponible', erreur: true }))
       .finally(() => setChargement(false));
   }, [moi, estInvite]);
@@ -214,7 +221,12 @@ export function FriendsScreen({ onClose }: { onClose: () => void }) {
           Ajouter
         </button>
       </div>
+      {/* Région live en PLACE plutôt qu'annonce globale : le message
+          commente la barre d'ajout juste au-dessus, le déporter ailleurs
+          lui ferait perdre son contexte. */}
       <p
+        role="status"
+        aria-live="polite"
         className={`mt-2 shrink-0 text-[11.5px] font-bold ${
           message?.erreur ? 'text-organic-accent-700' : message ? 'text-organic-accent2-800' : 'text-organic-neutral-600'
         }`}

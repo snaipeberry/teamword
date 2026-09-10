@@ -12,14 +12,23 @@ import { RoundResults } from './RoundResults';
 import { SoloRoundResults } from './SoloRoundResults';
 import { ActiveClueBar } from './ActiveClueBar';
 import { ProgressRail, RAIL_TOTAL_PX, useCamps } from './ProgressRails';
+import { announce } from '../lib/announce';
 import type { UseSoloProfileResult } from '../hooks/useSoloProfile';
 import {
+  hapticSelect,
   hapticTick,
   hapticWin,
   hapticWordFound,
   playCorrectSound,
+  playKeySound,
+  playPeerJoinSound,
+  playPeerLeaveSound,
+  playReactionSound,
+  playRivalWordSound,
+  playTickSound,
   playWinSound,
   playWordFoundSound,
+  resetStreak,
   unlockAudio,
 } from '../lib/sounds';
 
@@ -54,6 +63,10 @@ export function CrosswordGrid({
   // (invisible) state, so a normal effect flipping this once is more robust.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  /** Origine de l'onde de fin de grille : la dernière case qu'on a remplie
+   *  soi-même — c'est de là que le regard part au moment où tout se verrouille. */
+  const derniereCase = useRef<string | null>(null);
+  const [ondeDepuis, setOndeDepuis] = useState<string | null>(null);
 
   /**
    * Taille de la grille, mesurée plutôt que calculée en CSS.
@@ -172,15 +185,51 @@ export function CrosswordGrid({
     return map;
   }, [puzzle.words, solvedWordIds, cellsByWordId]);
 
+  /**
+   * Qui a pris ce mot ?
+   *
+   * La chronologie serveur l'enregistre dans les DEUX régimes de jeu (voir
+   * `recordTimeline`) : grille commune comme grilles séparées. Un mot encore
+   * absent de la chronologie est forcément le sien — la détection locale est
+   * optimiste et devance le serveur, alors qu'un mot d'adversaire ne peut
+   * nous parvenir QUE par lui, chronologie comprise.
+   */
+  const solverOf = useCallback(
+    (wordId: string) => game.timeline.find((e) => e.wordId === wordId)?.playerId ?? game.myPlayerId,
+    [game.timeline, game.myPlayerId],
+  );
+
   const prevSolvedWordIds = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const foundNewWord = [...solvedWordIds].some((id) => !prevSolvedWordIds.current.has(id));
-    if (foundNewWord) {
-      playWordFoundSound();
-      hapticWordFound();
-    }
+    const nouveaux = [...solvedWordIds].filter((id) => !prevSolvedWordIds.current.has(id));
     prevSolvedWordIds.current = solvedWordIds;
-  }, [solvedWordIds]);
+    if (nouveaux.length === 0) return;
+
+    // Un mot pris par quelqu'un d'autre ne doit pas sonner comme une
+    // réussite : même motif, une octave plus bas et bien plus discret, pour
+    // savoir QUI a marqué sans quitter sa grille des yeux.
+    const reponses = nouveaux
+      .map((id) => puzzle.words.find((w) => w.id === id)?.answer)
+      .filter(Boolean)
+      .join(', ');
+
+    if (nouveaux.every((id) => solverOf(id) !== game.myPlayerId)) {
+      playRivalWordSound();
+      const nom = game.scoreboard.find((p) => p.playerId === solverOf(nouveaux[0]))?.name ?? 'Un adversaire';
+      announce(`${nom} a trouvé ${reponses}`, 'info', { discret: true });
+      return;
+    }
+    playWordFoundSound();
+    hapticWordFound();
+    announce(`Mot trouvé : ${reponses}`, 'succes', { discret: true });
+  }, [solvedWordIds, solverOf, game.myPlayerId, game.scoreboard, puzzle.words]);
+
+  // Une nouvelle grille repart à zéro : la série de carillons ne doit pas
+  // hériter de l'élan de la manche précédente.
+  useEffect(() => {
+    resetStreak();
+    return resetStreak;
+  }, [round]);
 
   const isSolved = useMemo(
     () => allLetterCells.length > 0 && allLetterCells.every(({ id, answer }) => game.getLetter(id) === answer),
@@ -196,12 +245,38 @@ export function CrosswordGrid({
   );
 
   useEffect(() => {
-    if (isSolved) {
+    if (!isSolved) return;
+    // La grille se referme d'abord d'un seul geste, EN partant de la dernière
+    // case remplie ; les confettis ne la recouvrent qu'ensuite. L'inverse
+    // escamotait le seul instant où la grille achevée est visible entière.
+    setOndeDepuis(derniereCase.current ?? allLetterCells[0]?.id ?? null);
+    announce('Grille terminée !', 'succes');
+    const t = setTimeout(() => {
       setCelebrating(true);
       playWinSound();
       hapticWin();
-    }
-  }, [isSolved]);
+    }, 560);
+    return () => clearTimeout(t);
+  }, [isSolved, allLetterCells]);
+
+  /**
+   * Délai d'allumage de chaque case pendant l'onde finale, par distance de
+   * Tchebychev à l'origine — les anneaux carrés d'une grille, plutôt que des
+   * cercles qui ne colleraient à rien de ce qui est dessiné.
+   */
+  const waveDelayByCell = useMemo(() => {
+    if (!ondeDepuis) return null;
+    const [r0, c0] = ondeDepuis.split('-').map(Number);
+    const map = new Map<string, number>();
+    puzzle.grid.forEach((rowCells, row) => {
+      rowCells.forEach((cell, col) => {
+        if (cell.type !== 'letter') return;
+        const anneau = Math.max(Math.abs(row - r0), Math.abs(col - c0));
+        map.set(cellId(row, col), anneau * 0.045);
+      });
+    });
+    return map;
+  }, [ondeDepuis, puzzle.grid]);
 
   // La célébration ne fait plus avancer d'elle-même : elle cède la place à
   // l'écran de résultats, qui attend que tout le monde soit prêt. Avancer
@@ -247,6 +322,7 @@ export function CrosswordGrid({
     game.revealLetter(hintTarget, answer);
     playCorrectSound();
     hapticTick();
+    announce(`Indice : la lettre est ${answer}`);
   }, [hintTarget, answerByCellId, game]);
 
   const activeWordCellIds = activeWordId ? (cellsByWordId.get(activeWordId) ?? []) : [];
@@ -273,6 +349,13 @@ export function CrosswordGrid({
 
   const activeFilled = activeWordCellIds.filter((id) => game.getLetter(id)).length;
 
+  // Une seule case encore fausse dans le mot : elle respire. Le mot est sur
+  // le point de tomber, et ça se voit avant même d'avoir tapé la lettre.
+  const derniereCaseVide = useMemo(() => {
+    const restantes = activeWordCellIds.filter((id) => game.getLetter(id) !== answerByCellId.get(id));
+    return restantes.length === 1 ? restantes[0] : null;
+  }, [activeWordCellIds, game, answerByCellId]);
+
   // Pour la carte plein écran de la barre de définition : une case par
   // lettre, avec son état verrouillé pour la teinter comme dans la grille.
   const activeWordSlots = activeWordCellIds.map((id) => ({
@@ -298,6 +381,10 @@ export function CrosswordGrid({
       setActiveCellId(id);
       setActiveWordId(nextWordId);
       game.setMyActiveCell(id);
+      // Le liseré apparaissait sans un bruit : un clic très bref confirme le
+      // doigt, nettement plus court que le son d'une lettre posée.
+      playTickSound();
+      hapticSelect();
     },
     [activeCellId, activeWordId, game, puzzle.grid],
   );
@@ -321,6 +408,8 @@ export function CrosswordGrid({
       setActiveWordId(wordId);
       setActiveCellId(target);
       game.setMyActiveCell(target);
+      playTickSound();
+      hapticSelect();
     },
     [cellsByWordId, answerByCellId, game],
   );
@@ -357,7 +446,14 @@ export function CrosswordGrid({
 
   const handleLetter = useCallback(
     (letter: string) => {
-      if (!activeCellId || isCellLocked(activeCellId)) return;
+      // Taper sans case sélectionnée, ou sur une case déjà verrouillée, ne
+      // faisait absolument rien — pas même un bruit. Un clic mat accuse
+      // réception du geste sans prétendre qu'une lettre est tombée.
+      if (!activeCellId || isCellLocked(activeCellId)) {
+        playKeySound();
+        return;
+      }
+      derniereCase.current = activeCellId;
       game.setLetter(activeCellId, letter);
       playCorrectSound();
       hapticTick();
@@ -374,6 +470,8 @@ export function CrosswordGrid({
     }
     if (game.getLetter(activeCellId)) {
       game.setLetter(activeCellId, '');
+      playKeySound();
+      hapticSelect();
     } else {
       moveWithinWord(-1);
     }
@@ -431,6 +529,44 @@ export function CrosswordGrid({
   const hintBudget = soloScored ? (soloProfile.profile?.hintBalance ?? 0) : Math.max(0, 3 - monHintCount);
   const hintsExhausted = soloScored ? (soloProfile.profile?.hintBalance ?? 0) <= 0 : monHintCount >= 3;
 
+
+  // Une réaction arrivait en glissant, mais en silence — donc on la ratait,
+  // le regard étant dans la grille. Un « pop » léger suffit à faire lever
+  // les yeux une demi-seconde.
+  const nbReactions = game.reactions.length;
+  const nbReactionsAvant = useRef(nbReactions);
+  useEffect(() => {
+    if (nbReactions > nbReactionsAvant.current) playReactionSound();
+    nbReactionsAvant.current = nbReactions;
+  }, [nbReactions]);
+
+  /**
+   * Départs et retours des autres joueurs.
+   *
+   * Le serveur suivait déjà les déconnexions pour la règle d'abandon, sans
+   * que rien ne l'affiche : on découvrait qu'on jouait seul en regardant un
+   * rail qui ne bougeait plus. La mention passe par le calque flottant des
+   * réactions — coût nul en hauteur, alors que la grille se dispute chaque
+   * pixel.
+   */
+  const presenceAvant = useRef<Map<string, boolean> | null>(null);
+  useEffect(() => {
+    const maintenant = new Map(
+      game.scoreboard.filter((p) => !p.isMe).map((p) => [p.playerId, p.online] as const),
+    );
+    const avant = presenceAvant.current;
+    presenceAvant.current = maintenant;
+    if (!avant) return; // premier passage : photo, sans rien annoncer
+
+    for (const [id, enLigne] of maintenant) {
+      const etait = avant.get(id);
+      if (etait === undefined || etait === enLigne) continue;
+      const nom = game.scoreboard.find((p) => p.playerId === id)?.name ?? 'Un joueur';
+      if (enLigne) playPeerJoinSound();
+      else playPeerLeaveSound();
+      announce(enLigne ? `${nom} est de retour` : `${nom} s'est déconnecté`);
+    }
+  }, [game.scoreboard]);
 
   const othersByCellId = useMemo(() => {
     const map = new Map<string, PlayerCursor[]>();
@@ -498,6 +634,10 @@ export function CrosswordGrid({
           }}
         >
         <div
+          role="group"
+          aria-label={`Grille de mots fléchés, ${puzzle.rows} lignes sur ${puzzle.cols} colonnes, ${solvedWordIds.size} mot${
+            solvedWordIds.size <= 1 ? '' : 's'
+          } trouvé${solvedWordIds.size <= 1 ? '' : 's'} sur ${puzzle.words.length}`}
           className="grid h-full w-full"
           style={{
             gridTemplateColumns: `repeat(${puzzle.cols}, 1fr)`,
@@ -538,7 +678,11 @@ export function CrosswordGrid({
                   othersHere={othersByCellId.get(id) ?? []}
                   onSelect={() => selectCell(row, col)}
                   lockedColor={game.solvedColorFor(id)}
-                  labelBelow={row === 0}
+                  waveDelay={waveDelayByCell?.get(id) ?? null}
+                  isLastEmpty={id === derniereCaseVide && !celebrating}
+                  row={row}
+                  col={col}
+                  wordLabel={activeWord?.clue ?? null}
                 />
               );
             }),

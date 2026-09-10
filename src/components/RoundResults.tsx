@@ -63,7 +63,7 @@ export function RoundResults({
     : [];
 
   return (
-    <ResultModal>
+    <ResultModal label={daily ? 'Grille du jour terminée' : `Grille ${round + 1} terminée`}>
         <h2 className="text-center font-display text-[20px] text-organic-text">
           {daily ? 'Grille du jour terminée !' : `Grille ${round + 1} terminée !`}
         </h2>

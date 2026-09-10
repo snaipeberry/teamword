@@ -182,6 +182,15 @@ function emptyRoom() {
     roundStartedAt: Date.now(),
     format: 'coop',
     /**
+     * playerId -> « partie:manche » déjà créditée en solo/quotidien.
+     *
+     * Une grille terminée ne rapporte qu'UNE fois. Recharger la page remonte
+     * les lettres enregistrées, donc la même complétion, donc un nouvel envoi
+     * de `soloGridDone` : sans ce repère, il suffisait de recharger en boucle
+     * sur une grille finie pour empiler les points et les indices.
+     */
+    soloCredite: {},
+    /**
      * Limite de temps de la partie, en minutes — `null` = illimité (défaut,
      * comportement historique). Le chrono ne part qu'au lancement, pas à la
      * création du salon : voir l'intent `start`.
@@ -201,8 +210,21 @@ function emptyRoom() {
     // Rien de tout ceci n'est utilisé hors ranked — laissé à sa valeur par
     // défaut ailleurs, sans effet sur les parties privées/bot/solo/quotidien.
 
-    /** Horodatage de fin de match (Date.now() + 10 min), posé par `tryMatch`. */
+    /**
+     * Horodatage de fin de match — posé quand le match COMMENCE réellement,
+     * c'est-à-dire quand les deux joueurs sont dans la salle (voir `join`),
+     * et non à sa création. Entre les deux il s'écoule un rechargement de
+     * page, une fabrication de grille et une connexion : les décompter du
+     * temps de jeu revenait à commencer la partie à 9 minutes et des
+     * poussières, ce qui se voit surtout sur une revanche.
+     */
     matchEndsAt: null,
+    /** Début effectif du match. Sert de verrou : une reconnexion en cours de
+     *  partie ne doit surtout pas relancer le chrono à zéro. */
+    matchStartedAt: null,
+    /** Création de la salle — sert à conclure une salle classée que l'un des
+     *  deux joueurs n'a jamais rejointe (voir la boucle de surveillance). */
+    createdAt: Date.now(),
     /** Le match est-il conclu (temps écoulé ou abandon) ? */
     matchOver: false,
     /** Vainqueur une fois `matchOver` — `null` si égalité parfaite. */
@@ -951,10 +973,24 @@ async function loadAccounts() {
 async function bulkReplace(client, table, columns, rows) {
   await client.query(`DELETE FROM ${table}`);
   if (!rows.length) return;
-  const placeholders = rows
-    .map((row, i) => `(${row.map((_, j) => `$${i * columns.length + j + 1}`).join(',')})`)
-    .join(',');
-  await client.query(`INSERT INTO ${table} (${columns.join(',')}) VALUES ${placeholders}`, rows.flat());
+
+  // Postgres refuse au-delà de 65535 paramètres liés dans une même requête.
+  // En un seul INSERT, la table `accounts` (8 colonnes) cassait donc à
+  // ~8 100 comptes et `profiles` à ~32 700 — silencieusement, du point de vue
+  // du joueur : l'erreur était consignée, `dirty` restait vrai, et le serveur
+  // réessayait toutes les dix secondes en échouant à chaque fois. Autrement
+  // dit, passé ce seuil, plus rien n'était jamais sauvegardé.
+  const parLot = Math.max(1, Math.floor(60_000 / columns.length));
+  for (let debut = 0; debut < rows.length; debut += parLot) {
+    const lot = rows.slice(debut, debut + parLot);
+    const placeholders = lot
+      .map((row, i) => `(${row.map((_, j) => `$${i * columns.length + j + 1}`).join(',')})`)
+      .join(',');
+    await client.query(
+      `INSERT INTO ${table} (${columns.join(',')}) VALUES ${placeholders}`,
+      lot.flat(),
+    );
+  }
 }
 
 // Un instantané complet sur 5 tables à chaque cycle, même quand rien n'a
@@ -1334,6 +1370,15 @@ const INTENTS = {
    * mots — même niveau de confiance que `scored` sur l'intent `letter`.
    */
   soloGridDone(state, { points, daily = false }, playerId) {
+    // Une même grille ne rapporte qu'une fois — voir `soloCredite`. Le
+    // contrôle est ICI et pas côté client : un rechargement y remonte
+    // toujours un composant neuf, qui ne peut pas savoir qu'il rejoue une
+    // fin de manche déjà soldée.
+    const cle = `${state.game}:${state.round}`;
+    if (!state.soloCredite) state.soloCredite = {};
+    if (state.soloCredite[playerId] === cle) return false;
+    state.soloCredite[playerId] = cle;
+
     const profile = getProfile(playerId);
     const gagne = Math.max(0, Math.floor(Number(points) || 0));
 
@@ -1493,6 +1538,11 @@ function leaveQueue(ws) {
 /** Un duel classé dure ce temps-là, quel que soit l'avancement de la grille
  *  en cours au moment où il s'écoule — voir le balayage périodique plus bas. */
 const MATCH_DURATION_MS = 10 * 60 * 1000;
+
+/** Au-delà, on considère que le second joueur ne viendra jamais : la salle
+ *  classée est conclue plutôt que laissée ouverte sans chrono. Large à
+ *  dessein — un téléphone qui rame met parfois dix bonnes secondes. */
+const RANKED_JOIN_GRACE_MS = 3 * 60 * 1000;
 /** Délai de grâce d'une déconnexion avant que PARTIR ne coûte plus rien à
  *  l'autre joueur — voir l'intent `leaveMatch`. */
 const FORFEIT_GRACE_MS = 5 * 60 * 1000;
@@ -1603,7 +1653,8 @@ function tryMatch() {
         // attendre ni rien à régler dans un salon.
         state.started = true;
         state.ranked = true;
-        state.matchEndsAt = Date.now() + MATCH_DURATION_MS;
+        // Pas de `matchEndsAt` ici : le chrono part à l'arrivée du second
+        // joueur (voir `join`), pas à la création de la salle.
         state.grade = rankedGrade();
         rooms.set(code, state);
 
@@ -1627,6 +1678,20 @@ setInterval(() => {
 
   const now = Date.now();
   for (const [code, state] of rooms) {
+    // Salle classée que le second joueur n'a jamais rejointe : son chrono
+    // n'a donc jamais démarré, et rien ne la conclurait. On lui laisse le
+    // temps d'un chargement très lent, puis on tranche sur les mots trouvés.
+    if (
+      state.ranked &&
+      !state.matchOver &&
+      !state.matchStartedAt &&
+      now - (state.createdAt ?? now) >= RANKED_JOIN_GRACE_MS
+    ) {
+      concludeRankedMatch(state);
+      markDirty();
+      broadcastState(code);
+      continue;
+    }
     // Duel classé (10 min imposées) comme partie privée limitée par l'hôte :
     // `matchEndsAt` suffit à les reconnaître toutes les deux.
     if (!state.matchOver && state.matchEndsAt && now >= state.matchEndsAt) {
@@ -2238,6 +2303,18 @@ wss.on('connection', (ws) => {
       // la règle des 5 minutes de grâce.
       if (state.disconnectedAt) delete state.disconnectedAt[ws.player.id];
 
+      // Duel classé : LE moment où le match commence vraiment, les deux
+      // joueurs étant enfin connectés. `matchStartedAt` fait verrou — sans
+      // lui, la moindre reconnexion (rechargement de page, réseau qui
+      // tousse, second onglet) redonnerait dix minutes pleines.
+      if (state.ranked && !state.matchStartedAt && peers(code).size >= 2) {
+        state.matchStartedAt = Date.now();
+        state.matchEndsAt = state.matchStartedAt + MATCH_DURATION_MS;
+        // La chronologie des mots repart du même instant : sinon les
+        // premiers mots de la revanche hériteraient du temps d'attente.
+        state.roundStartedAt = state.matchStartedAt;
+      }
+
       // Le profil persistant reprend le pseudo courant : sans cela, un joueur
       // qui n'a jamais ouvert l'écran de profil apparaîtrait « Joueur » au
       // classement alors qu'il porte un nom en partie.
@@ -2340,7 +2417,8 @@ wss.on('connection', (ws) => {
         const nouvelle = emptyRoom();
         nouvelle.started = true;
         nouvelle.ranked = true;
-        nouvelle.matchEndsAt = Date.now() + MATCH_DURATION_MS;
+        // Comme pour un premier appariement : le chrono ne démarre qu'une
+        // fois les deux joueurs revenus dans la nouvelle salle.
         nouvelle.grade = rankedGrade();
         rooms.set(code, nouvelle);
         send(ws, { t: 'matched', room: code });

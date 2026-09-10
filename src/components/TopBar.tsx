@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { SoundToggle } from './SoundToggle';
 import { SessionMenu } from './SessionMenu';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
 import { GRADE_LABELS, type MultiplayerGrade } from '../lib/difficulty';
+import { playChronoTick, playMinuteWarningSound } from '../lib/sounds';
 
 /** Même ensemble que REACTIONS côté serveur — un émoji d'ici qu'il ne
  *  reconnaît pas serait silencieusement ignoré (voir index.js, intent
@@ -81,6 +82,44 @@ export function TopBar({
   }, [matchEndsAt]);
   const secondesRestantes = matchEndsAt ? Math.max(0, Math.round((matchEndsAt - maintenant) / 1000)) : null;
 
+  /**
+   * La fin du temps s'entend.
+   *
+   * Un tic par seconde sur les dix dernières, montant en hauteur, et un
+   * repère unique à une minute. Le chrono n'existe que si quelqu'un a choisi
+   * une limite — les dix minutes du duel classé, ou la durée réglée par
+   * l'hôte : personne ne se voit donc imposer un décompte qu'il n'a pas
+   * demandé.
+   */
+  const moinsDeMouvement = useReducedMotion();
+  const derniereSeconde = useRef<number | null>(null);
+  useEffect(() => {
+    if (secondesRestantes === null) {
+      derniereSeconde.current = null;
+      return;
+    }
+    const avant = derniereSeconde.current;
+    derniereSeconde.current = secondesRestantes;
+    // Premier affichage : on prend la mesure sans sonner, sinon rejoindre une
+    // partie à 8 secondes de la fin déclencherait un tic isolé.
+    if (avant === null || avant === secondesRestantes) return;
+    if (secondesRestantes === 60) playMinuteWarningSound();
+    else if (secondesRestantes > 0 && secondesRestantes <= 10) playChronoTick(secondesRestantes);
+  }, [secondesRestantes]);
+
+  const urgence = secondesRestantes !== null && secondesRestantes <= 10 && secondesRestantes > 0;
+
+  // Le sélecteur de réactions s'ouvrait sans pouvoir se refermer autrement
+  // qu'en le rappuyant : au clavier, on s'y retrouvait coincé.
+  useEffect(() => {
+    if (!reactionsOuvertes) return;
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setReactionsOuvertes(false);
+    };
+    document.addEventListener('keydown', surTouche, true);
+    return () => document.removeEventListener('keydown', surTouche, true);
+  }, [reactionsOuvertes]);
+
   const copyLink = async () => {
     // Surtout pas window.location.href : sur une preview Vercel, cette URL
     // est protégée et forcerait l'invité à se connecter à Vercel.
@@ -116,7 +155,12 @@ export function TopBar({
       {/* Le chrono s'affiche dès qu'une fin est programmée : duel classé
           (10 min imposées) comme partie privée limitée par l'hôte. */}
       {secondesRestantes !== null && (
-        <span
+        <motion.span
+          // Repart de zéro à chaque seconde des dix dernières : la pastille bat
+          // en même temps que le tic, pour que le son ait un corps à l'écran.
+          key={urgence ? secondesRestantes : 'calme'}
+          animate={urgence && !moinsDeMouvement ? { scale: [1, 1.16, 1] } : { scale: 1 }}
+          transition={{ duration: 0.42, ease: 'easeOut' }}
           className={`shrink-0 rounded-full px-2 py-1 font-display text-[11px] tabular-nums ${
             secondesRestantes <= 30
               ? 'bg-organic-accent-200 text-organic-accent-800'
@@ -124,7 +168,7 @@ export function TopBar({
           }`}
         >
           {Math.floor(secondesRestantes / 60)}:{String(secondesRestantes % 60).padStart(2, '0')}
-        </span>
+        </motion.span>
       )}
       {ranked ? null : (
         <>

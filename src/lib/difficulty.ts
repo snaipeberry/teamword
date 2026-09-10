@@ -38,7 +38,7 @@ export const GRADE_LABELS: Record<MultiplayerGrade, string> = {
 const GRADE_DISTRIBUTIONS: Record<MultiplayerGrade, HintDistribution> = {
   facile: { facile: 0.9, moyen: 0.1, difficile: 0 },
   // Reprend exactement l'ancien niveau facile.
-  moyen: { facile: 0.8, moyen: 0.2, difficile: 0 },
+  moyen: { facile: 0.7, moyen: 0.3, difficile: 0 },
   // Même répartition moyen/difficile que l'ancien niveau difficile — juste
   // sans indice facile du tout.
   difficile: { facile: 0, moyen: 0.08, difficile: 0.9 },
@@ -57,26 +57,24 @@ export function multiplayerDistribution(grade: MultiplayerGrade): HintDistributi
 const SOLO_ROTATION: MultiplayerGrade[] = ['facile', 'moyen', 'difficile'];
 
 /**
- * Index de rotation à partir du profil : `soloGrids` compte TOUTES les
- * grilles solo terminées, grille du jour incluse (voir `soloGridDone` côté
- * serveur) — or la grille du jour a sa propre difficulté fixe et ne doit
- * pas décaler la rotation des vraies grilles solo. On la retranche donc
- * (`dailies`, déjà suivi séparément) plutôt que d'ajouter un compteur dédié
- * côté serveur.
+ * Index de rotation à partir du RANG de la grille dans la partie solo (son
+ * numéro de manche, voir App.tsx). Volontairement pas le compteur de grilles
+ * du profil : celui-ci change au milieu d'une manche, au moment précis où la
+ * grille est déclarée terminée.
  */
-function soloRotationIndex(soloGrids: number, dailies: number): number {
+function soloRotationIndex(rang: number): number {
   const n = SOLO_ROTATION.length;
-  return ((soloGrids - dailies) % n + n) % n;
+  return ((rang % n) + n) % n;
 }
 
-/** Solo : niveau du moment dans la rotation. */
-export function soloGrade(soloGrids: number, dailies: number): MultiplayerGrade {
-  return SOLO_ROTATION[soloRotationIndex(soloGrids, dailies)];
+/** Solo : niveau du moment dans la rotation, pour un rang donné. */
+export function soloGrade(rang: number): MultiplayerGrade {
+  return SOLO_ROTATION[soloRotationIndex(rang)];
 }
 
 /** Solo : répartition des indices pour le niveau courant de la rotation. */
-export function soloDistribution(soloGrids: number, dailies: number): HintDistribution {
-  return multiplayerDistribution(soloGrade(soloGrids, dailies));
+export function soloDistribution(rang: number): HintDistribution {
+  return multiplayerDistribution(soloGrade(rang));
 }
 
 /** Grille du jour : fixe, quel que soit le joueur (le serveur l'impose de

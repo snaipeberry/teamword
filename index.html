@@ -17,10 +17,26 @@
     <link rel="icon" href="/icons/icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Feuille de polices NON bloquante : chargée en `preload`, puis promue en
+      feuille de style une fois arrivée. Avant, le premier pixel attendait un
+      aller-retour vers deux domaines tiers — sur une connexion moyenne, c'est
+      la moitié du temps avant affichage. `display=swap` était déjà là : le
+      texte s'affiche en police de repli puis bascule, rien ne clignote en
+      blanc.
+    -->
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap"
-      rel="stylesheet"
+      onload="this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <title>TeamWords</title>
   </head>
   <body>

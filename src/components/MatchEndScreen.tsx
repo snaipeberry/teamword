@@ -1,11 +1,21 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { blockPlayer, fetchProfile, type Profile } from '../lib/roomClient';
 import { activePlayerId } from '../lib/auth';
 import { goHome, rememberReturnScreen } from '../lib/sessionCode';
 import { screenShell } from '../lib/motion';
 import { Avatar } from './Avatar';
+import { CompletionCelebration } from './CompletionCelebration';
+import { announce } from '../lib/announce';
+import {
+  hapticMatchEnd,
+  playCountUpTick,
+  playDefeatSound,
+  playDrawSound,
+  playRematchSound,
+  playVictorySound,
+} from '../lib/sounds';
 
 /**
  * Écran de fin d'un duel classé (1v1 aléatoire) : le match dure 10 minutes
@@ -31,14 +41,26 @@ export function MatchEndScreen() {
   const [aBloquer, setABloquer] = useState<string | null>(null);
   const [bloques, setBloques] = useState<Set<string>>(new Set());
 
-  const bloquer = async (playerId: string) => {
+  const [blocageEnCours, setBlocageEnCours] = useState(false);
+  const bloquer = async (playerId: string, nom: string) => {
     if (aBloquer !== playerId) {
       setABloquer(playerId);
+      announce(`Appuyez à nouveau pour ne plus jamais affronter ${nom}.`);
       return;
     }
     setABloquer(null);
-    await blockPlayer(myId, playerId).catch(() => {});
-    setBloques((prev) => new Set(prev).add(playerId));
+    setBlocageEnCours(true);
+    try {
+      await blockPlayer(myId, playerId);
+      setBloques((prev) => new Set(prev).add(playerId));
+      announce(`${nom} ne vous sera plus proposé en duel.`, 'succes');
+    } catch {
+      // L'échec était avalé : le joueur croyait avoir bloqué quelqu'un qui
+      // pouvait très bien retomber en face de lui au duel suivant.
+      announce('Blocage impossible. Vérifiez votre connexion.', 'erreur');
+    } finally {
+      setBlocageEnCours(false);
+    }
   };
 
   useEffect(() => {
@@ -77,9 +99,48 @@ export function MatchEndScreen() {
   };
 
   const enAttenteRevanche = rematchRequestedByMe && !rematchRequestedByOpponent;
+  const moinsDeMouvement = useReducedMotion();
+
+  /**
+   * L'écran où l'on attend le plus, et où il ne se passait rigoureusement
+   * rien. Le verdict s'annonce une seule fois, à l'arrivée.
+   *
+   * La défaite descend sans jamais claquer : on a perdu un duel, on n'a pas
+   * commis de faute. Et la victoire ne reprend PAS la fanfare de grille
+   * terminée — gagner contre quelqu'un ne doit pas sonner comme finir une
+   * grille tout seul.
+   */
+  const [confettis, setConfettis] = useState(false);
+  const annonce = useRef(false);
+  useEffect(() => {
+    if (annonce.current) return;
+    annonce.current = true;
+    if (cooperatif || (!gagne && !perdu)) {
+      playDrawSound();
+      return;
+    }
+    hapticMatchEnd();
+    if (gagne) {
+      playVictorySound();
+      setConfettis(true);
+    } else {
+      playDefeatSound();
+    }
+  }, [cooperatif, gagne, perdu]);
+
+  // L'adversaire propose la revanche : le bouton changeait de texte en
+  // silence, donc la proposition passait inaperçue.
+  const revancheAnnoncee = useRef(rematchRequestedByOpponent);
+  useEffect(() => {
+    if (rematchRequestedByOpponent && !revancheAnnoncee.current) playRematchSound();
+    revancheAnnoncee.current = rematchRequestedByOpponent;
+  }, [rematchRequestedByOpponent]);
 
   return (
     <div className={`${screenShell} items-center justify-center text-center`}>
+      <AnimatePresence>
+        {confettis && <CompletionCelebration onDone={() => setConfettis(false)} />}
+      </AnimatePresence>
       <motion.p
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -118,15 +179,17 @@ export function MatchEndScreen() {
             <span className="min-w-0 flex-1 truncate text-left text-[14px] font-bold text-organic-text">
               {p.isMe ? 'Vous' : p.name}
             </span>
-            <span className="font-display text-[19px] tabular-nums text-organic-text">{p.score}</span>
+            <span className="font-display text-[19px] tabular-nums text-organic-text">
+              <CompteurMontant valeur={p.score} />
+            </span>
             {/* Réservé au duel ALÉATOIRE : on n'a pas choisi cet adversaire.
                 Quelqu'un qu'on a soi-même invité en partie privée, on cesse
                 simplement de l'inviter. */}
             {ranked && !p.isMe && (
               <button
                 type="button"
-                onClick={() => void bloquer(p.playerId)}
-                disabled={bloques.has(p.playerId)}
+                onClick={() => void bloquer(p.playerId, p.name)}
+                disabled={bloques.has(p.playerId) || blocageEnCours}
                 aria-label={aBloquer === p.playerId ? 'Confirmer le blocage' : `Bloquer ${p.name}`}
                 className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wide ${
                   bloques.has(p.playerId)
@@ -136,7 +199,13 @@ export function MatchEndScreen() {
                       : 'text-organic-neutral-600 active:bg-organic-neutral-300'
                 }`}
               >
-                {bloques.has(p.playerId) ? 'bloqué' : aBloquer === p.playerId ? 'confirmer' : 'bloquer'}
+                {bloques.has(p.playerId)
+                  ? 'bloqué'
+                  : blocageEnCours
+                    ? '…'
+                    : aBloquer === p.playerId
+                      ? 'confirmer'
+                      : 'bloquer'}
               </button>
             )}
           </div>
@@ -166,6 +235,18 @@ export function MatchEndScreen() {
             <motion.button
               type="button"
               whileTap={{ scale: 0.96 }}
+              // Pulse tant que l'adversaire attend une réponse : c'est la
+              // seule chose à faire sur cet écran à ce moment-là.
+              animate={
+                rematchRequestedByOpponent && !moinsDeMouvement
+                  ? { scale: [1, 1.03, 1] }
+                  : { scale: 1 }
+              }
+              transition={
+                rematchRequestedByOpponent && !moinsDeMouvement
+                  ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' }
+                  : { duration: 0.2 }
+              }
               onClick={requestRematch}
               disabled={enAttenteRevanche}
               className={`w-full rounded-full py-3.5 font-display text-[15px] shadow-md transition ${
@@ -199,4 +280,37 @@ export function MatchEndScreen() {
       </div>
     </div>
   );
+}
+
+/**
+ * Un score qui défile de zéro jusqu'à sa valeur, un tic par cran.
+ *
+ * `AnimatedNumber` ne convenait pas : il part de la valeur qu'on lui donne et
+ * ne bouge qu'aux suivantes, alors qu'ici il n'y a qu'une seule valeur, et
+ * c'est justement son arrivée qu'on veut montrer.
+ */
+function CompteurMontant({ valeur }: { valeur: number }) {
+  const [affiche, setAffiche] = useState(0);
+  const moinsDeMouvement = useReducedMotion();
+
+  useEffect(() => {
+    if (moinsDeMouvement || valeur <= 0) {
+      setAffiche(valeur);
+      return;
+    }
+    // Durée constante quel que soit le score : trois mots ou trente, le
+    // décompte prend le même temps, sinon une grosse partie s'éterniserait.
+    const pas = Math.max(1, Math.round(valeur / 14));
+    const intervalle = 900 / Math.ceil(valeur / pas);
+    let courant = 0;
+    const minuteur = setInterval(() => {
+      courant = Math.min(valeur, courant + pas);
+      setAffiche(courant);
+      playCountUpTick();
+      if (courant >= valeur) clearInterval(minuteur);
+    }, intervalle);
+    return () => clearInterval(minuteur);
+  }, [valeur, moinsDeMouvement]);
+
+  return <>{affiche}</>;
 }

@@ -35,3 +35,38 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+
+/*
+ * Focus clavier VISIBLE, partout.
+ *
+ * Il n'y en avait quasiment aucun : quelqu'un qui navigue au clavier ne
+ * pouvait pas savoir où il se trouvait dans la grille, le clavier intégré ou
+ * les formulaires. `:focus-visible` et non `:focus` — la bague ne doit pas
+ * apparaître au doigt ni à la souris, seulement quand elle sert.
+ *
+ * Terracotta 600 sur double liseré : lisible aussi bien sur les cases claires
+ * de la grille que sur les boutons pleins de la palette.
+ */
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #f5ead8,
+    0 0 0 4px #b2622d;
+  border-radius: 6px;
+  position: relative;
+  z-index: 20;
+}
+
+/* Contenu réservé aux lecteurs d'écran : présent dans l'arbre
+   d'accessibilité, invisible à l'œil. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameState, useRound } from '../state/GameState';
 import { buildInviteUrl, goHome } from '../lib/sessionCode';
@@ -6,6 +6,8 @@ import { Avatar } from './Avatar';
 import { GRADE_LABELS, MULTIPLAYER_GRADES } from '../lib/difficulty';
 import { screenShell } from '../lib/motion';
 import { BackButton } from './BackButton';
+import { playPeerJoinSound, playPeerLeaveSound, playTapSound, unlockAudio } from '../lib/sounds';
+import { announce } from '../lib/announce';
 
 /**
  * Salon d'attente : code à partager, liste des joueurs, départ.
@@ -26,10 +28,36 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
   // filtre il continuerait d'apparaître dans la liste de l'hôte.
   const presents = game.scoreboard.filter((p) => p.online && !isKicked(p.playerId));
 
+  /**
+   * Quelqu'un arrive, ou s'en va.
+   *
+   * La ligne s'animait déjà, mais on regarde rarement l'écran en attendant du
+   * monde : deux notes chaudes suffisent à faire lever les yeux à l'hôte.
+   */
+  // La liste est reconstruite à chaque rendu : on dépend d'une CLÉ stable,
+  // sinon l'effet tournerait en permanence pour ne rien constater.
+  const clePresents = presents.map((p) => p.playerId).sort().join(',');
+  const presentsAvant = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const ids = new Set(clePresents ? clePresents.split(',') : []);
+    const avant = presentsAvant.current;
+    presentsAvant.current = ids;
+    if (!avant) return; // premier rendu : on photographie le salon, sans sonner
+    for (const id of ids) if (!avant.has(id)) playPeerJoinSound();
+    for (const id of avant) if (!ids.has(id)) playPeerLeaveSound();
+  }, [clePresents]);
+
   const copier = async (quoi: 'code' | 'lien') => {
-    await navigator.clipboard.writeText(quoi === 'code' ? sessionId : buildInviteUrl(sessionId));
-    setCopied(quoi);
-    setTimeout(() => setCopied(null), 1500);
+    try {
+      await navigator.clipboard.writeText(quoi === 'code' ? sessionId : buildInviteUrl(sessionId));
+      setCopied(quoi);
+      announce(quoi === 'code' ? 'Code copié' : 'Lien copié', 'succes');
+      setTimeout(() => setCopied(null), 1500);
+    } catch {
+      // Le presse-papiers peut être refusé (contexte non sécurisé, permission
+      // retirée) : jusqu'ici l'échec passait pour un succès silencieux.
+      announce('Copie impossible. Sélectionnez le code à la main.', 'erreur');
+    }
   };
 
   const styleEquipe = (playerId: string) =>
@@ -315,7 +343,11 @@ export function Lobby({ sessionId, bot = false }: { sessionId: string; bot?: boo
           <motion.button
             type="button"
             whileTap={{ scale: 0.96 }}
-            onClick={startGame}
+            onClick={() => {
+              unlockAudio();
+              playTapSound();
+              startGame();
+            }}
             className="w-full rounded-full bg-organic-accent-500 py-3.5 font-display text-[16px] text-organic-bg shadow-md active:bg-organic-accent-600"
           >
             Commencer

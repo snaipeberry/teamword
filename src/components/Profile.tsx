@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Avatar } from './Avatar';
 import { AVATAR_PRESETS } from '../lib/avatarPresets';
 import { fetchBlocked, fetchProfile, unblockPlayer, updateProfile, type Profile as ProfileData } from '../lib/roomClient';
+import { announce } from '../lib/announce';
 import { activePlayerId, activePlayerName, currentSession, deleteAccount, logout } from '../lib/auth';
 import { AuthScreen } from './Auth';
 import { screenClassName, screenShell, screenTransition, screenVariants } from '../lib/motion';
@@ -25,6 +26,11 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
   const [authOuvert, setAuthOuvert] = useState(false);
   const [bloques, setBloques] = useState<{ id: string; name: string }[]>([]);
   const [suppressionConfirmee, setSuppressionConfirmee] = useState(false);
+  /** Ce qui est en train de partir vers le serveur. Sans cet état, un
+   *  enregistrement sur connexion moyenne était strictement indiscernable
+   *  d'un clic qui n'avait rien déclenché. */
+  const [enCours, setEnCours] = useState<'avatar' | 'deblocage' | 'suppression' | null>(null);
+
   const id = activePlayerId();
 
   const rechargerBloques = (ids: string[]) => {
@@ -40,8 +46,14 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
   }, []);
 
   const debloquer = async (playerId: string) => {
-    const restants = await unblockPlayer(id, playerId).catch(() => bloques.map((b) => b.id));
-    rechargerBloques(restants);
+    setEnCours('deblocage');
+    announce('Déblocage…');
+    const restants = await unblockPlayer(id, playerId).catch(() => {
+      announce('Déblocage impossible. Vérifiez votre connexion.', 'erreur');
+      return bloques.map((b) => b.id);
+    });
+    await rechargerBloques(restants);
+    setEnCours(null);
   };
 
   // Le profil vit sur le serveur : on le met à jour par une requête HTTP
@@ -49,18 +61,41 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
   // photo passe encore par ici — le nom est fixe, voir auth.ts.
   const choisirAvatar = async (presetId: string) => {
     setChoixAvatarOuvert(false);
-    await updateProfile(id, { avatar: presetId }).catch(() => setErreur('Enregistrement impossible'));
-    await recharger();
+    setEnCours('avatar');
+    // Affichage optimiste : la nouvelle photo apparaît tout de suite, quitte
+    // à être corrigée par le rechargement. L'attendre laissait l'ancienne à
+    // l'écran pendant tout l'aller-retour, comme si le clic s'était perdu.
+    setProfile((p) => (p ? { ...p, avatar: presetId } : p));
+    announce('Enregistrement de la photo…');
+    try {
+      await updateProfile(id, { avatar: presetId });
+      await recharger();
+      announce('Photo enregistrée', 'succes');
+    } catch {
+      setErreur('Enregistrement impossible');
+      announce('Enregistrement impossible. Vérifiez votre connexion.', 'erreur');
+      await recharger();
+    } finally {
+      setEnCours(null);
+    }
   };
 
   const supprimerCompte = async () => {
     if (!suppressionConfirmee) {
       setSuppressionConfirmee(true);
+      announce('Appuyez à nouveau pour confirmer la suppression définitive du compte.');
       return;
     }
+    setEnCours('suppression');
+    announce('Suppression du compte…');
     const res = await deleteAccount();
-    if (res === true) window.location.reload();
-    else setErreur(res);
+    if (res === true) {
+      window.location.reload();
+      return;
+    }
+    setEnCours(null);
+    setErreur(res);
+    announce(res, 'erreur');
   };
 
   return (
@@ -146,7 +181,8 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
                   key={p.id}
                   type="button"
                   onClick={() => void choisirAvatar(p.id)}
-                  aria-label={p.id}
+                  disabled={enCours !== null}
+                  aria-label={`Choisir la photo ${p.id}`}
                   className="active:scale-90"
                 >
                   <span
@@ -299,9 +335,10 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
                 <button
                   type="button"
                   onClick={() => void debloquer(b.id)}
+                  disabled={enCours !== null}
                   className="shrink-0 rounded-full bg-organic-neutral-200 px-2.5 py-1 text-[10px] font-bold text-organic-text active:scale-95"
                 >
-                  Débloquer
+                  {enCours === 'deblocage' ? 'Déblocage…' : 'Débloquer'}
                 </button>
               </div>
             ))}
@@ -309,7 +346,11 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
         </div>
       )}
 
-      {erreur && <p className="mt-3 text-[11px] font-bold text-organic-accent-700">{erreur}</p>}
+      {erreur && (
+        <p role="alert" className="mt-3 text-[11px] font-bold text-organic-accent-700">
+          {erreur}
+        </p>
+      )}
 
       {/* Gestion du compte en pied de page : ce sont des réglages, pas le
           contenu de l'écran — ils ne doivent pas s'intercaler entre les
@@ -331,11 +372,16 @@ export function ProfileScreen({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={() => void supprimerCompte()}
+                disabled={enCours !== null}
                 className={`rounded-full px-3 py-1 text-[11px] font-bold ${
                   suppressionConfirmee ? 'bg-organic-accent-700 text-organic-bg' : 'text-organic-accent-700/70'
                 }`}
               >
-                {suppressionConfirmee ? 'Confirmer la suppression' : 'Supprimer mon compte'}
+                {enCours === 'suppression'
+                  ? 'Suppression…'
+                  : suppressionConfirmee
+                    ? 'Confirmer la suppression'
+                    : 'Supprimer mon compte'}
               </button>
             </div>
           </div>

@@ -32,7 +32,7 @@ export function SoloRoundResults({
       : 100;
 
   return (
-    <ResultModal>
+    <ResultModal label={`Grille ${round + 1} terminée`}>
         <h2 className="text-center font-display text-[20px] text-organic-text">
           Grille {round + 1} terminée !
         </h2>

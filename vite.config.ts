@@ -25,6 +25,26 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(getBuildVersion()),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /**
+         * Bibliothèques dans leurs propres paquets.
+         *
+         * Tout tenait dans un seul fichier de 397 Ko : le moindre correctif
+         * d'affichage obligeait chaque visiteur à retélécharger React et
+         * framer-motion avec. Séparés, ils restent en cache d'une version à
+         * l'autre — sur une connexion moyenne, c'est la différence entre
+         * recharger toute l'application et n'en recharger que la part qui a
+         * réellement changé.
+         */
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

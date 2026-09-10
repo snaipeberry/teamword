@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { buildGrid } from '../lib/gridBuilder';
 import { demoPuzzle } from '../data/demoPuzzle';
 import { fetchPuzzle } from '../lib/puzzleApi';
 import type { HintDistribution, MultiplayerGrade } from '../lib/difficulty';
 import type { Puzzle } from '../types/puzzle';
+
+/** Au-delà, on cesse d'attendre le serveur de grilles. Large à dessein :
+ *  fabriquer une grille 10x10 prend déjà plusieurs secondes en temps normal. */
+const DELAI_MAX_MS = 20_000;
 
 interface UsePuzzleResult {
   puzzle: Puzzle | null;
@@ -35,6 +39,10 @@ interface UsePuzzleOptions {
  */
 export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzzleResult {
   const { hints, difficulty, ready = true } = options;
+  // Distingue notre échéance de l'abandon provoqué par un démontage : le
+  // premier doit basculer sur la grille de repli, le second ne doit rien
+  // faire du tout.
+  const echeanceAtteinte = useRef(false);
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +58,15 @@ export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzz
 
     const controller = new AbortController();
     let cancelled = false;
+    // Une grille se fabrique côté serveur : sur une connexion moyenne, ou un
+    // service qui rame, l'attente était sans fin ET sans mot. On coupe au
+    // bout d'un délai généreux — la grille de démonstration embarquée prend
+    // alors le relais, ce qui vaut toujours mieux qu'un point qui pulse.
+    echeanceAtteinte.current = false;
+    const echeance = setTimeout(() => {
+      echeanceAtteinte.current = true;
+      controller.abort();
+    }, DELAI_MAX_MS);
 
     setLoading(true);
     setError(null);
@@ -68,7 +85,11 @@ export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzz
         setLoading(false);
       })
       .catch((err: unknown) => {
-        if (cancelled || (err instanceof Error && err.name === 'AbortError')) return;
+        if (cancelled) return;
+        // Un abandon déclenché par NOTRE échéance doit aboutir au repli ;
+        // celui du démontage, non — il n'y a plus personne pour le voir.
+        const abandon = err instanceof Error && err.name === 'AbortError';
+        if (abandon && !echeanceAtteinte.current) return;
         // Le jeu reste jouable hors ligne / serveur éteint : on retombe sur
         // la grille de démonstration embarquée.
         setError(err instanceof Error ? err.message : String(err));
@@ -78,6 +99,7 @@ export function usePuzzle(seed: string, options: UsePuzzleOptions = {}): UsePuzz
 
     return () => {
       cancelled = true;
+      clearTimeout(echeance);
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

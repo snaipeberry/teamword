@@ -123,9 +123,16 @@ export function LeaderboardScreen({ onClose }: { onClose: () => void }) {
           {reste.map((r, i) => (
             <motion.div
               key={r.id}
-              initial={{ opacity: 0, y: 4 }}
+              // Sa propre ligne vient se poser à sa place, après les autres et
+              // de plus loin : on voit où l'on est arrivé au lieu de le lire.
+              initial={{ opacity: 0, y: r.id === moi ? 16 : 4 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i, 12) * 0.025 }}
+              transition={{
+                delay: r.id === moi ? 0.28 : Math.min(i, 12) * 0.025,
+                type: r.id === moi ? 'spring' : 'tween',
+                stiffness: 320,
+                damping: 22,
+              }}
               className={`flex items-center gap-2.5 rounded-2xl border px-3 py-2 ${
                 r.id === moi
                   ? 'border-organic-accent2-300 bg-organic-accent2-200'

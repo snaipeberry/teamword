@@ -154,7 +154,13 @@ export function AuthScreen({
         className={champ}
       />
 
-      {erreur && <p className="text-center text-[12px] font-bold text-organic-accent-700">{erreur}</p>}
+      {/* `role="alert"` : un échec de connexion doit interrompre la lecture
+          en cours, pas attendre son tour. */}
+      {erreur && (
+        <p role="alert" className="text-center text-[12px] font-bold text-organic-accent-700">
+          {erreur}
+        </p>
+      )}
 
       <motion.button
         type="button"
@@ -163,7 +169,7 @@ export function AuthScreen({
         onClick={() => void valider()}
         className="w-full rounded-full bg-organic-accent-500 py-3.5 font-display text-[15px] text-organic-bg shadow-md active:bg-organic-accent-600 disabled:opacity-40"
       >
-        {enCours ? '…' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
+        {enCours ? (mode === 'login' ? 'Connexion…' : 'Création…') : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
       </motion.button>
       </div>
 

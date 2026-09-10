@@ -21,6 +21,7 @@ export function CompletionCelebration({ onDone }: { onDone: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-organic-neutral-900/40 backdrop-blur-sm"
     >
       {confetti.map((i) => {

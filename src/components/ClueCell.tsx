@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import type { Arrow, ClueCellData } from '../types/puzzle';
 
 /**
@@ -126,10 +127,17 @@ export function ClueCell({
           // choisir un mot ET son sens de lecture, notamment pour les mots
           // verticaux qu'on ne pouvait sélectionner qu'en tapant deux fois de
           // suite la même case.
-          <button
+          <ClueLine
             key={i}
-            type="button"
+            solved={solved}
             onClick={() => onSelectWord(clue.wordId)}
+            // La flèche est un glyphe décoratif, donc muet : sans ce libellé,
+            // un lecteur d'écran lisait la définition sans jamais dire dans
+            // quel sens le mot se lit — l'information que la case porte.
+            ariaLabel={`${clue.text}, ${clue.direction === 'down' ? 'vers le bas' : 'vers la droite'}${
+              solved ? ', trouvé' : ''
+            }`}
+            ariaPressed={active}
             className={[
               // `text-[1em]` est indispensable : un <button> n'hérite pas de
               // `font-size` (feuille de style du navigateur pour les contrôles
@@ -165,9 +173,62 @@ export function ClueCell({
             >
               {ARROW_GLYPH[arrow]}
             </span>
-          </button>
+          </ClueLine>
         );
       })}
     </div>
+  );
+}
+
+/**
+ * Une définition, qui s'illumine à l'instant où son mot tombe.
+ *
+ * Avant, elle passait sans transition de « à trouver » à « barrée » : le seul
+ * moment où la flèche fait ce qu'elle dessine — pousser sa couleur vers son
+ * mot — n'était pas montré. Le flash est local à la ligne, d'où ce petit
+ * composant plutôt qu'un état porté par la case entière, qui en contient
+ * parfois deux.
+ */
+function ClueLine({
+  solved,
+  onClick,
+  className,
+  ariaLabel,
+  ariaPressed,
+  children,
+}: {
+  solved: boolean;
+  onClick: () => void;
+  className: string;
+  ariaLabel: string;
+  ariaPressed: boolean;
+  children: React.ReactNode;
+}) {
+  const [flash, setFlash] = useState(false);
+  // Initialisé à la valeur d'ARRIVÉE : une grille rejointe en cours de partie,
+  // ou restaurée, ne doit pas faire clignoter d'un coup tout ce qui est déjà
+  // trouvé. Seule une transition non-résolu → résolu compte.
+  const etaitResolu = useRef(solved);
+
+  useEffect(() => {
+    if (solved && !etaitResolu.current) {
+      setFlash(true);
+      const t = setTimeout(() => setFlash(false), 620);
+      etaitResolu.current = solved;
+      return () => clearTimeout(t);
+    }
+    etaitResolu.current = solved;
+  }, [solved]);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
+      className={`${className} ${flash ? 'bg-organic-accent2-300 !opacity-100 !text-organic-accent2-900' : ''}`}
+    >
+      {children}
+    </button>
   );
 }

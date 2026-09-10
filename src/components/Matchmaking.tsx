@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { connectRoom, fetchProfile, type Profile, type RoomConnection } from '../lib/roomClient';
 import { activePlayerId, activePlayerName, activePlayerToken, currentSession } from '../lib/auth';
 import { rememberReturnScreen } from '../lib/sessionCode';
+import { playMatchFoundSound, playSearchPulseSound } from '../lib/sounds';
 import { Avatar } from './Avatar';
 
 /**
@@ -44,6 +45,9 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
           else setErreur(true);
         },
         onMatched: (room) => {
+          // Le seul instant de cet écran où quelque chose arrive : jusqu'ici
+          // la recherche basculait vers la grille sans rien annoncer.
+          playMatchFoundSound();
           // Partie déjà démarrée côté serveur : on saute le salon.
           // Mémorisé pour que le retour depuis la partie ramène ici à
           // « Multijoueur » (d'où le duel a été lancé), pas à l'accueil pur.
@@ -58,8 +62,13 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
     connection.current = conn;
 
     const tick = setInterval(() => setSecondes((s) => s + 1), 1000);
+    // Un battement très grave toutes les deux secondes : l'attente devient
+    // une attente, au lieu d'un écran arrêté. Assez faible pour qu'on
+    // l'oublie, assez présent pour qu'on sache que ça cherche encore.
+    const battement = setInterval(playSearchPulseSound, 2000);
     return () => {
       clearInterval(tick);
+      clearInterval(battement);
       conn.send({ t: 'unqueue' });
       conn.close();
     };
@@ -73,7 +82,7 @@ export function Matchmaking({ onClose }: { onClose: () => void }) {
           (Maquette V2 « la grille est l'interface ».) */}
       <motion.div
         animate={{ scale: [1, 1.04, 1] }}
-        transition={{ repeat: Infinity, duration: 1.8 }}
+        transition={{ repeat: Infinity, duration: 2 }}
         className="relative flex h-[200px] w-[200px] items-center justify-center"
       >
         <span className="absolute inset-0 rounded-full bg-organic-accent-100" />
